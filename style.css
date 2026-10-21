@@ -23,6 +23,8 @@ body {
     position: fixed;
     box-sizing: border-box;
     overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    transform: translateZ(0);
 }
 
 @keyframes gradientBG {
@@ -377,7 +379,7 @@ h1 { font-size: 16px; font-weight: 700; margin: 2px 0; }
     margin-top: 0;
 }
 .menu-panel.acik {
-    max-height: 180px;
+    max-height: 200px;
     opacity: 1;
     margin-top: 6px;
     padding-bottom: 4px;
@@ -389,7 +391,7 @@ h1 { font-size: 16px; font-weight: 700; margin: 2px 0; }
     background: rgba(255, 255, 255, 0.18);
     border: 1px solid rgba(255, 255, 255, 0.25);
     color: white;
-    padding: 5px 10px;
+    padding: 6px 10px;
     border-radius: 8px;
     font-size: 10px;
     font-weight: 600;
@@ -399,7 +401,7 @@ h1 { font-size: 16px; font-weight: 700; margin: 2px 0; }
 
 .menu-item-small { padding: 3px 6px !important; font-size: 8px !important; opacity: 0.85; border-radius: 6px !important; width: 60%; margin: 2px auto 0 auto; background: rgba(255, 255, 255, 0.1) !important; }
 
-/* Modal Esnek ve Kaydırılabilir Yapı */
+/* MODALLAR: İçeriden kusursuz kaydırılabilir yapı */
 .modal {
     position: fixed;
     top: 0;
@@ -421,12 +423,12 @@ h1 { font-size: 16px; font-weight: 700; margin: 2px 0; }
 .modal-content {
     background: rgba(20, 20, 20, 0.95);
     border-top: 1px solid rgba(255, 255, 255, 0.25);
-    padding: 16px 14px;
+    padding: 18px 14px;
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
     width: 100%;
     max-width: 380px;
-    max-height: 80vh;
+    max-height: 75vh;
     height: auto;
     text-align: center;
     color: white;
@@ -438,6 +440,7 @@ h1 { font-size: 16px; font-weight: 700; margin: 2px 0; }
     flex-direction: column;
     box-sizing: border-box;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 .modal.acik .modal-content { transform: translateY(0); }
 
@@ -447,17 +450,17 @@ h1 { font-size: 16px; font-weight: 700; margin: 2px 0; }
 .input-eye-wrapper input { width: 100% !important; padding-right: 35px !important; box-sizing: border-box !important; }
 .eye-btn { position: absolute; right: 10px; cursor: pointer; font-size: 14px; opacity: 0.8; }
 
-.song-list { display: flex; flex-direction: column; gap: 5px; max-height: 45vh; overflow-y: auto; margin-top: 10px; text-align: left; }
+.song-list { display: flex; flex-direction: column; gap: 5px; max-height: 40vh; overflow-y: auto; margin-top: 10px; text-align: left; -webkit-overflow-scrolling: touch; }
 .song-item { background: rgba(255, 255, 255, 0.12); padding: 8px 10px; border-radius: 8px; font-size: 10px; color: white; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255, 255, 255, 0.1); flex-shrink: 0; }
 .song-title-click { flex: 1; cursor: pointer; margin-right: 6px; }
 .delete-song-btn { background: none; border: none; cursor: pointer; font-size: 11px; opacity: 0.7; padding: 3px; }
 
 .add-song-box { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; width: 100%; box-sizing: border-box; }
 .add-song-box input, .add-song-box textarea { width: 100%; box-sizing: border-box; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 8px; color: white; font-size: 11px; outline: none; }
-.add-song-box button, .add-song-trigger { background: #ff4b5c; border: none; color: white; padding: 8px; border-radius: 8px; font-weight: 600; font-size: 11px; cursor: pointer; width: 100%; box-sizing: border-box; flex-shrink: 0; margin-top: 8px; }
+.add-song-box button, .add-song-trigger { background: #ff4b5c; border: none; color: white; padding: 8px; border-radius: 8px; font-weight: 600; font-size: 11px; cursor: pointer; width: 100%; box-sizing: border-box; flex-shrink: 0; margin-top: 6px; }
 
-.gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 10px; max-height: 45vh; overflow-y: auto; }
-.gallery-card { position: relative; width: 100%; height: 90px; border-radius: 10px; overflow: hidden; }
+.gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 10px; max-height: 40vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.gallery-card { position: relative; width: 100%; height: 90px; border-radius: 10px; overflow: hidden; flex-shrink: 0; }
 .gallery-card img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; transform: scaleX(-1); }
 .delete-photo-btn { position: absolute; top: 4px; right: 4px; background: rgba(0, 0, 0, 0.6); border: none; color: white; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 9px; }
 
@@ -465,7 +468,8 @@ h1 { font-size: 16px; font-weight: 700; margin: 2px 0; }
 .lightbox.acik { display: flex; }
 .lightbox img { max-width: 90%; max-height: 80%; border-radius: 12px; }
 
-.song-list::-webkit-scrollbar, .gallery-grid::-webkit-scrollbar, .modal-content::-webkit-scrollbar { display: none; }
+.song-list::-webkit-scrollbar, .gallery-grid::-webkit-scrollbar, .modal-content::-webkit-scrollbar { width: 3px; }
+.song-list::-webkit-scrollbar-thumb, .gallery-grid::-webkit-scrollbar-thumb, .modal-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
 
 .heart { position: absolute; color: rgba(255, 255, 255, 0.7); font-size: 16px; user-select: none; pointer-events: none; animation: moveHeart 5s linear infinite; }
 @keyframes moveHeart { 0% { transform: translateY(100vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; } }
