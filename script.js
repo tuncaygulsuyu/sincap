@@ -93,7 +93,7 @@ function sifreGuncelle() {
 
 // 🎮 GÖREV MOTORU
 let caughtSquirrels = 0;
-let currentMood = "🥺 Biraz Üzgünüm / Kırgınım";
+let currentMood = "🥰 Çok Mutluyum!";
 let selectedUser = "Tuncay";
 
 function selectUser(user) {
@@ -145,9 +145,16 @@ function spawnSquirrels() {
 
 function checkMoodSlider(val) {
     const textEl = document.getElementById("moodStatusText");
-    if (val <= 30) { currentMood = "😡 Çok Sinirliyim!"; textEl.style.color = "#ff4b5c"; }
-    else if (val <= 70) { currentMood = "🥺 Biraz Üzgünüm / Kırgınım"; textEl.style.color = "#ffdd59"; }
-    else { currentMood = "🥰 Çok Mutluyum!"; textEl.style.color = "#02c39a"; }
+    if (val <= 30) {
+        currentMood = "😡 Çok Sinirliyim!";
+        textEl.style.color = "#ff4b5c";
+    } else if (val <= 70) {
+        currentMood = "🥰 Çok Mutluyum!";
+        textEl.style.color = "#02c39a";
+    } else {
+        currentMood = "🥺 Biraz Üzgünüm / Kırgınım";
+        textEl.style.color = "#ffdd59";
+    }
     textEl.innerText = currentMood;
 }
 
@@ -174,26 +181,47 @@ function toggleModal(modalId) {
     }
 }
 
-// 🎲 AŞK ÇARKI / SÜRPRİZ KART MOTORU
+// 🎡 ÇARKIFELEK MOTORU
 const surpriseCards = [
     "🤗 Bugün Tuncay sana kocaman sarılma borçlu!",
     "🍰 Yavru sincap sana en sevdiğin tatlıyı ısmarlayacak!",
     "💆‍♂️ 10 dakikalık masaj hakkı kazandın!",
     "🎬 Bu akşamki filmi sen seçiyorsun!",
     "🍕 En sevdiğiniz yemeği söyleme sırası sende!",
-    "💋 5 saniyelik uzun öpücük hakkı!"
+    "💋 5 saniyelik uzun öpücük hakkı!",
+    "☕ Sabah kahvesini diğeri hazırlayacak!",
+    "🎵 Gün boyunca sadece senin seçtiğin şarkılar çalacak!",
+    "💌 Telefonuna en tatlı iltifat mesajı yazılacak!",
+    "🛁 Akşam için banyo/spa ortamı hazırlanacak!",
+    "🍫 En sevdiğin çikolata/atıştırmalık ödülü kazandın!",
+    "📸 Birlikte komik bir selfie çekilme vakti!",
+    "📞 Gün içinde sürpriz görüntülü arama hakkı!",
+    "⭐ İstediğin bir konuda veto hakkı kazandın!"
 ];
 
 function wheelAcKapat() { toggleModal("wheelModal"); }
 
-function drawSurpriseCard() {
-    const box = document.getElementById("surpriseText");
-    box.style.opacity = 0;
+let isSpinning = false;
+function spinWheel() {
+    if (isSpinning) return;
+    isSpinning = true;
+    
+    const disk = document.getElementById("wheelDisk");
+    const spinBtn = document.getElementById("spinBtn");
+    const surpriseText = document.getElementById("surpriseText");
+
+    spinBtn.disabled = true;
+    surpriseText.innerText = "Çark dönüyor, şansına ne çıkacak? 🎯";
+
+    const randomDegree = Math.floor(Math.random() * 1000) + 2160;
+    disk.style.transform = `rotate(${randomDegree}deg)`;
+
     setTimeout(() => {
         const randomCard = surpriseCards[Math.floor(Math.random() * surpriseCards.length)];
-        box.innerText = randomCard;
-        box.style.opacity = 1;
-    }, 200);
+        surpriseText.innerText = randomCard;
+        spinBtn.disabled = false;
+        isSpinning = false;
+    }, 8000);
 }
 
 // Live Counter
@@ -316,19 +344,6 @@ db.collection("sarkilar").orderBy("tarih", "desc").onSnapshot((snapshot) => {
     snapshot.forEach((doc) => { sarkiListesi.push({ id: doc.id, ...doc.data() }); });
     sarkiListesiniCiz();
 });
-
-let mevcutIndex = -1;
-function sonrakiSarki() {
-    if (sarkiListesi.length === 0) return;
-    mevcutIndex = (mevcutIndex + 1) % sarkiListesi.length;
-    platformSecimAc(sarkiListesi[mevcutIndex].title);
-}
-
-function oncekiSarki() {
-    if (sarkiListesi.length === 0) return;
-    mevcutIndex = (mevcutIndex - 1 + sarkiListesi.length) % sarkiListesi.length;
-    platformSecimAc(sarkiListesi[mevcutIndex].title);
-}
 
 function sarkiListesiAcKapat() {
     toggleModal("musicModal");
@@ -514,7 +529,6 @@ function updateDailyWidget() {
     const imgEl = document.getElementById("dailyWidgetImg");
     if (!imgEl) return;
     if (fotograflarListesi.length > 0) {
-        // Rastgele bir fotoğrafı Günün Anısı olarak seç
         const randomImg = fotograflarListesi[Math.floor(Math.random() * fotograflarListesi.length)].url;
         imgEl.src = randomImg;
     }

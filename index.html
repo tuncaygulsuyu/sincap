@@ -48,20 +48,22 @@
                     <button id="btnUser2" class="user-select-btn" onclick="selectUser('Yavru Sincap')">🐿️ Yavru Sincap</button>
                 </div>
 
-                <div id="moodStatusText" style="font-size:14px; font-weight:700; color:#ffdd59; margin-bottom:10px;">🥺 Biraz Üzgünüm / Kırgınım</div>
+                <div id="moodStatusText" style="font-size:14px; font-weight:700; color:#02c39a; margin-bottom:10px;">🥰 Çok Mutluyum!</div>
                 <input type="range" id="moodSlider" min="0" max="100" value="50" oninput="checkMoodSlider(this.value)">
                 <div style="display:flex; justify-content:space-between; font-size:10px; opacity:0.8; margin-top:5px;">
                     <span>😡 Sinirli</span>
-                    <span>🥺 Üzgün</span>
                     <span>🥰 Mutlu</span>
+                    <span>🥺 Üzgün</span>
                 </div>
-                <button class="love-btn" style="margin-top:15px;" onclick="saveMoodAndEnter()">Kaydet & Giriş Yap 🗝️</button>
+                <button class="love-btn" style="margin-top:12px;" onclick="saveMoodAndEnter()">Kaydet & Giriş Yap 🗝️</button>
+                <button class="skip-btn" onclick="kilitCoz()">Bu seferlik atla ➡️</button>
             </div>
 
             <!-- Görev B: Sincap Yakalama Oyunu -->
             <div id="taskCatchGame" class="task-box" style="display:none;">
                 <p style="font-size:12px; opacity:0.9;">Ekranda beliren 3 sincabı yakala! (<span id="catchCount">0</span>/3)</p>
                 <div class="catch-area" id="catchArea"></div>
+                <button class="skip-btn" style="margin-top:10px;" onclick="kilitCoz()">Bu seferlik atla ➡️</button>
             </div>
         </div>
     </div>
@@ -70,7 +72,7 @@
     <div class="bg-animation" id="bgAnimation"></div>
 
     <div class="main-wrapper">
-        <!-- Üst Spotify Tarzı Mini Müzik Widget'ı -->
+        <!-- Üst Müzik Widget'ı -->
         <div class="top-music-widget">
             <audio id="bgMusic" src="sarkilarimiz/Ajda_Pekkan_Sen_Olurdun_Yine.mp3" loop></audio>
             <div class="song-info">
@@ -81,10 +83,8 @@
                 </div>
             </div>
             <div class="widget-controls">
-                <button class="widget-btn" onclick="oncekiSarki()">⏮️</button>
-                <button id="playBtn" class="widget-btn" onclick="muzikOynatDuraklat()">▶️</button>
-                <button class="widget-btn" onclick="sonrakiSarki()">⏭️</button>
-                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.2" oninput="sesAyarla(this.value)">
+                <button id="playBtn" class="widget-btn-main" onclick="muzikOynatDuraklat()">▶️</button>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.2" oninput="sesAyarla(this.value)" title="Ses Seviyesi">
                 <button id="muteBtn" class="widget-btn" onclick="sesSustur()">🔊</button>
             </div>
         </div>
@@ -117,7 +117,7 @@
                 <button class="menu-item" onclick="sarkiListesiAcKapat()">🎵 Şarkı Listemiz</button>
                 <button class="menu-item" onclick="galeriAcKapat()">📸 Anı Galerimiz</button>
                 <button class="menu-item" onclick="todoAcKapat()">📋 Yapılacaklar Listesi</button>
-                <button class="menu-item" onclick="wheelAcKapat()">🎲 Aşk Çarkıfeleği & Görev</button>
+                <button class="menu-item" onclick="wheelAcKapat()">🎡 Aşk Çarkıfeleği</button>
                 <button class="menu-item" onclick="notlarAcKapat()">💌 Özel Notlar</button>
                 <button class="menu-item" onclick="moodAcKapat()">🎭 Ruh Halimiz Log</button>
                 <button class="menu-item menu-item-small" onclick="sifreDegistirModalAcKapat()">⚙️ PIN Şifresini Değiştir</button>
@@ -125,18 +125,25 @@
         </div>
     </div>
 
-    <!-- 🎲 Aşk Çarkıfeleği / Sürpriz Not Modalı -->
+    <!-- 🎡 Gerçek Çarkıfeleği Modalı -->
     <div class="modal" id="wheelModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="wheelAcKapat()">&times;</span>
-            <h2>🎲 Sürpriz Aşk Kartı</h2>
-            <p style="font-size:12px; opacity:0.8; margin-bottom:15px;">Bugünkü tatlı göreviniz veya vaadiniz gelsin!</p>
+            <h2>🎡 Aşk Çarkıfeleği</h2>
+            <p style="font-size:12px; opacity:0.8; margin-bottom:12px;">Çarkı çevir, kaderindeki sürpriz görevi gör!</p>
 
-            <div class="surprise-card-box" id="surpriseCardBox">
-                <span id="surpriseText" style="font-size:15px; font-weight:600; color:#ffdd59;">Kart Çekmek İçin Butona Bas! 🎁</span>
+            <div class="wheel-container" id="wheelContainer">
+                <div class="wheel-pointer">▼</div>
+                <div class="wheel-disk" id="wheelDisk">
+                    <span class="wheel-label">ÇEVİR 🎲</span>
+                </div>
             </div>
 
-            <button class="love-btn" style="margin-top:15px;" onclick="drawSurpriseCard()">Kart Çek 🎲</button>
+            <div class="surprise-card-box" id="surpriseCardBox" style="margin-top:15px;">
+                <span id="surpriseText" style="font-size:14px; font-weight:600; color:#ffdd59;">Hadi çarkı çevir ve şansını dene! 🎁</span>
+            </div>
+
+            <button class="love-btn" style="margin-top:15px;" id="spinBtn" onclick="spinWheel()">Çarkı Çevir! 🎡</button>
         </div>
     </div>
 
