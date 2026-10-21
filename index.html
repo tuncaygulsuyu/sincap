@@ -17,7 +17,7 @@
 
     <!-- 🔒 2 Aşamalı Güvenlik & Görev Kilit Ekranı -->
     <div class="lock-screen" id="lockScreen">
-        <!-- Aşama 1: 4 Haneli PIN Girişi -->
+        <!-- Aşama 1: PIN Girişi -->
         <div class="lock-card" id="pinStage">
             <div class="lock-icon">🔒</div>
             <h2>Sadece İkimize Özel ❤️</h2>
@@ -58,7 +58,7 @@
                 <button class="love-btn" style="margin-top:15px;" onclick="saveMoodAndEnter()">Kaydet & Giriş Yap 🗝️</button>
             </div>
 
-            <!-- Görev B: Sincap Yakalama Oyunu (Nadir) -->
+            <!-- Görev B: Sincap Yakalama Oyunu -->
             <div id="taskCatchGame" class="task-box" style="display:none;">
                 <p style="font-size:12px; opacity:0.9;">Ekranda beliren 3 sincabı yakala! (<span id="catchCount">0</span>/3)</p>
                 <div class="catch-area" id="catchArea"></div>
@@ -89,6 +89,12 @@
             </div>
         </div>
 
+        <!-- 📸 WIDGET: Günün Anısı Köşesi -->
+        <div class="daily-photo-widget" id="dailyPhotoWidget" onclick="galeriAcKapat()">
+            <div class="widget-badge">📸 Günün Anısı</div>
+            <img id="dailyWidgetImg" src="giris_sincaplar_gemini.jpg" alt="Günün Anısı">
+        </div>
+
         <!-- Ana Kart -->
         <div class="card">
             <div class="profile-icon">
@@ -111,10 +117,26 @@
                 <button class="menu-item" onclick="sarkiListesiAcKapat()">🎵 Şarkı Listemiz</button>
                 <button class="menu-item" onclick="galeriAcKapat()">📸 Anı Galerimiz</button>
                 <button class="menu-item" onclick="todoAcKapat()">📋 Yapılacaklar Listesi</button>
+                <button class="menu-item" onclick="wheelAcKapat()">🎲 Aşk Çarkıfeleği & Görev</button>
                 <button class="menu-item" onclick="notlarAcKapat()">💌 Özel Notlar</button>
                 <button class="menu-item" onclick="moodAcKapat()">🎭 Ruh Halimiz Log</button>
                 <button class="menu-item menu-item-small" onclick="sifreDegistirModalAcKapat()">⚙️ PIN Şifresini Değiştir</button>
             </div>
+        </div>
+    </div>
+
+    <!-- 🎲 Aşk Çarkıfeleği / Sürpriz Not Modalı -->
+    <div class="modal" id="wheelModal">
+        <div class="modal-content" style="height:auto;">
+            <span class="close-btn" onclick="wheelAcKapat()">&times;</span>
+            <h2>🎲 Sürpriz Aşk Kartı</h2>
+            <p style="font-size:12px; opacity:0.8; margin-bottom:15px;">Bugünkü tatlı göreviniz veya vaadiniz gelsin!</p>
+
+            <div class="surprise-card-box" id="surpriseCardBox">
+                <span id="surpriseText" style="font-size:15px; font-weight:600; color:#ffdd59;">Kart Çekmek İçin Butona Bas! 🎁</span>
+            </div>
+
+            <button class="love-btn" style="margin-top:15px;" onclick="drawSurpriseCard()">Kart Çek 🎲</button>
         </div>
     </div>
 
@@ -127,7 +149,7 @@
         </div>
     </div>
 
-    <!-- 🎵 Şarkı Listesi Tam Ekran Kayar Pencere -->
+    <!-- 🎵 Şarkı Listesi -->
     <div class="modal" id="musicModal">
         <div class="modal-content">
             <span class="close-btn" onclick="sarkiListesiAcKapat()">&times;</span>
@@ -137,7 +159,7 @@
         </div>
     </div>
 
-    <!-- 🎧 Şarkı Dinleme Platform Seçimi Pop-up -->
+    <!-- 🎧 Şarkı Dinleme Platform Seçimi -->
     <div class="modal" id="platformSelectModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="platformModalAcKapat()">&times;</span>
@@ -151,7 +173,7 @@
         </div>
     </div>
 
-    <!-- 📋 Yapılacaklar Listesi Modal -->
+    <!-- 📋 Yapılacaklar Listesi -->
     <div class="modal" id="todoModal">
         <div class="modal-content">
             <span class="close-btn" onclick="todoAcKapat()">&times;</span>
@@ -173,7 +195,7 @@
         </div>
     </div>
 
-    <!-- 💌 Özel Notlar Tam Ekran Kayar Pencere -->
+    <!-- 💌 Özel Notlar -->
     <div class="modal" id="notesModal">
         <div class="modal-content">
             <span class="close-btn" onclick="notlarAcKapat()">&times;</span>
@@ -225,7 +247,7 @@
         </div>
     </div>
 
-    <!-- Anı Galerisi Kayar Pencere -->
+    <!-- Anı Galerisi -->
     <div class="modal" id="galleryModal">
         <div class="modal-content">
             <span class="close-btn" onclick="galeriAcKapat()">&times;</span>

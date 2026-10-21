@@ -51,7 +51,7 @@ function sifreKontrol() {
         errorMsg.style.display = "none";
         pinStage.style.display = "none";
         taskStage.style.display = "block";
-        randomTaskInit(); // Şifre doğruysa göreve geç
+        randomTaskInit();
     } else {
         errorMsg.style.display = "block";
         pinInputs.forEach(input => input.value = "");
@@ -81,15 +81,9 @@ function sifreGuncelle() {
     const errBox = document.getElementById("changePassError");
     errBox.style.display = "none";
 
-    if (oldPass !== OZEL_SIFRE) {
-        errBox.innerText = "Mevcut PIN şifreniz hatalı!"; errBox.style.display = "block"; return;
-    }
-    if (newPass.length !== 4 || isNaN(newPass)) {
-        errBox.innerText = "Yeni PIN 4 haneli rakam olmalıdır!"; errBox.style.display = "block"; return;
-    }
-    if (newPass !== confirmPass) {
-        errBox.innerText = "Yeni şifreler birbiriyle uyuşmuyor!"; errBox.style.display = "block"; return;
-    }
+    if (oldPass !== OZEL_SIFRE) { errBox.innerText = "Mevcut PIN şifreniz hatalı!"; errBox.style.display = "block"; return; }
+    if (newPass.length !== 4 || isNaN(newPass)) { errBox.innerText = "Yeni PIN 4 haneli rakam olmalıdır!"; errBox.style.display = "block"; return; }
+    if (newPass !== confirmPass) { errBox.innerText = "Yeni şifreler birbiriyle uyuşmuyor!"; errBox.style.display = "block"; return; }
 
     OZEL_SIFRE = newPass;
     localStorage.setItem("sincapOzelSifre", newPass);
@@ -97,7 +91,7 @@ function sifreGuncelle() {
     sifreDegistirModalAcKapat();
 }
 
-// 🎮 GÖREV MOTORU (%80 Ruh Hali / %20 Sincap Yakalama)
+// 🎮 GÖREV MOTORU
 let caughtSquirrels = 0;
 let currentMood = "🥺 Biraz Üzgünüm / Kırgınım";
 let selectedUser = "Tuncay";
@@ -109,7 +103,7 @@ function selectUser(user) {
 }
 
 function randomTaskInit() {
-    const isRareCatch = Math.random() < 0.2; // %20 İhtimalle sincap yakalama
+    const isRareCatch = Math.random() < 0.2;
 
     document.getElementById("taskSliderGame").style.display = "none";
     document.getElementById("taskCatchGame").style.display = "none";
@@ -151,13 +145,9 @@ function spawnSquirrels() {
 
 function checkMoodSlider(val) {
     const textEl = document.getElementById("moodStatusText");
-    if (val <= 30) {
-        currentMood = "😡 Çok Sinirliyim!"; textEl.style.color = "#ff4b5c";
-    } else if (val <= 70) {
-        currentMood = "🥺 Biraz Üzgünüm / Kırgınım"; textEl.style.color = "#ffdd59";
-    } else {
-        currentMood = "🥰 Çok Mutluyum!"; textEl.style.color = "#02c39a";
-    }
+    if (val <= 30) { currentMood = "😡 Çok Sinirliyim!"; textEl.style.color = "#ff4b5c"; }
+    else if (val <= 70) { currentMood = "🥺 Biraz Üzgünüm / Kırgınım"; textEl.style.color = "#ffdd59"; }
+    else { currentMood = "🥰 Çok Mutluyum!"; textEl.style.color = "#02c39a"; }
     textEl.innerText = currentMood;
 }
 
@@ -166,9 +156,7 @@ function saveMoodAndEnter() {
         kisi: selectedUser,
         durum: currentMood,
         tarih: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-        kilitCoz();
-    });
+    }).then(() => { kilitCoz(); });
 }
 
 function kilitCoz() {
@@ -184,6 +172,28 @@ function toggleModal(modalId) {
     } else {
         document.body.classList.remove("modal-open");
     }
+}
+
+// 🎲 AŞK ÇARKI / SÜRPRİZ KART MOTORU
+const surpriseCards = [
+    "🤗 Bugün Tuncay sana kocaman sarılma borçlu!",
+    "🍰 Yavru sincap sana en sevdiğin tatlıyı ısmarlayacak!",
+    "💆‍♂️ 10 dakikalık masaj hakkı kazandın!",
+    "🎬 Bu akşamki filmi sen seçiyorsun!",
+    "🍕 En sevdiğiniz yemeği söyleme sırası sende!",
+    "💋 5 saniyelik uzun öpücük hakkı!"
+];
+
+function wheelAcKapat() { toggleModal("wheelModal"); }
+
+function drawSurpriseCard() {
+    const box = document.getElementById("surpriseText");
+    box.style.opacity = 0;
+    setTimeout(() => {
+        const randomCard = surpriseCards[Math.floor(Math.random() * surpriseCards.length)];
+        box.innerText = randomCard;
+        box.style.opacity = 1;
+    }, 200);
 }
 
 // Live Counter
@@ -378,7 +388,7 @@ function sarkiEkle() {
 
 function sarkiSil(docId) { db.collection("sarkilar").doc(docId).delete(); }
 
-// 🔥 FIREBASE İLE CANLI YAPILACAKLAR LİSTESİ (TO-DO LIST)
+// 🔥 FIREBASE İLE CANLI YAPILACAKLAR LİSTESİ
 let todoListesi = [];
 
 db.collection("todolist").orderBy("tarih", "desc").onSnapshot((snapshot) => {
@@ -490,14 +500,25 @@ function notEkle() {
 
 function notSil(docId) { db.collection("notlar").doc(docId).delete(); }
 
-// 🔥 CLOUDINARY + FIREBASE İLE CANLI GALERİ
+// 🔥 CLOUDINARY + FIREBASE İLE CANLI GALERİ VE GÜNÜN ANISI WIDGET'I
 let fotograflarListesi = [];
 
 db.collection("fotograflar").orderBy("tarih", "desc").onSnapshot((snapshot) => {
     fotograflarListesi = [];
     snapshot.forEach((doc) => { fotograflarListesi.push({ id: doc.id, ...doc.data() }); });
     galeriyiCiz();
+    updateDailyWidget();
 });
+
+function updateDailyWidget() {
+    const imgEl = document.getElementById("dailyWidgetImg");
+    if (!imgEl) return;
+    if (fotograflarListesi.length > 0) {
+        // Rastgele bir fotoğrafı Günün Anısı olarak seç
+        const randomImg = fotograflarListesi[Math.floor(Math.random() * fotograflarListesi.length)].url;
+        imgEl.src = randomImg;
+    }
+}
 
 function galeriAcKapat() {
     toggleModal("galleryModal");
