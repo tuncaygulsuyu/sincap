@@ -91,7 +91,7 @@ function sifreGuncelle() {
 }
 
 let caughtSquirrels = 0;
-let currentMood = "🥺 Biraz Üzgünüm / Kırgınım";
+let currentMood = "🥰 Çok Mutluyum!";
 let currentMoodPercent = 50;
 let selectedUser = "Tuncay";
 
@@ -246,7 +246,7 @@ function ozelGunSil(docId) {
     db.collection("ozel_gunler").doc(docId).delete();
 }
 
-// 🎡 Çarkıfelek
+// 🎡 Çarkıfelek (3 Saniyede Sonuçlanacak Şekilde Güncellendi)
 const surpriseCards = [
     "🤗 Bugün Tuncay sana kocaman sarılma borçlu!",
     "🍰 Yavru sincap sana en sevdiğin tatlıyı ısmarlayacak!",
@@ -270,14 +270,14 @@ function spinWheel() {
     const surpriseText = document.getElementById("surpriseText");
     spinBtn.disabled = true;
     surpriseText.innerText = "Çark dönüyor... 🎯";
-    const randomDegree = Math.floor(Math.random() * 1000) + 2160;
+    const randomDegree = Math.floor(Math.random() * 720) + 1080; // 3 saniyeye uygun dönüş açısı
     disk.style.transform = `rotate(${randomDegree}deg)`;
     setTimeout(() => {
         const randomCard = surpriseCards[Math.floor(Math.random() * surpriseCards.length)];
         surpriseText.innerText = randomCard;
         spinBtn.disabled = false;
         isSpinning = false;
-    }, 8000);
+    }, 3000); // 3 saniye süre
 }
 
 // Sayaç

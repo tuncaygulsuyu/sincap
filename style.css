@@ -74,7 +74,7 @@ body.modal-open {
     transform: scaleX(-1);
 }
 
-/* Sürpriz Kart / Çark Alanı */
+/* Sürpriz Kart / Çark Alanı (3 Saniye Geçiş Süresi Eklendi) */
 .surprise-card-box {
     background: rgba(255, 255, 255, 0.12);
     border: 1px dashed rgba(255, 255, 255, 0.3);
@@ -115,7 +115,7 @@ body.modal-open {
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: transform 8s cubic-bezier(0.15, 0.9, 0.2, 1);
+    transition: transform 3s cubic-bezier(0.15, 0.9, 0.2, 1);
 }
 
 .wheel-label {
