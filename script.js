@@ -1,3 +1,73 @@
+// Dynamic Passcode (PIN) - Stored in localStorage
+let OZEL_SIFRE = localStorage.getItem("sincapOzelSifre") || "1508"; 
+
+const pinInputs = document.querySelectorAll('.pin-box');
+const lockScreen = document.getElementById("lockScreen");
+const errorMsg = document.getElementById("passError");
+
+pinInputs.forEach((input, index) => {
+    input.addEventListener('input', () => {
+        input.value = input.value.replace(/[^0-9]/g, '');
+
+        if (input.value !== '') {
+            if (index < pinInputs.length - 1) {
+                pinInputs[index + 1].focus();
+            } else {
+                sifreKontrol();
+            }
+        }
+    });
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && input.value === '' && index > 0) {
+            pinInputs[index - 1].focus();
+        }
+    });
+});
+
+function sifreKontrol() {
+    let girilenSifre = "";
+    pinInputs.forEach(input => girilenSifre += input.value);
+
+    if (girilenSifre === OZEL_SIFRE) {
+        lockScreen.classList.add("cozuldu");
+        errorMsg.style.display = "none";
+    } else {
+        errorMsg.style.display = "block";
+        pinInputs.forEach(input => input.value = "");
+        pinInputs[0].focus();
+    }
+}
+
+// Passcode Change Functions
+function sifreDegistirModalAcKapat() {
+    const modal = document.getElementById("changePassModal");
+    modal.classList.toggle("acik");
+}
+
+function sifreGuncelle() {
+    const oldPass = document.getElementById("oldPassInput").value;
+    const newPass = document.getElementById("newPassInput").value;
+
+    if (oldPass !== OZEL_SIFRE) {
+        alert("Mevcut şifreniz hatalı!");
+        return;
+    }
+    if (newPass.length !== 4 || isNaN(newPass)) {
+        alert("Yeni şifre tam 4 haneli rakamlardan oluşmalıdır!");
+        return;
+    }
+
+    OZEL_SIFRE = newPass;
+    localStorage.setItem("sincapOzelSifre", newPass);
+    alert("PIN şifreniz başarıyla değiştirildi! 🎉");
+    
+    document.getElementById("oldPassInput").value = "";
+    document.getElementById("newPassInput").value = "";
+    sifreDegistirModalAcKapat();
+}
+
+// Live Counter
 const baslangicTarihi = new Date(2026, 7, 15);
 
 function sayaciGuncelle() {
@@ -18,7 +88,7 @@ function sayaciGuncelle() {
 setInterval(sayaciGuncelle, 1000);
 sayaciGuncelle();
 
-// Kalp Efekti
+// Floating Hearts
 function kalpOlustur() {
     const heart = document.createElement("div");
     heart.classList.add("heart");
@@ -38,19 +108,20 @@ function kalpPatlat() {
     panel.classList.toggle("acik");
 }
 
-// Ana Müzik Elemanları
+// Music Player Controls
 const muzik = document.getElementById("bgMusic");
 const playBtn = document.getElementById("playBtn");
 const muteBtn = document.getElementById("muteBtn");
 const volumeSlider = document.getElementById("volumeSlider");
 
-// Varsayılan Ses Seviyesini %20 (0.2) Yap
 if (muzik) {
     muzik.volume = 0.2;
 }
 
-// Kayıtlı Şarkı Linkleri Listesi (Tarayıcı Hafızasından Alınır)
-let sarkiListesi = JSON.parse(localStorage.getItem("sincapEklenenSarkilar")) || [];
+let sarkiListesi = JSON.parse(localStorage.getItem("sincapEklenenSarkilar")) || [
+    { title: "Ajda Pekkan - Sen Olurdun Yine", src: "https://www.youtube.com/watch?v=example" },
+    { title: "Manga - Cevapsız Sorular", src: "https://www.youtube.com/watch?v=example2" }
+];
 
 function muzikOynatDuraklat() {
     if (!muzik) return;
@@ -81,7 +152,6 @@ function sesSustur() {
     }
 }
 
-// İleri / Geri butonları eklenen linkler arasında gezsin
 let mevcutIndex = -1;
 
 function sonrakiSarki() {
@@ -96,11 +166,12 @@ function oncekiSarki() {
     window.open(sarkiListesi[mevcutIndex].src, "_blank");
 }
 
-// Menüdeki Şarkı Listesini Aç / Kapat & Çiz
 function sarkiListesiAcKapat() {
-    const container = document.getElementById("playlistContainer");
-    container.classList.toggle("acik");
-    sarkiListesiniCiz();
+    const modal = document.getElementById("musicModal");
+    modal.classList.toggle("acik");
+    if(modal.classList.contains("acik")) {
+        sarkiListesiniCiz();
+    }
 }
 
 function sarkiListesiniCiz() {
@@ -163,7 +234,72 @@ function sarkiSil(index) {
     sarkiListesiniCiz();
 }
 
-// Dinamik Otomatik Fotoğraf Galerisi
+// Notes System
+let notlarListesi = JSON.parse(localStorage.getItem("sincapEklenenNotlar")) || [
+    "☕ Birlikte içtiğimiz o ilk kahvenin kokusu hâlâ burnumda...",
+    "🎬 İlk sinema buluşmamızda filmi değil seni izlemiştim!",
+    "🐿️ İyi ki hayatımdasın yavru sincabım, seni çok seviyorum!"
+];
+
+function notlarAcKapat() {
+    const modal = document.getElementById("notesModal");
+    modal.classList.toggle("acik");
+    if(modal.classList.contains("acik")) {
+        notlariCiz();
+    }
+}
+
+function notlariCiz() {
+    const listDiv = document.getElementById("notesList");
+    listDiv.innerHTML = "";
+
+    if (notlarListesi.length === 0) {
+        listDiv.innerHTML = `<div style="font-size:11px; opacity:0.7; padding:5px;">Henüz özel not eklenmemiş 💌</div>`;
+        return;
+    }
+
+    notlarListesi.forEach((not, index) => {
+        const item = document.createElement("div");
+        item.classList.add("song-item");
+        
+        item.innerHTML = `
+            <span class="song-title-click">
+                ${not}
+            </span>
+            <button class="delete-song-btn" onclick="notSil(${index})">🗑️</button>
+        `;
+        listDiv.appendChild(item);
+    });
+}
+
+function notEkleModalAcKapat() {
+    const modal = document.getElementById("addNoteModal");
+    modal.classList.toggle("acik");
+}
+
+function notEkle() {
+    const noteInput = document.getElementById("newNoteText");
+
+    if (noteInput.value.trim() === "") {
+        alert("Lütfen bir not yazın!");
+        return;
+    }
+
+    notlarListesi.push(noteInput.value);
+    localStorage.setItem("sincapEklenenNotlar", JSON.stringify(notlarListesi));
+
+    noteInput.value = "";
+    notlariCiz();
+    notEkleModalAcKapat();
+}
+
+function notSil(index) {
+    notlarListesi.splice(index, 1);
+    localStorage.setItem("sincapEklenenNotlar", JSON.stringify(notlarListesi));
+    notlariCiz();
+}
+
+// Dynamic Photo Gallery
 const toplamFotografSayisi = 16;
 
 function galeriAcKapat() {
@@ -183,14 +319,12 @@ function galeriyiCiz() {
         img.src = `fotograflarimiz/${i}.jpg`;
         img.alt = "";
         
-        // Uzantı kontrolü ve yüklenemeyen resmi gizleme
         img.onerror = function() {
             if (this.src.endsWith(".jpg")) {
                 this.src = this.src.replace(".jpg", ".png");
             } else if (this.src.endsWith(".png")) {
                 this.src = this.src.replace(".png", ".jpeg");
             } else {
-                // Eğer hiçbir şekilde bulunamazsa kırık ikon gösterme, tamamen gizle
                 this.style.display = "none";
             }
         };

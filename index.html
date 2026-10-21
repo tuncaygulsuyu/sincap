@@ -9,7 +9,25 @@
 </head>
 <body>
 
-    <!-- Arka planda uçuşan kalpler için container -->
+    <!-- 4 Haneli Şifreli Giriş Ekranı -->
+    <div class="lock-screen" id="lockScreen">
+        <div class="lock-card">
+            <div class="lock-icon">🔒</div>
+            <h2>Sadece İkimize Özel ❤️</h2>
+            <p>Devam etmek için 4 haneli pin kodumuzu gir:</p>
+
+            <div class="pin-container" id="pinContainer">
+                <input type="password" maxlength="1" class="pin-box" autofocus>
+                <input type="password" maxlength="1" class="pin-box">
+                <input type="password" maxlength="1" class="pin-box">
+                <input type="password" maxlength="1" class="pin-box">
+            </div>
+
+            <p id="passError" class="pass-error" style="display:none;">Hatalı şifre yavru sincabım! 🐿️</p>
+        </div>
+    </div>
+
+    <!-- Arka planda uçuşan kalpler -->
     <div class="bg-animation" id="bgAnimation"></div>
 
     <div class="main-wrapper">
@@ -52,22 +70,36 @@
             <!-- Menü Paneli -->
             <div class="menu-panel" id="menuPanel">
                 <button class="menu-item" onclick="sarkiListesiAcKapat()">🎵 Şarkı Listemiz</button>
-                
-                <!-- Gizli Şarkı Listesi -->
-                <div class="playlist-container" id="playlistContainer">
-                    <div id="songList" class="song-list"></div>
-                    <button class="add-song-trigger" onclick="sarkiEkleModalAcKapat()">➕ Yeni Şarkı Ekle</button>
-                </div>
-
                 <button class="menu-item" onclick="galeriAcKapat()">📸 Anı Galerimiz</button>
-                <button class="menu-item">💌 Özel Notlar</button>
+                <button class="menu-item" onclick="notlarAcKapat()">💌 Özel Notlar</button>
+                <button class="menu-item" onclick="sifreDegistirModalAcKapat()">⚙️ PIN Şifresini Değiştir</button>
             </div>
         </div>
     </div>
 
-    <!-- Şarkı Ekleme Pop-up Penceresi -->
-    <div class="modal" id="addSongModal">
+    <!-- 🎵 Şarkı Listesi Tam Ekran Kayar Pencere -->
+    <div class="modal" id="musicModal">
         <div class="modal-content">
+            <span class="close-btn" onclick="sarkiListesiAcKapat()">&times;</span>
+            <h2>🎵 Ortak Şarkı Listemiz</h2>
+            <div id="songList" class="song-list"></div>
+            <button class="add-song-trigger" onclick="sarkiEkleModalAcKapat()">➕ Yeni Şarkı Ekle</button>
+        </div>
+    </div>
+
+    <!-- 💌 Özel Notlar Tam Ekran Kayar Pencere -->
+    <div class="modal" id="notesModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="notlarAcKapat()">&times;</span>
+            <h2>💌 Özel Notlarımız</h2>
+            <div id="notesList" class="song-list"></div>
+            <button class="add-song-trigger" onclick="notEkleModalAcKapat()">✍️ Yeni Not Ekle</button>
+        </div>
+    </div>
+
+    <!-- Şarkı Ekle Pop-up -->
+    <div class="modal" id="addSongModal">
+        <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="sarkiEkleModalAcKapat()">&times;</span>
             <h2>🎵 Şarkı Ekle</h2>
             <div class="add-song-box">
@@ -78,7 +110,32 @@
         </div>
     </div>
 
-    <!-- Anı Galerisi Pop-up Penceresi -->
+    <!-- Not Ekle Pop-up -->
+    <div class="modal" id="addNoteModal">
+        <div class="modal-content" style="height:auto;">
+            <span class="close-btn" onclick="notEkleModalAcKapat()">&times;</span>
+            <h2>💌 Özel Not Ekle</h2>
+            <div class="add-song-box">
+                <textarea id="newNoteText" placeholder="Notunu yaz yavru sincabım..." rows="4"></textarea>
+                <button onclick="notEkle()">Notu Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Şifre Değiştir Pop-up -->
+    <div class="modal" id="changePassModal">
+        <div class="modal-content" style="height:auto;">
+            <span class="close-btn" onclick="sifreDegistirModalAcKapat()">&times;</span>
+            <h2>⚙️ Şifre Değiştir</h2>
+            <div class="add-song-box">
+                <input type="password" id="oldPassInput" maxlength="4" placeholder="Mevcut 4 Haneli PIN">
+                <input type="password" id="newPassInput" maxlength="4" placeholder="Yeni 4 Haneli PIN">
+                <button onclick="sifreGuncelle()">Şifreyi Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Anı Galerisi Kayar Pencere -->
     <div class="modal" id="galleryModal">
         <div class="modal-content">
             <span class="close-btn" onclick="galeriAcKapat()">&times;</span>
@@ -87,11 +144,10 @@
         </div>
     </div>
 
-    <!-- Lightbox (Büyük Resim ve Live Photo Video Gösterici) -->
-<div class="lightbox" id="lightbox" onclick="lightboxKapat()">
-    <img id="lightboxImg" src="" alt="Büyük Görsel" style="display:none;">
-    <video id="lightboxVideo" src="" autoplay loop controls style="display:none; max-width:90%; max-height:80%; border-radius:15px;"></video>
-</div>
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="lightboxKapat()">
+        <img id="lightboxImg" src="" alt="Büyük Görsel">
+    </div>
 
     <script src="script.js"></script>
 </body>

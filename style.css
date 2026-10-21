@@ -24,6 +24,84 @@ body {
     100% { background-position: 0% 50%; }
 }
 
+/* Kilit Ekranı ve 4 Kutulu PIN Tasarımı */
+.lock-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 15, 15, 0.95);
+    backdrop-filter: blur(20px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.lock-screen.cozuldu {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.lock-card {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 35px 20px;
+    border-radius: 24px;
+    text-align: center;
+    color: white;
+    width: 90%;
+    max-width: 340px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.lock-icon { font-size: 42px; margin-bottom: 10px; }
+.lock-card h2 { font-size: 19px; margin-bottom: 6px; }
+.lock-card p { font-size: 12px; opacity: 0.8; margin-bottom: 20px; }
+
+.pin-container {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.pin-box {
+    width: 50px;
+    height: 60px;
+    border-radius: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    background: rgba(0, 0, 0, 0.35);
+    color: #ff4b5c;
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.pin-box:focus {
+    border-color: #ff4b5c;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 12px rgba(255, 75, 92, 0.4);
+    transform: scale(1.05);
+}
+
+.pass-error {
+    color: #ff6b6b !important;
+    font-size: 12px !important;
+    margin-top: 10px !important;
+    animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
 .main-wrapper {
     display: flex;
     flex-direction: column;
@@ -168,81 +246,131 @@ h1 { font-size: 26px; font-weight: 700; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.
 
 /* Menü Paneli */
 .menu-panel {
-    max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out; opacity: 0; display: flex; flex-direction: column; gap: 10px; margin-top: 15px;
+    max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease; opacity: 0; display: flex; flex-direction: column; gap: 10px; margin-top: 15px;
 }
-.menu-panel.acik { max-height: 500px; opacity: 1; overflow-y: auto; }
-
-/* Scrollbar Gizleme */
-.menu-panel::-webkit-scrollbar,
-.song-list::-webkit-scrollbar,
-.gallery-grid::-webkit-scrollbar {
-    display: none;
-}
-.menu-panel, .song-list, .gallery-grid {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
+.menu-panel.acik { max-height: 400px; opacity: 1; }
 
 .menu-item {
-    background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 12px 15px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 14px 15px; border-radius: 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .menu-item:hover { background: rgba(255, 255, 255, 0.35); transform: translateY(-2px); }
 
-/* Şarkı Listesi Konteyneri */
-.playlist-container {
-    display: none; flex-direction: column; gap: 8px; background: rgba(0, 0, 0, 0.25); padding: 10px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.15);
+/* --- TAM EKRAN AŞAĞIDAN YUKARIYA KAYAR PENCERELER (FULLSCREEN SLIDE-UP MODAL) --- */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end; /* Ekranın altından başlasın */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
 }
-.playlist-container.acik { display: flex; }
 
-.song-list { display: flex; flex-direction: column; gap: 6px; max-height: 160px; overflow-y: auto; text-align: left; }
+.modal.acik {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: rgba(20, 20, 20, 0.85);
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 30px 20px;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    width: 100%;
+    max-width: 480px;
+    height: 80vh; /* Ekranın %80'ini kaplar (Tam ekran hissi) */
+    text-align: center;
+    color: white;
+    position: relative;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+    
+    /* Aşağıdan yukarıya yumuşak kayma animasyonu */
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal.acik .modal-content {
+    transform: translateY(0); /* Açılınca yukarı kayar */
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.2s;
+}
+.close-btn:hover { color: #ff4b5c; }
+
+/* Modal İçerik Listeleri (Şarkılar, Notlar vs.) */
+.song-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 20px;
+    padding-right: 5px;
+    text-align: left;
+}
 
 .song-item {
-    background: rgba(255, 255, 255, 0.12); padding: 8px 12px; border-radius: 10px; font-size: 12px; color: white; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 14px 16px;
+    border-radius: 14px;
+    font-size: 13px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 .song-item:hover { background: rgba(255, 255, 255, 0.22); }
 
-.song-title-click { flex: 1; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 8px; }
+.song-title-click { flex: 1; cursor: pointer; margin-right: 8px; line-height: 1.4; }
 
 .delete-song-btn {
-    background: none; border: none; cursor: pointer; font-size: 12px; opacity: 0.7; transition: opacity 0.2s; padding: 2px 4px;
+    background: none; border: none; cursor: pointer; font-size: 14px; opacity: 0.7; transition: opacity 0.2s; padding: 4px;
 }
 .delete-song-btn:hover { opacity: 1; }
 
-.add-song-trigger {
-    background: rgba(255, 255, 255, 0.15); border: 1px dashed rgba(255, 255, 255, 0.4); color: white; padding: 8px; border-radius: 10px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 4px;
+.add-song-box { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+.add-song-box input, .add-song-box textarea {
+    background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 12px; color: white; font-size: 14px; outline: none;
 }
-.add-song-trigger:hover { background: rgba(255, 255, 255, 0.25); }
-
-/* Modal (Pop-up) Yapıları */
-.modal {
-    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center;
+.add-song-box input::placeholder, .add-song-box textarea::placeholder { color: rgba(255, 255, 255, 0.6); }
+.add-song-box button, .add-song-trigger {
+    background: #ff4b5c; border: none; color: white; padding: 12px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; margin-top: 5px;
 }
-.modal.acik { display: flex; }
+.add-song-box button:hover, .add-song-trigger:hover { background: #e03e4e; }
 
-.modal-content {
-    background: rgba(30, 30, 30, 0.85); border: 1px solid rgba(255, 255, 255, 0.2); padding: 20px; border-radius: 20px; width: 90%; max-width: 380px; text-align: center; color: white; position: relative; box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-}
+.gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; flex: 1; overflow-y: auto; padding-bottom: 10px; }
+.gallery-grid img { width: 100%; height: 140px; object-fit: cover; border-radius: 16px; cursor: pointer; transition: transform 0.2s, border 0.2s; border: 2px solid transparent; }
+.gallery-grid img:hover { transform: scale(1.03); border: 2px solid #ff4b5c; }
 
-.close-btn { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; color: rgba(255, 255, 255, 0.7); }
-
-.add-song-box { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-.add-song-box input {
-    background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 10px; color: white; font-size: 13px; outline: none;
-}
-.add-song-box input::placeholder { color: rgba(255, 255, 255, 0.6); }
-.add-song-box button {
-    background: #ff4b5c; border: none; color: white; padding: 10px; border-radius: 10px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s; margin-top: 5px;
-}
-.add-song-box button:hover { background: #e03e4e; }
-
-.gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; max-height: 300px; overflow-y: auto; }
-.gallery-grid img { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; cursor: pointer; transition: transform 0.2s, border 0.2s; border: 2px solid transparent; }
-.gallery-grid img:hover { transform: scale(1.04); border: 2px solid #ff4b5c; }
-
-/* Lightbox */
-.lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 1100; justify-content: center; align-items: center; }
+/* Lightbox (Tam Ekran Foto Büyütme) */
+.lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 3000; justify-content: center; align-items: center; }
 .lightbox.acik { display: flex; }
-.lightbox img { max-width: 90%; max-height: 80%; border-radius: 15px; box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); }
+.lightbox img { max-width: 92%; max-height: 85%; border-radius: 16px; box-shadow: 0 0 30px rgba(0, 0, 0, 0.8); }
+
+/* Scrollbar Gizleme */
+.song-list::-webkit-scrollbar, .gallery-grid::-webkit-scrollbar { display: none; }
+.song-list, .gallery-grid { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* Kalpler */
 .heart { position: absolute; color: rgba(255, 255, 255, 0.7); font-size: 20px; user-select: none; pointer-events: none; animation: moveHeart 6s linear infinite; }
