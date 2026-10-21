@@ -372,7 +372,7 @@ body.modal-open {
     cursor: pointer;
 }
 
-/* 🌟 Küçültülmüş Kompakt Ana Kart (Telefonda Tam Sığma) */
+/* Ana Kart */
 .card {
     background: rgba(0, 0, 0, 0.35);
     backdrop-filter: blur(16px);

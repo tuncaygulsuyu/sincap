@@ -94,6 +94,7 @@ function sifreGuncelle() {
 // 🎮 GÖREV MOTORU
 let caughtSquirrels = 0;
 let currentMood = "🥰 Çok Mutluyum!";
+let currentMoodPercent = 50;
 let selectedUser = "Tuncay";
 
 function selectUser(user) {
@@ -144,7 +145,12 @@ function spawnSquirrels() {
 }
 
 function checkMoodSlider(val) {
+    currentMoodPercent = val;
     const textEl = document.getElementById("moodStatusText");
+    const percentEl = document.getElementById("moodPercentBadge");
+    
+    percentEl.innerText = `%${val}`;
+
     if (val <= 30) {
         currentMood = "😡 Çok Sinirliyim!";
         textEl.style.color = "#ff4b5c";
@@ -162,6 +168,7 @@ function saveMoodAndEnter() {
     db.collection("ruh_hali").add({
         kisi: selectedUser,
         durum: currentMood,
+        yuzde: currentMoodPercent,
         tarih: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => { kilitCoz(); });
 }
@@ -320,11 +327,12 @@ function moodCiz() {
 
         let zamanStr = m.tarih ? new Date(m.tarih.seconds * 1000).toLocaleString('tr-TR', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : 'Az önce';
         let kisiIsmi = m.kisi || 'Gizemli Sincap';
+        let yuzdeStr = m.yuzde !== undefined ? ` (%${m.yuzde})` : '';
 
         item.innerHTML = `
             <div style="display:flex; flex-direction:column; text-align:left;">
                 <span style="font-weight:700; font-size:12px; color:#ffdd59;">👤 ${kisiIsmi}</span>
-                <span style="font-size:11px; margin-top:2px;">${m.durum}</span>
+                <span style="font-size:11px; margin-top:2px;">${m.durum}${yuzdeStr}</span>
                 <span style="font-size:9px; opacity:0.6; margin-top:2px;">🕒 ${zamanStr}</span>
             </div>
             <button class="delete-song-btn" onclick="moodSil('${m.id}')">🗑️</button>
