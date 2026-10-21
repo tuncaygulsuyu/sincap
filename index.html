@@ -15,9 +15,10 @@
 </head>
 <body>
 
-    <!-- 4 Haneli Şifreli Giriş Ekranı (Numpad Uyumlu) -->
+    <!-- 🔒 2 Aşamalı Güvenlik & Görev Kilit Ekranı -->
     <div class="lock-screen" id="lockScreen">
-        <div class="lock-card">
+        <!-- Aşama 1: 4 Haneli PIN Girişi -->
+        <div class="lock-card" id="pinStage">
             <div class="lock-icon">🔒</div>
             <h2>Sadece İkimize Özel ❤️</h2>
             <p>Devam etmek için 4 haneli pin kodumuzu gir:</p>
@@ -30,6 +31,38 @@
             </div>
 
             <p id="passError" class="pass-error" style="display:none;">Hatalı şifre yavru sincabım! 🐿️</p>
+        </div>
+
+        <!-- Aşama 2: Eğlenceli Görev / Ruh Hali -->
+        <div class="lock-card" id="taskStage" style="display:none;">
+            <div class="lock-icon" id="taskIcon">🎭</div>
+            <h2 id="taskTitle">Günün Görevi</h2>
+            <p id="taskDesc">Devam etmek için görevi tamamla:</p>
+
+            <!-- Görev A: Ruh Hali Slider -->
+            <div id="taskSliderGame" class="task-box">
+                <p style="font-size:12px; margin-bottom:8px;">Sen kimsin ve şu an ruh halin nasıl?</p>
+                
+                <div style="display:flex; gap:10px; justify-content:center; margin-bottom:12px;">
+                    <button id="btnUser1" class="user-select-btn active" onclick="selectUser('Tuncay')">👦 Tuncay</button>
+                    <button id="btnUser2" class="user-select-btn" onclick="selectUser('Yavru Sincap')">🐿️ Yavru Sincap</button>
+                </div>
+
+                <div id="moodStatusText" style="font-size:14px; font-weight:700; color:#ffdd59; margin-bottom:10px;">🥺 Biraz Üzgünüm / Kırgınım</div>
+                <input type="range" id="moodSlider" min="0" max="100" value="50" oninput="checkMoodSlider(this.value)">
+                <div style="display:flex; justify-content:space-between; font-size:10px; opacity:0.8; margin-top:5px;">
+                    <span>😡 Sinirli</span>
+                    <span>🥺 Üzgün</span>
+                    <span>🥰 Mutlu</span>
+                </div>
+                <button class="love-btn" style="margin-top:15px;" onclick="saveMoodAndEnter()">Kaydet & Giriş Yap 🗝️</button>
+            </div>
+
+            <!-- Görev B: Sincap Yakalama Oyunu (Nadir) -->
+            <div id="taskCatchGame" class="task-box" style="display:none;">
+                <p style="font-size:12px; opacity:0.9;">Ekranda beliren 3 sincabı yakala! (<span id="catchCount">0</span>/3)</p>
+                <div class="catch-area" id="catchArea"></div>
+            </div>
         </div>
     </div>
 
@@ -77,9 +110,20 @@
             <div class="menu-panel" id="menuPanel">
                 <button class="menu-item" onclick="sarkiListesiAcKapat()">🎵 Şarkı Listemiz</button>
                 <button class="menu-item" onclick="galeriAcKapat()">📸 Anı Galerimiz</button>
+                <button class="menu-item" onclick="todoAcKapat()">📋 Yapılacaklar Listesi</button>
                 <button class="menu-item" onclick="notlarAcKapat()">💌 Özel Notlar</button>
+                <button class="menu-item" onclick="moodAcKapat()">🎭 Ruh Halimiz Log</button>
                 <button class="menu-item menu-item-small" onclick="sifreDegistirModalAcKapat()">⚙️ PIN Şifresini Değiştir</button>
             </div>
+        </div>
+    </div>
+
+    <!-- 🎭 Ruh Halimiz Log Modalı -->
+    <div class="modal" id="moodModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="moodAcKapat()">&times;</span>
+            <h2>🎭 Ruh Hali Geçmişimiz</h2>
+            <div id="moodList" class="song-list"></div>
         </div>
     </div>
 
@@ -103,6 +147,28 @@
                 <button style="background: #1DB954;" onclick="openPlatform('spotify')">🟢 Spotify'da Aç</button>
                 <button style="background: #FF0000;" onclick="openPlatform('ytmusic')">🔴 YouTube Music'te Aç</button>
                 <button style="background: #FF0000; opacity:0.85;" onclick="openPlatform('youtube')">▶️ YouTube'da Aç</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📋 Yapılacaklar Listesi Modal -->
+    <div class="modal" id="todoModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="todoAcKapat()">&times;</span>
+            <h2>📋 Yapılacaklar Listemiz</h2>
+            <div id="todoList" class="song-list"></div>
+            <button class="add-song-trigger" onclick="todoEkleModalAcKapat()">➕ Yeni Plan Ekle</button>
+        </div>
+    </div>
+
+    <!-- Yapılacak Ekle Pop-up -->
+    <div class="modal" id="addTodoModal">
+        <div class="modal-content" style="height:auto;">
+            <span class="close-btn" onclick="todoEkleModalAcKapat()">&times;</span>
+            <h2>📋 Plan / Hedef Ekle</h2>
+            <div class="add-song-box">
+                <input type="text" id="newTodoText" placeholder="Örn: Birlikte Kapadokya'ya gitmek 🎈">
+                <button onclick="todoEkle()">Listeye Ekle</button>
             </div>
         </div>
     </div>
@@ -148,16 +214,12 @@
             <h2>⚙️ PIN Şifresini Değiştir</h2>
             <div class="add-song-box">
                 <input type="text" inputmode="numeric" pattern="[0-9]*" id="oldPassInput" maxlength="4" placeholder="Mevcut 4 Haneli PIN">
-
                 <div class="input-eye-wrapper">
                     <input type="password" inputmode="numeric" pattern="[0-9]*" id="newPassInput" maxlength="4" placeholder="Yeni 4 Haneli PIN">
                     <span class="eye-btn" onclick="yeniSifreleriGosterGizle(this)">👁️</span>
                 </div>
-
                 <input type="password" inputmode="numeric" pattern="[0-9]*" id="confirmPassInput" maxlength="4" placeholder="Yeni PIN (Tekrar)">
-
                 <p id="changePassError" class="pass-error" style="display:none;"></p>
-
                 <button onclick="sifreGuncelle()">Şifreyi Kaydet</button>
             </div>
         </div>
@@ -168,13 +230,11 @@
         <div class="modal-content">
             <span class="close-btn" onclick="galeriAcKapat()">&times;</span>
             <h2>📸 Anı Galerimiz</h2>
-            
             <div style="margin-top:10px;">
                 <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="fotografYukle(event)">
                 <button class="add-song-trigger" onclick="document.getElementById('photoInput').click()">📸 Fotoğraf Yükle</button>
                 <p id="uploadStatus" style="font-size:11px; color:#ff4b5c; margin-top:5px; display:none;">Fotoğraf yükleniyor, lütfen bekleyin...</p>
             </div>
-
             <div class="gallery-grid" id="galleryGrid"></div>
         </div>
     </div>

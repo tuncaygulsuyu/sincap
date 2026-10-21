@@ -9,13 +9,9 @@ const firebaseConfig = {
     measurementId: "G-XBS4C7K40G"
 };
 
-// Firebase Başlatma
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
+if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
 
-// 2. Cloudinary Bilgileri
 const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/kokuno0e/image/upload";
 const CLOUDINARY_PRESET = "sincap_cloud";
 
@@ -23,13 +19,14 @@ const CLOUDINARY_PRESET = "sincap_cloud";
 let OZEL_SIFRE = localStorage.getItem("sincapOzelSifre") || "1508"; 
 
 const pinInputs = document.querySelectorAll('.pin-box');
+const pinStage = document.getElementById("pinStage");
+const taskStage = document.getElementById("taskStage");
 const lockScreen = document.getElementById("lockScreen");
 const errorMsg = document.getElementById("passError");
 
 pinInputs.forEach((input, index) => {
     input.addEventListener('input', () => {
         input.value = input.value.replace(/[^0-9]/g, '');
-
         if (input.value !== '') {
             if (index < pinInputs.length - 1) {
                 setTimeout(() => { pinInputs[index + 1].focus(); }, 10);
@@ -46,26 +43,15 @@ pinInputs.forEach((input, index) => {
     });
 });
 
-function toggleModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.classList.toggle("acik");
-    
-    const acikModalVarMi = document.querySelector('.modal.acik');
-    if (acikModalVarMi) {
-        document.body.classList.add("modal-open");
-    } else {
-        document.body.classList.remove("modal-open");
-    }
-}
-
 function sifreKontrol() {
     let girilenSifre = "";
     pinInputs.forEach(input => girilenSifre += input.value);
 
     if (girilenSifre === OZEL_SIFRE) {
-        lockScreen.classList.add("cozuldu");
         errorMsg.style.display = "none";
-        document.body.classList.remove("modal-open");
+        pinStage.style.display = "none";
+        taskStage.style.display = "block";
+        randomTaskInit(); // Şifre doğruysa göreve geç
     } else {
         errorMsg.style.display = "block";
         pinInputs.forEach(input => input.value = "");
@@ -76,15 +62,10 @@ function sifreKontrol() {
 function yeniSifreleriGosterGizle(eyeBtn) {
     const newPass = document.getElementById("newPassInput");
     const confirmPass = document.getElementById("confirmPassInput");
-
     if (newPass.type === "password") {
-        newPass.type = "text";
-        confirmPass.type = "text";
-        eyeBtn.innerText = "🙈";
+        newPass.type = "text"; confirmPass.type = "text"; eyeBtn.innerText = "🙈";
     } else {
-        newPass.type = "password";
-        confirmPass.type = "password";
-        eyeBtn.innerText = "👁️";
+        newPass.type = "password"; confirmPass.type = "password"; eyeBtn.innerText = "👁️";
     }
 }
 
@@ -98,53 +79,123 @@ function sifreGuncelle() {
     const newPass = document.getElementById("newPassInput").value;
     const confirmPass = document.getElementById("confirmPassInput").value;
     const errBox = document.getElementById("changePassError");
-
     errBox.style.display = "none";
 
     if (oldPass !== OZEL_SIFRE) {
-        errBox.innerText = "Mevcut PIN şifreniz hatalı!";
-        errBox.style.display = "block";
-        return;
+        errBox.innerText = "Mevcut PIN şifreniz hatalı!"; errBox.style.display = "block"; return;
     }
     if (newPass.length !== 4 || isNaN(newPass)) {
-        errBox.innerText = "Yeni PIN 4 haneli rakam olmalıdır!";
-        errBox.style.display = "block";
-        return;
+        errBox.innerText = "Yeni PIN 4 haneli rakam olmalıdır!"; errBox.style.display = "block"; return;
     }
     if (newPass !== confirmPass) {
-        errBox.innerText = "Yeni şifreler birbiriyle uyuşmuyor!";
-        errBox.style.display = "block";
-        return;
+        errBox.innerText = "Yeni şifreler birbiriyle uyuşmuyor!"; errBox.style.display = "block"; return;
     }
 
     OZEL_SIFRE = newPass;
     localStorage.setItem("sincapOzelSifre", newPass);
     alert("PIN şifreniz başarıyla değiştirildi! 🎉");
-    
-    document.getElementById("oldPassInput").value = "";
-    document.getElementById("newPassInput").value = "";
-    document.getElementById("confirmPassInput").value = "";
     sifreDegistirModalAcKapat();
+}
+
+// 🎮 GÖREV MOTORU (%80 Ruh Hali / %20 Sincap Yakalama)
+let caughtSquirrels = 0;
+let currentMood = "🥺 Biraz Üzgünüm / Kırgınım";
+let selectedUser = "Tuncay";
+
+function selectUser(user) {
+    selectedUser = user;
+    document.getElementById("btnUser1").classList.toggle("active", user === 'Tuncay');
+    document.getElementById("btnUser2").classList.toggle("active", user === 'Yavru Sincap');
+}
+
+function randomTaskInit() {
+    const isRareCatch = Math.random() < 0.2; // %20 İhtimalle sincap yakalama
+
+    document.getElementById("taskSliderGame").style.display = "none";
+    document.getElementById("taskCatchGame").style.display = "none";
+
+    if (isRareCatch) {
+        document.getElementById("taskIcon").innerText = "🐿️";
+        document.getElementById("taskTitle").innerText = "Nadir Sincap Yakalama Görevi";
+        document.getElementById("taskCatchGame").style.display = "block";
+        spawnSquirrels();
+    } else {
+        document.getElementById("taskIcon").innerText = "🎭";
+        document.getElementById("taskTitle").innerText = "Ruh Hali Görevi";
+        document.getElementById("taskSliderGame").style.display = "block";
+        checkMoodSlider(50);
+    }
+}
+
+function spawnSquirrels() {
+    const area = document.getElementById("catchArea");
+    area.innerHTML = "";
+    caughtSquirrels = 0;
+    document.getElementById("catchCount").innerText = 0;
+
+    for (let i = 0; i < 3; i++) {
+        const sq = document.createElement("span");
+        sq.classList.add("clickable-squirrel");
+        sq.innerText = "🐿️";
+        sq.style.top = Math.floor(Math.random() * 90) + "px";
+        sq.style.left = Math.floor(Math.random() * 80) + "%";
+        sq.onclick = function() {
+            sq.remove();
+            caughtSquirrels++;
+            document.getElementById("catchCount").innerText = caughtSquirrels;
+            if (caughtSquirrels >= 3) { setTimeout(kilitCoz, 200); }
+        };
+        area.appendChild(sq);
+    }
+}
+
+function checkMoodSlider(val) {
+    const textEl = document.getElementById("moodStatusText");
+    if (val <= 30) {
+        currentMood = "😡 Çok Sinirliyim!"; textEl.style.color = "#ff4b5c";
+    } else if (val <= 70) {
+        currentMood = "🥺 Biraz Üzgünüm / Kırgınım"; textEl.style.color = "#ffdd59";
+    } else {
+        currentMood = "🥰 Çok Mutluyum!"; textEl.style.color = "#02c39a";
+    }
+    textEl.innerText = currentMood;
+}
+
+function saveMoodAndEnter() {
+    db.collection("ruh_hali").add({
+        kisi: selectedUser,
+        durum: currentMood,
+        tarih: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        kilitCoz();
+    });
+}
+
+function kilitCoz() {
+    lockScreen.classList.add("cozuldu");
+    document.body.classList.remove("modal-open");
+}
+
+function toggleModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.toggle("acik");
+    if (document.querySelector('.modal.acik')) {
+        document.body.classList.add("modal-open");
+    } else {
+        document.body.classList.remove("modal-open");
+    }
 }
 
 // Live Counter
 const baslangicTarihi = new Date(2026, 7, 15);
-
 function sayaciGuncelle() {
     const simdi = new Date();
     const fark = simdi - baslangicTarihi;
-
-    const gun = Math.floor(fark / (1000 * 60 * 60 * 24));
-    const saat = Math.floor((fark / (1000 * 60 * 60)) % 24);
-    const dakika = Math.floor((fark / 1000 / 60) % 60);
-    const saniye = Math.floor((fark / 1000) % 60);
-
-    document.getElementById("gun").innerText = gun;
-    document.getElementById("saat").innerText = saat;
-    document.getElementById("dakika").innerText = dakika;
-    document.getElementById("saniye").innerText = saniye;
+    document.getElementById("gun").innerText = Math.floor(fark / (1000 * 60 * 60 * 24));
+    document.getElementById("saat").innerText = Math.floor((fark / (1000 * 60 * 60)) % 24);
+    document.getElementById("dakika").innerText = Math.floor((fark / 1000 / 60) % 60);
+    document.getElementById("saniye").innerText = Math.floor((fark / 1000) % 60);
 }
-
 setInterval(sayaciGuncelle, 1000);
 sayaciGuncelle();
 
@@ -156,7 +207,6 @@ function kalpOlustur() {
     heart.style.left = Math.random() * 100 + "vw";
     heart.style.animationDuration = Math.random() * 3 + 3 + "s";
     heart.style.fontSize = Math.random() * 15 + 15 + "px";
-    
     document.getElementById("bgAnimation").appendChild(heart);
     setTimeout(() => { heart.remove(); }, 6000);
 }
@@ -164,8 +214,7 @@ setInterval(kalpOlustur, 400);
 
 function kalpPatlat() {
     for (let i = 0; i < 15; i++) { setTimeout(kalpOlustur, i * 50); }
-    const panel = document.getElementById("menuPanel");
-    panel.classList.toggle("acik");
+    document.getElementById("menuPanel").classList.toggle("acik");
 }
 
 // Music Player
@@ -203,15 +252,58 @@ function sesSustur() {
     }
 }
 
-// 🔥 FIREBASE İLE CANLI ŞARKI LİSTESİ DİNLEYİCİSİ
+// 🔥 FIREBASE İLE CANLI RUH HALİ GEÇMİŞİ (MOOD LOG)
+let moodListesi = [];
+
+db.collection("ruh_hali").orderBy("tarih", "desc").onSnapshot((snapshot) => {
+    moodListesi = [];
+    snapshot.forEach((doc) => { moodListesi.push({ id: doc.id, ...doc.data() }); });
+    moodCiz();
+});
+
+function moodAcKapat() {
+    toggleModal("moodModal");
+    if (document.getElementById("moodModal").classList.contains("acik")) { moodCiz(); }
+}
+
+function moodCiz() {
+    const listDiv = document.getElementById("moodList");
+    if (!listDiv) return;
+    listDiv.innerHTML = "";
+
+    if (moodListesi.length === 0) {
+        listDiv.innerHTML = `<div style="font-size:11px; opacity:0.7; padding:5px;">Henüz kaydedilmiş ruh hali yok 🎭</div>`;
+        return;
+    }
+
+    moodListesi.forEach((m) => {
+        const item = document.createElement("div");
+        item.classList.add("song-item");
+
+        let zamanStr = m.tarih ? new Date(m.tarih.seconds * 1000).toLocaleString('tr-TR', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : 'Az önce';
+        let kisiIsmi = m.kisi || 'Gizemli Sincap';
+
+        item.innerHTML = `
+            <div style="display:flex; flex-direction:column; text-align:left;">
+                <span style="font-weight:700; font-size:13px; color:#ffdd59;">👤 ${kisiIsmi}</span>
+                <span style="font-size:12px; margin-top:2px;">${m.durum}</span>
+                <span style="font-size:10px; opacity:0.6; margin-top:3px;">🕒 ${zamanStr}</span>
+            </div>
+            <button class="delete-song-btn" onclick="moodSil('${m.id}')">🗑️</button>
+        `;
+        listDiv.appendChild(item);
+    });
+}
+
+function moodSil(docId) { db.collection("ruh_hali").doc(docId).delete(); }
+
+// 🔥 FIREBASE İLE CANLI ŞARKI LİSTESİ
 let sarkiListesi = [];
 let secilenSarkiAdi = "";
 
 db.collection("sarkilar").orderBy("tarih", "desc").onSnapshot((snapshot) => {
     sarkiListesi = [];
-    snapshot.forEach((doc) => {
-        sarkiListesi.push({ id: doc.id, ...doc.data() });
-    });
+    snapshot.forEach((doc) => { sarkiListesi.push({ id: doc.id, ...doc.data() }); });
     sarkiListesiniCiz();
 });
 
@@ -230,29 +322,22 @@ function oncekiSarki() {
 
 function sarkiListesiAcKapat() {
     toggleModal("musicModal");
-    if (document.getElementById("musicModal").classList.contains("acik")) {
-        sarkiListesiniCiz();
-    }
+    if (document.getElementById("musicModal").classList.contains("acik")) { sarkiListesiniCiz(); }
 }
 
 function sarkiListesiniCiz() {
     const listDiv = document.getElementById("songList");
     if (!listDiv) return;
     listDiv.innerHTML = "";
-
     if (sarkiListesi.length === 0) {
         listDiv.innerHTML = `<div style="font-size:11px; opacity:0.7; padding:5px;">Henüz eklenmiş ortak şarkı yok 🎵</div>`;
         return;
     }
-
     sarkiListesi.forEach((sarki) => {
         const item = document.createElement("div");
         item.classList.add("song-item");
-        
         item.innerHTML = `
-            <span class="song-title-click" onclick="platformSecimAc('${sarki.title}')">
-                🎵 ${sarki.title}
-            </span>
+            <span class="song-title-click" onclick="platformSecimAc('${sarki.title}')">🎵 ${sarki.title}</span>
             <button class="delete-song-btn" onclick="sarkiSil('${sarki.id}')">🗑️</button>
         `;
         listDiv.appendChild(item);
@@ -265,22 +350,14 @@ function platformSecimAc(title) {
     toggleModal("platformSelectModal");
 }
 
-function platformModalAcKapat() {
-    toggleModal("platformSelectModal");
-}
+function platformModalAcKapat() { toggleModal("platformSelectModal"); }
 
 function openPlatform(platform) {
     const encoded = encodeURIComponent(secilenSarkiAdi);
     let url = "";
-
-    if (platform === "spotify") {
-        url = `https://open.spotify.com/search/${encoded}`;
-    } else if (platform === "ytmusic") {
-        url = `https://music.youtube.com/search?q=${encoded}`;
-    } else if (platform === "youtube") {
-        url = `https://www.youtube.com/results?search_query=${encoded}`;
-    }
-
+    if (platform === "spotify") url = `https://open.spotify.com/search/${encoded}`;
+    else if (platform === "ytmusic") url = `https://music.youtube.com/search?q=${encoded}`;
+    else if (platform === "youtube") url = `https://www.youtube.com/results?search_query=${encoded}`;
     window.open(url, "_blank");
     platformModalAcKapat();
 }
@@ -289,12 +366,7 @@ function sarkiEkleModalAcKapat() { toggleModal("addSongModal"); }
 
 function sarkiEkle() {
     const nameInput = document.getElementById("newSongName");
-
-    if (nameInput.value.trim() === "") {
-        alert("Lütfen şarkı/sanatçı adını girin!");
-        return;
-    }
-
+    if (nameInput.value.trim() === "") return;
     db.collection("sarkilar").add({
         title: nameInput.value,
         tarih: firebase.firestore.FieldValue.serverTimestamp()
@@ -304,26 +376,80 @@ function sarkiEkle() {
     });
 }
 
-function sarkiSil(docId) {
-    db.collection("sarkilar").doc(docId).delete();
+function sarkiSil(docId) { db.collection("sarkilar").doc(docId).delete(); }
+
+// 🔥 FIREBASE İLE CANLI YAPILACAKLAR LİSTESİ (TO-DO LIST)
+let todoListesi = [];
+
+db.collection("todolist").orderBy("tarih", "desc").onSnapshot((snapshot) => {
+    todoListesi = [];
+    snapshot.forEach((doc) => { todoListesi.push({ id: doc.id, ...doc.data() }); });
+    todoCiz();
+});
+
+function todoAcKapat() {
+    toggleModal("todoModal");
+    if (document.getElementById("todoModal").classList.contains("acik")) { todoCiz(); }
 }
 
-// 🔥 FIREBASE İLE CANLI ÖZEL NOTLAR DİNLEYİCİSİ
+function todoCiz() {
+    const listDiv = document.getElementById("todoList");
+    if (!listDiv) return;
+    listDiv.innerHTML = "";
+
+    if (todoListesi.length === 0) {
+        listDiv.innerHTML = `<div style="font-size:11px; opacity:0.7; padding:5px;">Henüz plan eklenmemiş 📋</div>`;
+        return;
+    }
+
+    todoListesi.forEach((todo) => {
+        const item = document.createElement("div");
+        item.classList.add("song-item");
+
+        item.innerHTML = `
+            <span class="song-title-click ${todo.tamamlandi ? 'todo-done' : ''}" onclick="todoDurumDegistir('${todo.id}', ${!todo.tamamlandi})">
+                ${todo.tamamlandi ? '✅' : '📌'} ${todo.metin}
+            </span>
+            <button class="delete-song-btn" onclick="todoSil('${todo.id}')">🗑️</button>
+        `;
+        listDiv.appendChild(item);
+    });
+}
+
+function todoEkleModalAcKapat() { toggleModal("addTodoModal"); }
+
+function todoEkle() {
+    const input = document.getElementById("newTodoText");
+    if (input.value.trim() === "") return;
+
+    db.collection("todolist").add({
+        metin: input.value,
+        tamamlandi: false,
+        tarih: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        input.value = "";
+        todoEkleModalAcKapat();
+    });
+}
+
+function todoDurumDegistir(docId, yeniDurum) {
+    db.collection("todolist").doc(docId).update({ tamamlandi: yeniDurum });
+}
+
+function todoSil(docId) { db.collection("todolist").doc(docId).delete(); }
+
+// 🔥 FIREBASE İLE CANLI ÖZEL NOTLAR
 let notlarListesi = [];
 
 db.collection("notlar").orderBy("tarih", "desc").onSnapshot((snapshot) => {
     notlarListesi = [];
-    snapshot.forEach((doc) => {
-        notlarListesi.push({ id: doc.id, ...doc.data() });
-    });
+    snapshot.forEach((doc) => { notlarListesi.push({ id: doc.id, ...doc.data() }); });
     notlariCiz();
 });
 
 function notlarAcKapat() {
     toggleModal("notesModal");
-    if (document.getElementById("notesModal").classList.contains("acik")) {
-        notlariCiz();
-    }
+    if (document.getElementById("notesModal").classList.contains("acik")) { notlariCiz(); }
 }
 
 function notlariCiz() {
@@ -339,7 +465,6 @@ function notlariCiz() {
     notlarListesi.forEach((not) => {
         const item = document.createElement("div");
         item.classList.add("song-item");
-        
         item.innerHTML = `
             <span class="song-title-click">${not.metin}</span>
             <button class="delete-song-btn" onclick="notSil('${not.id}')">🗑️</button>
@@ -352,11 +477,7 @@ function notEkleModalAcKapat() { toggleModal("addNoteModal"); }
 
 function notEkle() {
     const noteInput = document.getElementById("newNoteText");
-
-    if (noteInput.value.trim() === "") {
-        alert("Lütfen bir not yazın!");
-        return;
-    }
+    if (noteInput.value.trim() === "") return;
 
     db.collection("notlar").add({
         metin: noteInput.value,
@@ -367,26 +488,20 @@ function notEkle() {
     });
 }
 
-function notSil(docId) {
-    db.collection("notlar").doc(docId).delete();
-}
+function notSil(docId) { db.collection("notlar").doc(docId).delete(); }
 
-// 🔥 CLOUDINARY + FIREBASE İLE CANLI DİNAMİK FOTOĞRAF GALERİSİ
+// 🔥 CLOUDINARY + FIREBASE İLE CANLI GALERİ
 let fotograflarListesi = [];
 
 db.collection("fotograflar").orderBy("tarih", "desc").onSnapshot((snapshot) => {
     fotograflarListesi = [];
-    snapshot.forEach((doc) => {
-        fotograflarListesi.push({ id: doc.id, ...doc.data() });
-    });
+    snapshot.forEach((doc) => { fotograflarListesi.push({ id: doc.id, ...doc.data() }); });
     galeriyiCiz();
 });
 
 function galeriAcKapat() {
     toggleModal("galleryModal");
-    if (document.getElementById("galleryModal").classList.contains("acik")) {
-        galeriyiCiz();
-    }
+    if (document.getElementById("galleryModal").classList.contains("acik")) { galeriyiCiz(); }
 }
 
 function galeriyiCiz() {
@@ -402,7 +517,6 @@ function galeriyiCiz() {
     fotograflarListesi.forEach((foto) => {
         const card = document.createElement("div");
         card.classList.add("gallery-card");
-
         card.innerHTML = `
             <img src="${foto.url}" onclick="resimBuyut('${foto.url}')">
             <button class="delete-photo-btn" onclick="fotografSil('${foto.id}')">🗑️</button>
@@ -422,11 +536,8 @@ function fotografYukle(event) {
     formData.append("file", file);
     formData.append("upload_preset", CLOUDINARY_PRESET);
 
-    fetch(CLOUDINARY_URL, {
-        method: "POST",
-        body: formData
-    })
-    .then(response => response.json())
+    fetch(CLOUDINARY_URL, { method: "POST", body: formData })
+    .then(res => res.json())
     .then(data => {
         if (data.secure_url) {
             db.collection("fotograflar").add({
@@ -436,16 +547,9 @@ function fotografYukle(event) {
                 statusText.style.display = "none";
                 event.target.value = "";
             });
-        } else {
-            alert("Fotoğraf yükleme hatası!");
-            statusText.style.display = "none";
         }
     })
-    .catch(error => {
-        console.error("Yükleme hatası:", error);
-        alert("Fotoğraf yüklenemedi!");
-        statusText.style.display = "none";
-    });
+    .catch(() => { statusText.style.display = "none"; });
 }
 
 function fotografSil(docId) {
@@ -454,10 +558,8 @@ function fotografSil(docId) {
 }
 
 function resimBuyut(src) {
-    const lightbox = document.getElementById("lightbox");
-    const lightboxImg = document.getElementById("lightboxImg");
-    lightboxImg.src = src;
-    lightbox.classList.add("acik");
+    document.getElementById("lightboxImg").src = src;
+    document.getElementById("lightbox").classList.add("acik");
 }
 
 function lightboxKapat() {
