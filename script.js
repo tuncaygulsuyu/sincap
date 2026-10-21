@@ -246,7 +246,7 @@ function ozelGunSil(docId) {
     db.collection("ozel_gunler").doc(docId).delete();
 }
 
-// 🎡 Çarkıfelek (3 Saniyede Sonuçlanacak Şekilde Güncellendi)
+// 🎡 Çarkıfelek
 const surpriseCards = [
     "🤗 Bugün Tuncay sana kocaman sarılma borçlu!",
     "🍰 Yavru sincap sana en sevdiğin tatlıyı ısmarlayacak!",
@@ -270,14 +270,14 @@ function spinWheel() {
     const surpriseText = document.getElementById("surpriseText");
     spinBtn.disabled = true;
     surpriseText.innerText = "Çark dönüyor... 🎯";
-    const randomDegree = Math.floor(Math.random() * 720) + 1080; // 3 saniyeye uygun dönüş açısı
+    const randomDegree = Math.floor(Math.random() * 720) + 1080;
     disk.style.transform = `rotate(${randomDegree}deg)`;
     setTimeout(() => {
         const randomCard = surpriseCards[Math.floor(Math.random() * surpriseCards.length)];
         surpriseText.innerText = randomCard;
         spinBtn.disabled = false;
         isSpinning = false;
-    }, 3000); // 3 saniye süre
+    }, 3000);
 }
 
 // Sayaç
