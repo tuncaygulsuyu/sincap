@@ -1,4 +1,21 @@
-// Dynamic Passcode (PIN) - Stored in localStorage
+// 1. Firebase Yapılandırması (Senin Projenin Birebir Bilgileri)
+const firebaseConfig = {
+    apiKey: "AIzaSyAER4JxoS772x2eDkRhIj_xtzcJXy9SpU0",
+    authDomain: "sincap-app-92914.firebaseapp.com",
+    projectId: "sincap-app-92914",
+    storageBucket: "sincap-app-92914.firebasestorage.app",
+    messagingSenderId: "646513752342",
+    appId: "1:646513752342:web:d5ac8ed855c4e3520af837",
+    measurementId: "G-XBS4C7K40G"
+};
+
+// Firebase Başlatma
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.firestore();
+
+// Dynamic Passcode (PIN)
 let OZEL_SIFRE = localStorage.getItem("sincapOzelSifre") || "1508"; 
 
 const pinInputs = document.querySelectorAll('.pin-box');
@@ -11,9 +28,7 @@ pinInputs.forEach((input, index) => {
 
         if (input.value !== '') {
             if (index < pinInputs.length - 1) {
-                setTimeout(() => {
-                    pinInputs[index + 1].focus();
-                }, 10);
+                setTimeout(() => { pinInputs[index + 1].focus(); }, 10);
             } else {
                 sifreKontrol();
             }
@@ -22,9 +37,7 @@ pinInputs.forEach((input, index) => {
 
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Backspace' && input.value === '' && index > 0) {
-            setTimeout(() => {
-                pinInputs[index - 1].focus();
-            }, 10);
+            setTimeout(() => { pinInputs[index - 1].focus(); }, 10);
         }
     });
 });
@@ -56,7 +69,6 @@ function sifreKontrol() {
     }
 }
 
-// İki Yeni Şifreyi Aynı Anda Göster / Gizle Fonksiyonu
 function yeniSifreleriGosterGizle(eyeBtn) {
     const newPass = document.getElementById("newPassInput");
     const confirmPass = document.getElementById("confirmPassInput");
@@ -72,7 +84,6 @@ function yeniSifreleriGosterGizle(eyeBtn) {
     }
 }
 
-// Passcode Change Functions
 function sifreDegistirModalAcKapat() {
     toggleModal("changePassModal");
     document.getElementById("changePassError").style.display = "none";
@@ -153,27 +164,18 @@ function kalpPatlat() {
     panel.classList.toggle("acik");
 }
 
-// Music Player Controls
+// Music Player
 const muzik = document.getElementById("bgMusic");
 const playBtn = document.getElementById("playBtn");
 const muteBtn = document.getElementById("muteBtn");
 const volumeSlider = document.getElementById("volumeSlider");
 
-if (muzik) {
-    muzik.volume = 0.2;
-}
-
-let sarkiListesi = JSON.parse(localStorage.getItem("sincapEklenenSarkilar")) || [
-    { title: "Ajda Pekkan - Sen Olurdun Yine", src: "https://www.youtube.com/watch?v=example" },
-    { title: "Manga - Cevapsız Sorular", src: "https://www.youtube.com/watch?v=example2" }
-];
+if (muzik) { muzik.volume = 0.2; }
 
 function muzikOynatDuraklat() {
     if (!muzik) return;
     if (muzik.paused) {
-        muzik.play().then(() => {
-            playBtn.innerText = "⏸️";
-        }).catch(err => console.log("Oynatma hatası:", err));
+        muzik.play().then(() => { playBtn.innerText = "⏸️"; }).catch(err => console.log(err));
     } else {
         muzik.pause();
         playBtn.innerText = "▶️";
@@ -197,8 +199,18 @@ function sesSustur() {
     }
 }
 
-let mevcutIndex = -1;
+// 🔥 FIREBASE İLE CANLI ŞARKI LİSTESİ DİNLEYİCİSİ
+let sarkiListesi = [];
 
+db.collection("sarkilar").onSnapshot((snapshot) => {
+    sarkiListesi = [];
+    snapshot.forEach((doc) => {
+        sarkiListesi.push({ id: doc.id, ...doc.data() });
+    });
+    sarkiListesiniCiz();
+});
+
+let mevcutIndex = -1;
 function sonrakiSarki() {
     if (sarkiListesi.length === 0) return;
     mevcutIndex = (mevcutIndex + 1) % sarkiListesi.length;
@@ -220,6 +232,7 @@ function sarkiListesiAcKapat() {
 
 function sarkiListesiniCiz() {
     const listDiv = document.getElementById("songList");
+    if (!listDiv) return;
     listDiv.innerHTML = "";
 
     if (sarkiListesi.length === 0) {
@@ -227,7 +240,7 @@ function sarkiListesiniCiz() {
         return;
     }
 
-    sarkiListesi.forEach((sarki, index) => {
+    sarkiListesi.forEach((sarki) => {
         const item = document.createElement("div");
         item.classList.add("song-item");
         
@@ -235,19 +248,14 @@ function sarkiListesiniCiz() {
             <span class="song-title-click" onclick="linkAc('${sarki.src}')">
                 🔗 ${sarki.title}
             </span>
-            <button class="delete-song-btn" onclick="sarkiSil(${index})">🗑️</button>
+            <button class="delete-song-btn" onclick="sarkiSil('${sarki.id}')">🗑️</button>
         `;
         listDiv.appendChild(item);
     });
 }
 
-function linkAc(url) {
-    window.open(url, "_blank");
-}
-
-function sarkiEkleModalAcKapat() {
-    toggleModal("addSongModal");
-}
+function linkAc(url) { window.open(url, "_blank"); }
+function sarkiEkleModalAcKapat() { toggleModal("addSongModal"); }
 
 function sarkiEkle() {
     const nameInput = document.getElementById("newSongName");
@@ -258,31 +266,31 @@ function sarkiEkle() {
         return;
     }
 
-    sarkiListesi.push({
+    db.collection("sarkilar").add({
         title: nameInput.value,
-        src: urlInput.value
+        src: urlInput.value,
+        tarih: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        nameInput.value = "";
+        urlInput.value = "";
+        sarkiEkleModalAcKapat();
     });
-
-    localStorage.setItem("sincapEklenenSarkilar", JSON.stringify(sarkiListesi));
-
-    nameInput.value = "";
-    urlInput.value = "";
-    sarkiListesiniCiz();
-    sarkiEkleModalAcKapat();
 }
 
-function sarkiSil(index) {
-    sarkiListesi.splice(index, 1);
-    localStorage.setItem("sincapEklenenSarkilar", JSON.stringify(sarkiListesi));
-    sarkiListesiniCiz();
+function sarkiSil(docId) {
+    db.collection("sarkilar").doc(docId).delete();
 }
 
-// Notes System
-let notlarListesi = JSON.parse(localStorage.getItem("sincapEklenenNotlar")) || [
-    "☕ Birlikte içtiğimiz o ilk kahvenin kokusu hâlâ burnumda...",
-    "🎬 İlk sinema buluşmamızda filmi değil seni izlemiştim!",
-    "🐿️ İyi ki hayatımdasın yavru sincabım, seni çok seviyorum!"
-];
+// 🔥 FIREBASE İLE CANLI ÖZEL NOTLAR DİNLEYİCİSİ
+let notlarListesi = [];
+
+db.collection("notlar").onSnapshot((snapshot) => {
+    notlarListesi = [];
+    snapshot.forEach((doc) => {
+        notlarListesi.push({ id: doc.id, ...doc.data() });
+    });
+    notlariCiz();
+});
 
 function notlarAcKapat() {
     toggleModal("notesModal");
@@ -293,6 +301,7 @@ function notlarAcKapat() {
 
 function notlariCiz() {
     const listDiv = document.getElementById("notesList");
+    if (!listDiv) return;
     listDiv.innerHTML = "";
 
     if (notlarListesi.length === 0) {
@@ -300,23 +309,19 @@ function notlariCiz() {
         return;
     }
 
-    notlarListesi.forEach((not, index) => {
+    notlarListesi.forEach((not) => {
         const item = document.createElement("div");
         item.classList.add("song-item");
         
         item.innerHTML = `
-            <span class="song-title-click">
-                ${not}
-            </span>
-            <button class="delete-song-btn" onclick="notSil(${index})">🗑️</button>
+            <span class="song-title-click">${not.metin}</span>
+            <button class="delete-song-btn" onclick="notSil('${not.id}')">🗑️</button>
         `;
         listDiv.appendChild(item);
     });
 }
 
-function notEkleModalAcKapat() {
-    toggleModal("addNoteModal");
-}
+function notEkleModalAcKapat() { toggleModal("addNoteModal"); }
 
 function notEkle() {
     const noteInput = document.getElementById("newNoteText");
@@ -326,18 +331,17 @@ function notEkle() {
         return;
     }
 
-    notlarListesi.push(noteInput.value);
-    localStorage.setItem("sincapEklenenNotlar", JSON.stringify(notlarListesi));
-
-    noteInput.value = "";
-    notlariCiz();
-    notEkleModalAcKapat();
+    db.collection("notlar").add({
+        metin: noteInput.value,
+        tarih: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        noteInput.value = "";
+        notEkleModalAcKapat();
+    });
 }
 
-function notSil(index) {
-    notlarListesi.splice(index, 1);
-    localStorage.setItem("sincapEklenenNotlar", JSON.stringify(notlarListesi));
-    notlariCiz();
+function notSil(docId) {
+    db.collection("notlar").doc(docId).delete();
 }
 
 // Dynamic Photo Gallery

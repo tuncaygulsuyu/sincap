@@ -2,10 +2,16 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#ee7752">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Sincap & Sevgilisi ❤️</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- 🔥 FIREBASE CANLI VERİTABANI KÜTÜPHANELERİ -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -122,22 +128,19 @@
         </div>
     </div>
 
-    <!-- Şifre Değiştir Pop-up (Taşma Çözüldü & Tek Göz İkonlu) -->
+    <!-- Şifre Değiştir Pop-up -->
     <div class="modal" id="changePassModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="sifreDegistirModalAcKapat()">&times;</span>
             <h2>⚙️ PIN Şifresini Değiştir</h2>
             <div class="add-song-box">
-                <!-- Mevcut PIN her zaman görünür (text) -->
                 <input type="text" inputmode="numeric" pattern="[0-9]*" id="oldPassInput" maxlength="4" placeholder="Mevcut 4 Haneli PIN">
 
-                <!-- Yeni PIN (Göz İkonlu) -->
                 <div class="input-eye-wrapper">
                     <input type="password" inputmode="numeric" pattern="[0-9]*" id="newPassInput" maxlength="4" placeholder="Yeni 4 Haneli PIN">
                     <span class="eye-btn" onclick="yeniSifreleriGosterGizle(this)">👁️</span>
                 </div>
 
-                <!-- Yeni PIN Tekrar -->
                 <input type="password" inputmode="numeric" pattern="[0-9]*" id="confirmPassInput" maxlength="4" placeholder="Yeni PIN (Tekrar)">
 
                 <p id="changePassError" class="pass-error" style="display:none;"></p>
