@@ -1,4 +1,4 @@
-// 1. Firebase Yapılandırması (Senin Projenin Birebir Bilgileri)
+// 1. Firebase Yapılandırması
 const firebaseConfig = {
     apiKey: "AIzaSyAER4JxoS772x2eDkRhIj_xtzcJXy9SpU0",
     authDomain: "sincap-app-92914.firebaseapp.com",
@@ -14,6 +14,10 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.firestore();
+
+// 2. Cloudinary Bilgileri
+const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/kokuno0e/image/upload";
+const CLOUDINARY_PRESET = "sincap_cloud";
 
 // Dynamic Passcode (PIN)
 let OZEL_SIFRE = localStorage.getItem("sincapOzelSifre") || "1508"; 
@@ -201,8 +205,9 @@ function sesSustur() {
 
 // 🔥 FIREBASE İLE CANLI ŞARKI LİSTESİ DİNLEYİCİSİ
 let sarkiListesi = [];
+let secilenSarkiAdi = "";
 
-db.collection("sarkilar").onSnapshot((snapshot) => {
+db.collection("sarkilar").orderBy("tarih", "desc").onSnapshot((snapshot) => {
     sarkiListesi = [];
     snapshot.forEach((doc) => {
         sarkiListesi.push({ id: doc.id, ...doc.data() });
@@ -214,13 +219,13 @@ let mevcutIndex = -1;
 function sonrakiSarki() {
     if (sarkiListesi.length === 0) return;
     mevcutIndex = (mevcutIndex + 1) % sarkiListesi.length;
-    window.open(sarkiListesi[mevcutIndex].src, "_blank");
+    platformSecimAc(sarkiListesi[mevcutIndex].title);
 }
 
 function oncekiSarki() {
     if (sarkiListesi.length === 0) return;
     mevcutIndex = (mevcutIndex - 1 + sarkiListesi.length) % sarkiListesi.length;
-    window.open(sarkiListesi[mevcutIndex].src, "_blank");
+    platformSecimAc(sarkiListesi[mevcutIndex].title);
 }
 
 function sarkiListesiAcKapat() {
@@ -236,7 +241,7 @@ function sarkiListesiniCiz() {
     listDiv.innerHTML = "";
 
     if (sarkiListesi.length === 0) {
-        listDiv.innerHTML = `<div style="font-size:11px; opacity:0.7; padding:5px;">Henüz eklenmiş ortak şarkı linki yok 🎵</div>`;
+        listDiv.innerHTML = `<div style="font-size:11px; opacity:0.7; padding:5px;">Henüz eklenmiş ortak şarkı yok 🎵</div>`;
         return;
     }
 
@@ -245,8 +250,8 @@ function sarkiListesiniCiz() {
         item.classList.add("song-item");
         
         item.innerHTML = `
-            <span class="song-title-click" onclick="linkAc('${sarki.src}')">
-                🔗 ${sarki.title}
+            <span class="song-title-click" onclick="platformSecimAc('${sarki.title}')">
+                🎵 ${sarki.title}
             </span>
             <button class="delete-song-btn" onclick="sarkiSil('${sarki.id}')">🗑️</button>
         `;
@@ -254,25 +259,47 @@ function sarkiListesiniCiz() {
     });
 }
 
-function linkAc(url) { window.open(url, "_blank"); }
+function platformSecimAc(title) {
+    secilenSarkiAdi = title;
+    document.getElementById("selectedSongName").innerText = title;
+    toggleModal("platformSelectModal");
+}
+
+function platformModalAcKapat() {
+    toggleModal("platformSelectModal");
+}
+
+function openPlatform(platform) {
+    const encoded = encodeURIComponent(secilenSarkiAdi);
+    let url = "";
+
+    if (platform === "spotify") {
+        url = `https://open.spotify.com/search/${encoded}`;
+    } else if (platform === "ytmusic") {
+        url = `https://music.youtube.com/search?q=${encoded}`;
+    } else if (platform === "youtube") {
+        url = `https://www.youtube.com/results?search_query=${encoded}`;
+    }
+
+    window.open(url, "_blank");
+    platformModalAcKapat();
+}
+
 function sarkiEkleModalAcKapat() { toggleModal("addSongModal"); }
 
 function sarkiEkle() {
     const nameInput = document.getElementById("newSongName");
-    const urlInput = document.getElementById("newSongUrl");
 
-    if (nameInput.value.trim() === "" || urlInput.value.trim() === "") {
-        alert("Lütfen hem şarkı adını hem de linki girin!");
+    if (nameInput.value.trim() === "") {
+        alert("Lütfen şarkı/sanatçı adını girin!");
         return;
     }
 
     db.collection("sarkilar").add({
         title: nameInput.value,
-        src: urlInput.value,
         tarih: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
         nameInput.value = "";
-        urlInput.value = "";
         sarkiEkleModalAcKapat();
     });
 }
@@ -284,7 +311,7 @@ function sarkiSil(docId) {
 // 🔥 FIREBASE İLE CANLI ÖZEL NOTLAR DİNLEYİCİSİ
 let notlarListesi = [];
 
-db.collection("notlar").onSnapshot((snapshot) => {
+db.collection("notlar").orderBy("tarih", "desc").onSnapshot((snapshot) => {
     notlarListesi = [];
     snapshot.forEach((doc) => {
         notlarListesi.push({ id: doc.id, ...doc.data() });
@@ -344,8 +371,16 @@ function notSil(docId) {
     db.collection("notlar").doc(docId).delete();
 }
 
-// Dynamic Photo Gallery
-const toplamFotografSayisi = 16;
+// 🔥 CLOUDINARY + FIREBASE İLE CANLI DİNAMİK FOTOĞRAF GALERİSİ
+let fotograflarListesi = [];
+
+db.collection("fotograflar").orderBy("tarih", "desc").onSnapshot((snapshot) => {
+    fotograflarListesi = [];
+    snapshot.forEach((doc) => {
+        fotograflarListesi.push({ id: doc.id, ...doc.data() });
+    });
+    galeriyiCiz();
+});
 
 function galeriAcKapat() {
     toggleModal("galleryModal");
@@ -356,26 +391,66 @@ function galeriAcKapat() {
 
 function galeriyiCiz() {
     const grid = document.getElementById("galleryGrid");
+    if (!grid) return;
     grid.innerHTML = "";
-    
-    for (let i = 1; i <= toplamFotografSayisi; i++) {
-        const img = document.createElement("img");
-        img.src = `fotograflarimiz/${i}.jpg`;
-        img.alt = "";
-        
-        img.onerror = function() {
-            if (this.src.endsWith(".jpg")) {
-                this.src = this.src.replace(".jpg", ".png");
-            } else if (this.src.endsWith(".png")) {
-                this.src = this.src.replace(".png", ".jpeg");
-            } else {
-                this.style.display = "none";
-            }
-        };
 
-        img.onclick = () => resimBuyut(img.src);
-        grid.appendChild(img);
+    if (fotograflarListesi.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; font-size:11px; opacity:0.7; padding:10px;">Henüz fotoğraf yüklenmemiş 📸</div>`;
+        return;
     }
+
+    fotograflarListesi.forEach((foto) => {
+        const card = document.createElement("div");
+        card.classList.add("gallery-card");
+
+        card.innerHTML = `
+            <img src="${foto.url}" onclick="resimBuyut('${foto.url}')">
+            <button class="delete-photo-btn" onclick="fotografSil('${foto.id}')">🗑️</button>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function fotografYukle(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const statusText = document.getElementById("uploadStatus");
+    statusText.style.display = "block";
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_PRESET);
+
+    fetch(CLOUDINARY_URL, {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.secure_url) {
+            db.collection("fotograflar").add({
+                url: data.secure_url,
+                tarih: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                statusText.style.display = "none";
+                event.target.value = "";
+            });
+        } else {
+            alert("Fotoğraf yükleme hatası!");
+            statusText.style.display = "none";
+        }
+    })
+    .catch(error => {
+        console.error("Yükleme hatası:", error);
+        alert("Fotoğraf yüklenemedi!");
+        statusText.style.display = "none";
+    });
+}
+
+function fotografSil(docId) {
+    if (!confirm("Bu fotoğrafı silmek istediğinize emin misiniz?")) return;
+    db.collection("fotograflar").doc(docId).delete();
 }
 
 function resimBuyut(src) {

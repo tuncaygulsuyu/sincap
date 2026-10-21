@@ -93,6 +93,20 @@
         </div>
     </div>
 
+    <!-- 🎧 Şarkı Dinleme Platform Seçimi Pop-up -->
+    <div class="modal" id="platformSelectModal">
+        <div class="modal-content" style="height:auto;">
+            <span class="close-btn" onclick="platformModalAcKapat()">&times;</span>
+            <h2 id="selectedSongName">Şarkı Dinle</h2>
+            <p style="font-size: 12px; opacity:0.8; margin-bottom:15px;">Hangi uygulamada dinlemek istersin?</p>
+            <div class="add-song-box">
+                <button style="background: #1DB954;" onclick="openPlatform('spotify')">🟢 Spotify'da Aç</button>
+                <button style="background: #FF0000;" onclick="openPlatform('ytmusic')">🔴 YouTube Music'te Aç</button>
+                <button style="background: #FF0000; opacity:0.85;" onclick="openPlatform('youtube')">▶️ YouTube'da Aç</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 💌 Özel Notlar Tam Ekran Kayar Pencere -->
     <div class="modal" id="notesModal">
         <div class="modal-content">
@@ -109,8 +123,7 @@
             <span class="close-btn" onclick="sarkiEkleModalAcKapat()">&times;</span>
             <h2>🎵 Şarkı Ekle</h2>
             <div class="add-song-box">
-                <input type="text" id="newSongName" placeholder="Şarkı / Şarkıcı Adı">
-                <input type="text" id="newSongUrl" placeholder="YouTube / Spotify Linki">
+                <input type="text" id="newSongName" placeholder="Şarkı / Sanatçı Adı (Örn: Ajda Pekkan - Sen Olurdun Yine)">
                 <button onclick="sarkiEkle()">Listeye Ekle</button>
             </div>
         </div>
@@ -155,6 +168,13 @@
         <div class="modal-content">
             <span class="close-btn" onclick="galeriAcKapat()">&times;</span>
             <h2>📸 Anı Galerimiz</h2>
+            
+            <div style="margin-top:10px;">
+                <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="fotografYukle(event)">
+                <button class="add-song-trigger" onclick="document.getElementById('photoInput').click()">📸 Fotoğraf Yükle</button>
+                <p id="uploadStatus" style="font-size:11px; color:#ff4b5c; margin-top:5px; display:none;">Fotoğraf yükleniyor, lütfen bekleyin...</p>
+            </div>
+
             <div class="gallery-grid" id="galleryGrid"></div>
         </div>
     </div>
