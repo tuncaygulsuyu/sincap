@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#ee7752">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Sincap & Sevgilisi ❤️</title>
@@ -41,31 +41,31 @@
 
             <!-- Görev A: Ruh Hali Slider + Yüzde Göstergesi -->
             <div id="taskSliderGame" class="task-box">
-                <p style="font-size:12px; margin-bottom:8px;">Sen kimsin ve şu an ruh halin nasıl?</p>
+                <p style="font-size:11px; margin-bottom:6px;">Sen kimsin ve şu an ruh halin nasıl?</p>
                 
-                <div style="display:flex; gap:10px; justify-content:center; margin-bottom:12px;">
+                <div style="display:flex; gap:8px; justify-content:center; margin-bottom:8px;">
                     <button id="btnUser1" class="user-select-btn active" onclick="selectUser('Tuncay')">👦 Tuncay</button>
                     <button id="btnUser2" class="user-select-btn" onclick="selectUser('Yavru Sincap')">🐿️ Yavru Sincap</button>
                 </div>
 
-                <div id="moodStatusText" style="font-size:14px; font-weight:700; color:#02c39a; margin-bottom:4px;">🥰 Çok Mutluyum!</div>
-                <div id="moodPercentBadge" style="font-size:10px; background:rgba(255,255,255,0.15); display:inline-block; padding:2px 8px; border-radius:10px; margin-bottom:10px; font-weight:600; color:#ffdd59;">%50</div>
+                <div id="moodStatusText" style="font-size:13px; font-weight:700; color:#ffdd59; margin-bottom:2px;">🥺 Biraz Üzgünüm / Kırgınım</div>
+                <div id="moodPercentBadge" style="font-size:9px; background:rgba(255,255,255,0.15); display:inline-block; padding:2px 6px; border-radius:8px; margin-bottom:8px; font-weight:600; color:#ffdd59;">%50</div>
                 
                 <input type="range" id="moodSlider" min="0" max="100" value="50" oninput="checkMoodSlider(this.value)">
-                <div style="display:flex; justify-content:space-between; font-size:10px; opacity:0.8; margin-top:5px;">
+                <div style="display:flex; justify-content:space-between; font-size:9px; opacity:0.8; margin-top:3px;">
                     <span>😡 Sinirli</span>
-                    <span>🥰 Mutlu</span>
                     <span>🥺 Üzgün</span>
+                    <span>🥰 Mutlu</span>
                 </div>
-                <button class="love-btn" style="margin-top:12px;" onclick="saveMoodAndEnter()">Kaydet & Giriş Yap 🗝️</button>
+                <button class="love-btn" style="margin-top:10px;" onclick="saveMoodAndEnter()">Kaydet & Giriş Yap 🗝️</button>
                 <button class="skip-btn-glass" onclick="kilitCoz()">Bu seferlik atla ➡️</button>
             </div>
 
             <!-- Görev B: Sincap Yakalama Oyunu -->
             <div id="taskCatchGame" class="task-box" style="display:none;">
-                <p style="font-size:12px; opacity:0.9;">Ekranda beliren 3 sincabı yakala! (<span id="catchCount">0</span>/3)</p>
+                <p style="font-size:11px; opacity:0.9;">Ekranda beliren 3 sincabı yakala! (<span id="catchCount">0</span>/3)</p>
                 <div class="catch-area" id="catchArea"></div>
-                <button class="skip-btn-glass" style="margin-top:10px;" onclick="kilitCoz()">Bu seferlik atla ➡️</button>
+                <button class="skip-btn-glass" style="margin-top:8px;" onclick="kilitCoz()">Bu seferlik atla ➡️</button>
             </div>
         </div>
     </div>
@@ -128,7 +128,7 @@
         </div>
     </div>
 
-    <!-- ⏳ Özel Günlerimiz Modalı -->
+    <!-- Modallar -->
     <div class="modal" id="ozelGunModal">
         <div class="modal-content">
             <span class="close-btn" onclick="ozelGunlerAcKapat()">&times;</span>
@@ -138,7 +138,6 @@
         </div>
     </div>
 
-    <!-- Özel Gün Ekle Pop-up -->
     <div class="modal" id="addOzelGunModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="ozelGunEkleModalAcKapat()">&times;</span>
@@ -151,29 +150,22 @@
         </div>
     </div>
 
-    <!-- 🎡 Gerçek Çarkıfeleği Modalı -->
     <div class="modal" id="wheelModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="wheelAcKapat()">&times;</span>
             <h2>🎡 Aşk Çarkıfeleği</h2>
-            <p style="font-size:12px; opacity:0.8; margin-bottom:12px;">Çarkı çevir, kaderindeki sürpriz görevi gör!</p>
-
+            <p style="font-size:11px; opacity:0.8; margin-bottom:8px;">Çarkı çevir, kaderindeki sürpriz görevi gör!</p>
             <div class="wheel-container" id="wheelContainer">
                 <div class="wheel-pointer">▼</div>
-                <div class="wheel-disk" id="wheelDisk">
-                    <span class="wheel-label">ÇEVİR 🎲</span>
-                </div>
+                <div class="wheel-disk" id="wheelDisk"><span class="wheel-label">ÇEVİR 🎲</span></div>
             </div>
-
-            <div class="surprise-card-box" id="surpriseCardBox" style="margin-top:15px;">
-                <span id="surpriseText" style="font-size:14px; font-weight:600; color:#ffdd59;">Hadi çarkı çevir ve şansını dene! 🎁</span>
+            <div class="surprise-card-box" id="surpriseCardBox" style="margin-top:10px;">
+                <span id="surpriseText" style="font-size:13px; font-weight:600; color:#ffdd59;">Hadi çarkı çevir ve şansını dene! 🎁</span>
             </div>
-
-            <button class="love-btn" style="margin-top:15px;" id="spinBtn" onclick="spinWheel()">Çarkı Çevir! 🎡</button>
+            <button class="love-btn" style="margin-top:10px;" id="spinBtn" onclick="spinWheel()">Çarkı Çevir! 🎡</button>
         </div>
     </div>
 
-    <!-- 🎭 Ruh Halimiz Log Modalı -->
     <div class="modal" id="moodModal">
         <div class="modal-content">
             <span class="close-btn" onclick="moodAcKapat()">&times;</span>
@@ -182,7 +174,6 @@
         </div>
     </div>
 
-    <!-- 🎵 Şarkı Listesi -->
     <div class="modal" id="musicModal">
         <div class="modal-content">
             <span class="close-btn" onclick="sarkiListesiAcKapat()">&times;</span>
@@ -192,12 +183,11 @@
         </div>
     </div>
 
-    <!-- 🎧 Şarkı Dinleme Platform Seçimi -->
     <div class="modal" id="platformSelectModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="platformModalAcKapat()">&times;</span>
             <h2 id="selectedSongName">Şarkı Dinle</h2>
-            <p style="font-size: 12px; opacity:0.8; margin-bottom:15px;">Hangi uygulamada dinlemek istersin?</p>
+            <p style="font-size: 11px; opacity:0.8; margin-bottom:10px;">Hangi uygulamada dinlemek istersin?</p>
             <div class="add-song-box">
                 <button style="background: #1DB954;" onclick="openPlatform('spotify')">🟢 Spotify'da Aç</button>
                 <button style="background: #FF0000;" onclick="openPlatform('ytmusic')">🔴 YouTube Music'te Aç</button>
@@ -206,7 +196,6 @@
         </div>
     </div>
 
-    <!-- 📋 Yapılacaklar Listesi -->
     <div class="modal" id="todoModal">
         <div class="modal-content">
             <span class="close-btn" onclick="todoAcKapat()">&times;</span>
@@ -216,7 +205,6 @@
         </div>
     </div>
 
-    <!-- Yapılacak Ekle Pop-up -->
     <div class="modal" id="addTodoModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="todoEkleModalAcKapat()">&times;</span>
@@ -228,7 +216,6 @@
         </div>
     </div>
 
-    <!-- 💌 Özel Notlar -->
     <div class="modal" id="notesModal">
         <div class="modal-content">
             <span class="close-btn" onclick="notlarAcKapat()">&times;</span>
@@ -238,31 +225,28 @@
         </div>
     </div>
 
-    <!-- Şarkı Ekle Pop-up -->
     <div class="modal" id="addSongModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="sarkiEkleModalAcKapat()">&times;</span>
             <h2>🎵 Şarkı Ekle</h2>
             <div class="add-song-box">
-                <input type="text" id="newSongName" placeholder="Şarkı / Sanatçı Adı (Örn: Ajda Pekkan - Sen Olurdun Yine)">
+                <input type="text" id="newSongName" placeholder="Şarkı / Sanatçı Adı">
                 <button onclick="sarkiEkle()">Listeye Ekle</button>
             </div>
         </div>
     </div>
 
-    <!-- Not Ekle Pop-up -->
     <div class="modal" id="addNoteModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="notEkleModalAcKapat()">&times;</span>
             <h2>💌 Özel Not Ekle</h2>
             <div class="add-song-box">
-                <textarea id="newNoteText" placeholder="Notunu yaz yavru sincabım..." rows="4"></textarea>
+                <textarea id="newNoteText" placeholder="Notunu yaz yavru sincabım..." rows="3"></textarea>
                 <button onclick="notEkle()">Notu Kaydet</button>
             </div>
         </div>
     </div>
 
-    <!-- Şifre Değiştir Pop-up -->
     <div class="modal" id="changePassModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="sifreDegistirModalAcKapat()">&times;</span>
@@ -280,21 +264,19 @@
         </div>
     </div>
 
-    <!-- Anı Galerisi -->
     <div class="modal" id="galleryModal">
         <div class="modal-content">
             <span class="close-btn" onclick="galeriAcKapat()">&times;</span>
             <h2>📸 Anı Galerimiz</h2>
-            <div style="margin-top:10px;">
+            <div style="margin-top:6px;">
                 <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="fotografYukle(event)">
                 <button class="add-song-trigger" onclick="document.getElementById('photoInput').click()">📸 Fotoğraf Yükle</button>
-                <p id="uploadStatus" style="font-size:11px; color:#ff4b5c; margin-top:5px; display:none;">Fotoğraf yükleniyor, lütfen bekleyin...</p>
+                <p id="uploadStatus" style="font-size:10px; color:#ff4b5c; margin-top:3px; display:none;">Yükleniyor...</p>
             </div>
             <div class="gallery-grid" id="galleryGrid"></div>
         </div>
     </div>
 
-    <!-- Lightbox -->
     <div class="lightbox" id="lightbox" onclick="lightboxKapat()">
         <img id="lightboxImg" src="" alt="Büyük Görsel">
     </div>

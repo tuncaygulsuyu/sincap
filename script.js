@@ -15,7 +15,6 @@ const db = firebase.firestore();
 const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/kokuno0e/image/upload";
 const CLOUDINARY_PRESET = "sincap_cloud";
 
-// Dynamic Passcode (PIN)
 let OZEL_SIFRE = localStorage.getItem("sincapOzelSifre") || "1508"; 
 
 const pinInputs = document.querySelectorAll('.pin-box');
@@ -91,9 +90,8 @@ function sifreGuncelle() {
     sifreDegistirModalAcKapat();
 }
 
-// 🎮 GÖREV MOTORU
 let caughtSquirrels = 0;
-let currentMood = "🥰 Çok Mutluyum!";
+let currentMood = "🥺 Biraz Üzgünüm / Kırgınım";
 let currentMoodPercent = 50;
 let selectedUser = "Tuncay";
 
@@ -105,7 +103,6 @@ function selectUser(user) {
 
 function randomTaskInit() {
     const isRareCatch = Math.random() < 0.2;
-
     document.getElementById("taskSliderGame").style.display = "none";
     document.getElementById("taskCatchGame").style.display = "none";
 
@@ -132,7 +129,7 @@ function spawnSquirrels() {
         const sq = document.createElement("span");
         sq.classList.add("clickable-squirrel");
         sq.innerText = "🐿️";
-        sq.style.top = Math.floor(Math.random() * 80) + "px";
+        sq.style.top = Math.floor(Math.random() * 65) + "px";
         sq.style.left = Math.floor(Math.random() * 80) + "%";
         sq.onclick = function() {
             sq.remove();
@@ -155,11 +152,11 @@ function checkMoodSlider(val) {
         currentMood = "😡 Çok Sinirliyim!";
         textEl.style.color = "#ff4b5c";
     } else if (val <= 70) {
-        currentMood = "🥰 Çok Mutluyum!";
-        textEl.style.color = "#02c39a";
-    } else {
         currentMood = "🥺 Biraz Üzgünüm / Kırgınım";
         textEl.style.color = "#ffdd59";
+    } else {
+        currentMood = "🥰 Çok Mutluyum!";
+        textEl.style.color = "#02c39a";
     }
     textEl.innerText = currentMood;
 }
@@ -188,9 +185,8 @@ function toggleModal(modalId) {
     }
 }
 
-// ⏳ ÖZEL GÜNLER MOTORU (FIREBASE)
+// ⏳ Özel Günler
 let ozelGunlerListesi = [];
-
 db.collection("ozel_gunler").orderBy("tarih", "asc").onSnapshot((snapshot) => {
     ozelGunlerListesi = [];
     snapshot.forEach((doc) => { ozelGunlerListesi.push({ id: doc.id, ...doc.data() }); });
@@ -206,25 +202,21 @@ function ozelGunCiz() {
     const listDiv = document.getElementById("ozelGunList");
     if (!listDiv) return;
     listDiv.innerHTML = "";
-
     if (ozelGunlerListesi.length === 0) {
-        listDiv.innerHTML = `<div style="font-size:11px; opacity:0.7; padding:5px;">Henüz özel gün eklenmemiş ⏳</div>`;
+        listDiv.innerHTML = `<div style="font-size:10px; opacity:0.7; padding:4px;">Henüz özel gün eklenmemiş ⏳</div>`;
         return;
     }
-
     const simdi = new Date();
     ozelGunlerListesi.forEach((gun) => {
         const item = document.createElement("div");
         item.classList.add("song-item");
-
         let hedefTarih = new Date(gun.tarih);
         let farkGun = Math.ceil((hedefTarih - simdi) / (1000 * 60 * 60 * 24));
-        let kalanStr = farkGun >= 0 ? `${farkGun} gün kaldı 🎉` : `Geçti / Kutlandı ❤️`;
-
+        let kalanStr = farkGun >= 0 ? `${farkGun} gün kaldı 🎉` : `Kutlandı ❤️`;
         item.innerHTML = `
             <div style="display:flex; flex-direction:column; text-align:left;">
-                <span style="font-weight:700; font-size:12px; color:#ffdd59;">✨ ${gun.baslik}</span>
-                <span style="font-size:11px; margin-top:2px;">📅 ${gun.tarih} (${kalanStr})</span>
+                <span style="font-weight:700; font-size:11px; color:#ffdd59;">✨ ${gun.baslik}</span>
+                <span style="font-size:10px; margin-top:2px;">📅 ${gun.tarih} (${kalanStr})</span>
             </div>
             <button class="delete-song-btn" onclick="ozelGunSil('${gun.id}')">🗑️</button>
         `;
@@ -237,9 +229,7 @@ function ozelGunEkleModalAcKapat() { toggleModal("addOzelGunModal"); }
 function ozelGunEkle() {
     const baslikInput = document.getElementById("yeniGunBaslik");
     const tarihInput = document.getElementById("yeniGunTarih");
-
     if (baslikInput.value.trim() === "" || !tarihInput.value) return;
-
     db.collection("ozel_gunler").add({
         baslik: baslikInput.value,
         tarih: tarihInput.value,
@@ -256,7 +246,7 @@ function ozelGunSil(docId) {
     db.collection("ozel_gunler").doc(docId).delete();
 }
 
-// 🎡 ÇARKIFELEK MOTORU
+// 🎡 Çarkıfelek
 const surpriseCards = [
     "🤗 Bugün Tuncay sana kocaman sarılma borçlu!",
     "🍰 Yavru sincap sana en sevdiğin tatlıyı ısmarlayacak!",
@@ -266,12 +256,7 @@ const surpriseCards = [
     "💋 5 saniyelik uzun öpücük hakkı!",
     "☕ Sabah kahvesini diğeri hazırlayacak!",
     "🎵 Gün boyunca sadece senin seçtiğin şarkılar çalacak!",
-    "💌 Telefonuna en tatlı iltifat mesajı yazılacak!",
-    "🛁 Akşam için banyo/spa ortamı hazırlanacak!",
-    "🍫 En sevdiğin çikolata/atıştırmalık ödülü kazandın!",
-    "📸 Birlikte komik bir selfie çekilme vakti!",
-    "📞 Gün içinde sürpriz görüntülü arama hakkı!",
-    "⭐ İstediğin bir konuda veto hakkı kazandın!"
+    "💌 Telefonuna en tatlı iltifat mesajı yazılacak!"
 ];
 
 function wheelAcKapat() { toggleModal("wheelModal"); }
@@ -280,17 +265,13 @@ let isSpinning = false;
 function spinWheel() {
     if (isSpinning) return;
     isSpinning = true;
-    
     const disk = document.getElementById("wheelDisk");
     const spinBtn = document.getElementById("spinBtn");
     const surpriseText = document.getElementById("surpriseText");
-
     spinBtn.disabled = true;
-    surpriseText.innerText = "Çark dönüyor, şansına ne çıkacak? 🎯";
-
+    surpriseText.innerText = "Çark dönüyor... 🎯";
     const randomDegree = Math.floor(Math.random() * 1000) + 2160;
     disk.style.transform = `rotate(${randomDegree}deg)`;
-
     setTimeout(() => {
         const randomCard = surpriseCards[Math.floor(Math.random() * surpriseCards.length)];
         surpriseText.innerText = randomCard;
@@ -299,7 +280,7 @@ function spinWheel() {
     }, 8000);
 }
 
-// Live Counter
+// Sayaç
 const baslangicTarihi = new Date(2026, 7, 15);
 function sayaciGuncelle() {
     const simdi = new Date();
@@ -312,25 +293,24 @@ function sayaciGuncelle() {
 setInterval(sayaciGuncelle, 1000);
 sayaciGuncelle();
 
-// Floating Hearts
+// Kalpler
 function kalpOlustur() {
     const heart = document.createElement("div");
     heart.classList.add("heart");
     heart.innerText = "❤️";
     heart.style.left = Math.random() * 100 + "vw";
-    heart.style.animationDuration = Math.random() * 3 + 3 + "s";
-    heart.style.fontSize = Math.random() * 15 + 15 + "px";
+    heart.style.animationDuration = Math.random() * 3 + 2 + "s";
     document.getElementById("bgAnimation").appendChild(heart);
-    setTimeout(() => { heart.remove(); }, 6000);
+    setTimeout(() => { heart.remove(); }, 5000);
 }
-setInterval(kalpOlustur, 400);
+setInterval(kalpOlustur, 600);
 
 function kalpPatlat() {
-    for (let i = 0; i < 15; i++) { setTimeout(kalpOlustur, i * 50); }
+    for (let i = 0; i < 10; i++) { setTimeout(kalpOlustur, i * 40); }
     document.getElementById("menuPanel").classList.toggle("acik");
 }
 
-// Music Player
+// Müzik
 const muzik = document.getElementById("bgMusic");
 const playBtn = document.getElementById("playBtn");
 const muteBtn = document.getElementById("muteBtn");
@@ -365,9 +345,8 @@ function sesSustur() {
     }
 }
 
-// 🔥 FIREBASE İLE CANLI RUH HALİ GEÇMİŞİ (MOOD LOG)
+// Ruh Hali Logları
 let moodListesi = [];
-
 db.collection("ruh_hali").orderBy("tarih", "desc").onSnapshot((snapshot) => {
     moodListesi = [];
     snapshot.forEach((doc) => { moodListesi.push({ id: doc.id, ...doc.data() }); });
@@ -383,25 +362,20 @@ function moodCiz() {
     const listDiv = document.getElementById("moodList");
     if (!listDiv) return;
     listDiv.innerHTML = "";
-
     if (moodListesi.length === 0) {
-        listDiv.innerHTML = `<div style="font-size:11px; opacity:0.7; padding:5px;">Henüz kaydedilmiş ruh hali yok 🎭</div>`;
+        listDiv.innerHTML = `<div style="font-size:10px; opacity:0.7; padding:4px;">Kayıt yok 🎭</div>`;
         return;
     }
-
     moodListesi.forEach((m) => {
         const item = document.createElement("div");
         item.classList.add("song-item");
-
         let zamanStr = m.tarih ? new Date(m.tarih.seconds * 1000).toLocaleString('tr-TR', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : 'Az önce';
-        let kisiIsmi = m.kisi || 'Gizemli Sincap';
         let yuzdeStr = m.yuzde !== undefined ? ` (%${m.yuzde})` : '';
-
         item.innerHTML = `
             <div style="display:flex; flex-direction:column; text-align:left;">
-                <span style="font-weight:700; font-size:12px; color:#ffdd59;">👤 ${kisiIsmi}</span>
-                <span style="font-size:11px; margin-top:2px;">${m.durum}${yuzdeStr}</span>
-                <span style="font-size:9px; opacity:0.6; margin-top:2px;">🕒 ${zamanStr}</span>
+                <span style="font-weight:700; font-size:11px; color:#ffdd59;">👤 ${m.kisi || 'Sincap'}</span>
+                <span style="font-size:10px; margin-top:2px;">${m.durum}${yuzdeStr}</span>
+                <span style="font-size:8px; opacity:0.6; margin-top:1px;">🕒 ${zamanStr}</span>
             </div>
             <button class="delete-song-btn" onclick="moodSil('${m.id}')">🗑️</button>
         `;
@@ -411,10 +385,9 @@ function moodCiz() {
 
 function moodSil(docId) { db.collection("ruh_hali").doc(docId).delete(); }
 
-// 🔥 FIREBASE İLE CANLI ŞARKI LİSTESİ
+// Şarkı Listesi
 let sarkiListesi = [];
 let secilenSarkiAdi = "";
-
 db.collection("sarkilar").orderBy("tarih", "desc").onSnapshot((snapshot) => {
     sarkiListesi = [];
     snapshot.forEach((doc) => { sarkiListesi.push({ id: doc.id, ...doc.data() }); });
@@ -431,7 +404,7 @@ function sarkiListesiniCiz() {
     if (!listDiv) return;
     listDiv.innerHTML = "";
     if (sarkiListesi.length === 0) {
-        listDiv.innerHTML = `<div style="font-size:11px; opacity:0.7; padding:5px;">Henüz eklenmiş ortak şarkı yok 🎵</div>`;
+        listDiv.innerHTML = `<div style="font-size:10px; opacity:0.7; padding:4px;">Şarkı yok 🎵</div>`;
         return;
     }
     sarkiListesi.forEach((sarki) => {
@@ -479,9 +452,8 @@ function sarkiEkle() {
 
 function sarkiSil(docId) { db.collection("sarkilar").doc(docId).delete(); }
 
-// 🔥 FIREBASE İLE CANLI YAPILACAKLAR LİSTESİ
+// Yapılacaklar
 let todoListesi = [];
-
 db.collection("todolist").orderBy("tarih", "desc").onSnapshot((snapshot) => {
     todoListesi = [];
     snapshot.forEach((doc) => { todoListesi.push({ id: doc.id, ...doc.data() }); });
@@ -497,16 +469,13 @@ function todoCiz() {
     const listDiv = document.getElementById("todoList");
     if (!listDiv) return;
     listDiv.innerHTML = "";
-
     if (todoListesi.length === 0) {
-        listDiv.innerHTML = `<div style="font-size:11px; opacity:0.7; padding:5px;">Henüz plan eklenmemiş 📋</div>`;
+        listDiv.innerHTML = `<div style="font-size:10px; opacity:0.7; padding:4px;">Plan yok 📋</div>`;
         return;
     }
-
     todoListesi.forEach((todo) => {
         const item = document.createElement("div");
         item.classList.add("song-item");
-
         item.innerHTML = `
             <span class="song-title-click ${todo.tamamlandi ? 'todo-done' : ''}" onclick="todoDurumDegistir('${todo.id}', ${!todo.tamamlandi})">
                 ${todo.tamamlandi ? '✅' : '📌'} ${todo.metin}
@@ -522,7 +491,6 @@ function todoEkleModalAcKapat() { toggleModal("addTodoModal"); }
 function todoEkle() {
     const input = document.getElementById("newTodoText");
     if (input.value.trim() === "") return;
-
     db.collection("todolist").add({
         metin: input.value,
         tamamlandi: false,
@@ -539,9 +507,8 @@ function todoDurumDegistir(docId, yeniDurum) {
 
 function todoSil(docId) { db.collection("todolist").doc(docId).delete(); }
 
-// 🔥 FIREBASE İLE CANLI ÖZEL NOTLAR
+// Özel Notlar
 let notlarListesi = [];
-
 db.collection("notlar").orderBy("tarih", "desc").onSnapshot((snapshot) => {
     notlarListesi = [];
     snapshot.forEach((doc) => { notlarListesi.push({ id: doc.id, ...doc.data() }); });
@@ -557,12 +524,10 @@ function notlariCiz() {
     const listDiv = document.getElementById("notesList");
     if (!listDiv) return;
     listDiv.innerHTML = "";
-
     if (notlarListesi.length === 0) {
-        listDiv.innerHTML = `<div style="font-size:11px; opacity:0.7; padding:5px;">Henüz özel not eklenmemiş 💌</div>`;
+        listDiv.innerHTML = `<div style="font-size:10px; opacity:0.7; padding:4px;">Not yok 💌</div>`;
         return;
     }
-
     notlarListesi.forEach((not) => {
         const item = document.createElement("div");
         item.classList.add("song-item");
@@ -579,7 +544,6 @@ function notEkleModalAcKapat() { toggleModal("addNoteModal"); }
 function notEkle() {
     const noteInput = document.getElementById("newNoteText");
     if (noteInput.value.trim() === "") return;
-
     db.collection("notlar").add({
         metin: noteInput.value,
         tarih: firebase.firestore.FieldValue.serverTimestamp()
@@ -591,9 +555,8 @@ function notEkle() {
 
 function notSil(docId) { db.collection("notlar").doc(docId).delete(); }
 
-// 🔥 CLOUDINARY + FIREBASE İLE CANLI GALERİ VE GÜNÜN ANISI WIDGET'I
+// Galeri
 let fotograflarListesi = [];
-
 db.collection("fotograflar").orderBy("tarih", "desc").onSnapshot((snapshot) => {
     fotograflarListesi = [];
     snapshot.forEach((doc) => { fotograflarListesi.push({ id: doc.id, ...doc.data() }); });
@@ -619,12 +582,10 @@ function galeriyiCiz() {
     const grid = document.getElementById("galleryGrid");
     if (!grid) return;
     grid.innerHTML = "";
-
     if (fotograflarListesi.length === 0) {
-        grid.innerHTML = `<div style="grid-column: 1 / -1; font-size:11px; opacity:0.7; padding:10px;">Henüz fotoğraf yüklenmemiş 📸</div>`;
+        grid.innerHTML = `<div style="grid-column: 1 / -1; font-size:10px; opacity:0.7; padding:10px;">Fotoğraf yok 📸</div>`;
         return;
     }
-
     fotograflarListesi.forEach((foto) => {
         const card = document.createElement("div");
         card.classList.add("gallery-card");
@@ -639,10 +600,8 @@ function galeriyiCiz() {
 function fotografYukle(event) {
     const file = event.target.files[0];
     if (!file) return;
-
     const statusText = document.getElementById("uploadStatus");
     statusText.style.display = "block";
-
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", CLOUDINARY_PRESET);
@@ -664,7 +623,7 @@ function fotografYukle(event) {
 }
 
 function fotografSil(docId) {
-    if (!confirm("Bu fotoğrafı silmek istediğinize emin misiniz?")) return;
+    if (!confirm("Silmek istediğine emin misin?")) return;
     db.collection("fotograflar").doc(docId).delete();
 }
 
