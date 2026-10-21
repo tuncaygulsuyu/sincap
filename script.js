@@ -131,7 +131,7 @@ function spawnSquirrels() {
         const sq = document.createElement("span");
         sq.classList.add("clickable-squirrel");
         sq.innerText = "🐿️";
-        sq.style.top = Math.floor(Math.random() * 90) + "px";
+        sq.style.top = Math.floor(Math.random() * 80) + "px";
         sq.style.left = Math.floor(Math.random() * 80) + "%";
         sq.onclick = function() {
             sq.remove();
@@ -323,9 +323,9 @@ function moodCiz() {
 
         item.innerHTML = `
             <div style="display:flex; flex-direction:column; text-align:left;">
-                <span style="font-weight:700; font-size:13px; color:#ffdd59;">👤 ${kisiIsmi}</span>
-                <span style="font-size:12px; margin-top:2px;">${m.durum}</span>
-                <span style="font-size:10px; opacity:0.6; margin-top:3px;">🕒 ${zamanStr}</span>
+                <span style="font-weight:700; font-size:12px; color:#ffdd59;">👤 ${kisiIsmi}</span>
+                <span style="font-size:11px; margin-top:2px;">${m.durum}</span>
+                <span style="font-size:9px; opacity:0.6; margin-top:2px;">🕒 ${zamanStr}</span>
             </div>
             <button class="delete-song-btn" onclick="moodSil('${m.id}')">🗑️</button>
         `;

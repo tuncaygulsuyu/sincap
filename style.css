@@ -4,26 +4,24 @@ html {
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
     width: 100%;
-    height: 100%;
-    overflow-x: hidden;
-    overscroll-behavior: none;
+    min-height: 100%;
     background: transparent;
 }
 
 body {
     margin: 0;
-    padding: 0;
+    padding: 20px 0;
     background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab, #ffdd59, #02c39a);
     background-size: 600% 600%;
     animation: gradientBG 35s ease infinite;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    position: fixed;
     box-sizing: border-box;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 @keyframes gradientBG {
@@ -41,13 +39,13 @@ body.modal-open {
     background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 20px;
-    padding: 8px;
+    border-radius: 18px;
+    padding: 6px;
     width: 100%;
     box-sizing: border-box;
     position: relative;
     cursor: pointer;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .daily-photo-widget:hover { transform: scale(1.02); }
@@ -55,14 +53,14 @@ body.modal-open {
 
 .widget-badge {
     position: absolute;
-    top: 14px;
-    left: 14px;
+    top: 12px;
+    left: 12px;
     background: rgba(0, 0, 0, 0.65);
     backdrop-filter: blur(8px);
     color: #ffdd59;
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 700;
-    padding: 4px 10px;
+    padding: 3px 8px;
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     z-index: 2;
@@ -70,9 +68,9 @@ body.modal-open {
 
 #dailyWidgetImg {
     width: 100%;
-    height: 130px;
+    height: 110px;
     object-fit: cover;
-    border-radius: 14px;
+    border-radius: 12px;
     display: block;
     transform: scaleX(-1);
 }
@@ -81,9 +79,9 @@ body.modal-open {
 .surprise-card-box {
     background: rgba(255, 255, 255, 0.12);
     border: 1px dashed rgba(255, 255, 255, 0.3);
-    border-radius: 18px;
-    padding: 20px 15px;
-    min-height: 70px;
+    border-radius: 16px;
+    padding: 15px 12px;
+    min-height: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -94,9 +92,9 @@ body.modal-open {
 
 .wheel-container {
     position: relative;
-    width: 130px;
-    height: 130px;
-    margin: 10px auto;
+    width: 120px;
+    height: 120px;
+    margin: 8px auto;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -107,7 +105,7 @@ body.modal-open {
     top: -8px;
     z-index: 10;
     color: #ff4b5c;
-    font-size: 20px;
+    font-size: 18px;
     text-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 
@@ -126,9 +124,9 @@ body.modal-open {
 
 .wheel-label {
     background: rgba(0,0,0,0.7);
-    padding: 8px 12px;
+    padding: 6px 10px;
     border-radius: 50%;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     color: white;
     border: 2px solid white;
@@ -158,8 +156,8 @@ body.modal-open {
 .lock-card {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 30px 20px;
-    border-radius: 24px;
+    padding: 25px 18px;
+    border-radius: 22px;
     text-align: center;
     color: white;
     width: 85%;
@@ -173,25 +171,25 @@ body.modal-open {
     to { transform: scale(1); opacity: 1; }
 }
 
-.lock-icon { font-size: 38px; margin-bottom: 8px; }
-.lock-card h2 { font-size: 18px; margin-bottom: 6px; }
-.lock-card p { font-size: 11px; opacity: 0.8; margin-bottom: 18px; }
+.lock-icon { font-size: 34px; margin-bottom: 6px; }
+.lock-card h2 { font-size: 17px; margin-bottom: 4px; }
+.lock-card p { font-size: 11px; opacity: 0.8; margin-bottom: 15px; }
 
 .pin-container {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: 8px;
+    margin-bottom: 10px;
 }
 
 .pin-box {
-    width: 45px;
-    height: 55px;
-    border-radius: 12px;
+    width: 40px;
+    height: 50px;
+    border-radius: 10px;
     border: 2px solid rgba(255, 255, 255, 0.25);
     background: rgba(0, 0, 0, 0.35);
     color: #ff4b5c;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     text-align: center;
     outline: none;
@@ -209,8 +207,8 @@ body.modal-open {
     background: rgba(255, 255, 255, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.25);
     color: white;
-    padding: 8px 12px;
-    border-radius: 12px;
+    padding: 6px 10px;
+    border-radius: 10px;
     font-size: 11px;
     font-weight: 600;
     cursor: pointer;
@@ -230,17 +228,17 @@ body.modal-open {
     cursor: pointer;
 }
 
-/* 🌟 Şık Şeffaf Cam Efektli Atla Butonu */
+/* Şık Şeffaf Cam Efektli Atla Butonu */
 .skip-btn-glass {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.25);
     color: rgba(255, 255, 255, 0.85);
     font-size: 11px;
     font-weight: 500;
-    padding: 8px 16px;
-    border-radius: 20px;
+    padding: 7px 14px;
+    border-radius: 18px;
     cursor: pointer;
-    margin-top: 12px;
+    margin-top: 10px;
     backdrop-filter: blur(8px);
     transition: all 0.25s ease;
     width: 100%;
@@ -256,17 +254,17 @@ body.modal-open {
 .catch-area {
     position: relative;
     width: 100%;
-    height: 140px;
+    height: 120px;
     background: rgba(0,0,0,0.25);
-    border-radius: 16px;
+    border-radius: 14px;
     overflow: hidden;
-    margin-top: 10px;
+    margin-top: 8px;
     border: 1px dashed rgba(255,255,255,0.2);
 }
 
 .clickable-squirrel {
     position: absolute;
-    font-size: 28px;
+    font-size: 26px;
     cursor: pointer;
     user-select: none;
     transition: transform 0.15s ease;
@@ -278,7 +276,7 @@ body.modal-open {
 .pass-error {
     color: #ff6b6b !important;
     font-size: 11px !important;
-    margin-top: 8px !important;
+    margin-top: 6px !important;
     animation: shake 0.3s ease-in-out;
 }
 
@@ -292,44 +290,43 @@ body.modal-open {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     z-index: 10;
     width: 100%;
-    max-width: 420px;
+    max-width: 400px;
     padding: 0 10px;
     box-sizing: border-box;
 }
 
-/* Üst Müzik Widget'ı (Temizlenmiş, Genişletilmiş Sağ Bölüm) */
+/* Üst Müzik Widget'ı */
 .top-music-widget {
     background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50px;
-    padding: 8px 16px;
+    border-radius: 40px;
+    padding: 6px 14px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
     box-sizing: border-box;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
     transition: transform 0.3s ease;
 }
 .top-music-widget:hover { transform: translateY(-2px); }
 
 .song-info { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
 .song-text { display: flex; flex-direction: column; width: 100%; overflow: hidden; }
-.song-title { color: white; font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
-.song-artist { color: rgba(255, 255, 255, 0.7); font-size: 10px; font-weight: 300; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+.song-title { color: white; font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+.song-artist { color: rgba(255, 255, 255, 0.7); font-size: 9px; font-weight: 300; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
 
-/* 🌟 Genişletilmiş ve Düzgün Hizalanmış Kontroller */
 .widget-controls {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     background: rgba(255, 255, 255, 0.08);
-    padding: 4px 10px;
-    border-radius: 30px;
+    padding: 3px 8px;
+    border-radius: 25px;
     border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
@@ -337,14 +334,14 @@ body.modal-open {
     background: #ff4b5c;
     border: none;
     color: white;
-    width: 30px !important;
-    height: 30px !important;
+    width: 28px !important;
+    height: 28px !important;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px !important;
+    font-size: 10px !important;
     padding: 0 !important;
     box-shadow: 0 3px 8px rgba(255,75,92,0.4);
     transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -355,66 +352,59 @@ body.modal-open {
     background: rgba(255, 255, 255, 0.15);
     border: none;
     color: white;
-    width: 26px !important;
-    height: 26px !important;
+    width: 24px !important;
+    height: 24px !important;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px !important;
+    font-size: 9px !important;
     padding: 0 !important;
     transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .widget-btn:hover { background: rgba(255, 255, 255, 0.3); transform: scale(1.12); }
 
 #volumeSlider {
-    width: 75px;
+    width: 65px;
     height: 5px;
     accent-color: #ff4b5c;
     cursor: pointer;
 }
 
-/* Ana Kart */
+/* 🌟 Küçültülmüş Kompakt Ana Kart (Telefonda Tam Sığma) */
 .card {
     background: rgba(0, 0, 0, 0.35);
     backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 22px 20px;
-    border-radius: 24px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    padding: 16px 16px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
     text-align: center;
     color: #ffffff;
     width: 100%;
     box-sizing: border-box;
     will-change: transform;
-    animation: floatCard 5s ease-in-out infinite;
-}
-
-@keyframes floatCard {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-4px); }
 }
 
 .sincap-img {
-    width: 90px !important; height: 90px !important; object-fit: cover !important; border-radius: 50% !important; border: 3px solid rgba(255, 255, 255, 0.8) !important; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important; animation: pulse 2s infinite !important; margin: 0 auto 8px auto !important; display: block !important;
+    width: 75px !important; height: 75px !important; object-fit: cover !important; border-radius: 50% !important; border: 3px solid rgba(255, 255, 255, 0.8) !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important; animation: pulse 2s infinite !important; margin: 0 auto 6px auto !important; display: block !important;
 }
 
-@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
 
-h1 { font-size: 20px; font-weight: 700; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); margin: 4px 0; }
-.subtitle { font-size: 11px; opacity: 0.95; margin-bottom: 12px; text-shadow: 0 1px 5px rgba(0, 0, 0, 0.4); }
+h1 { font-size: 18px; font-weight: 700; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); margin: 2px 0; }
+.subtitle { font-size: 10px; opacity: 0.95; margin-bottom: 10px; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4); }
 
-.counter-box { display: flex; justify-content: space-between; gap: 6px; margin-bottom: 12px; }
-.time-unit { background: rgba(0, 0, 0, 0.25); padding: 8px 6px; border-radius: 12px; flex: 1; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); transition: transform 0.2s; }
-.time-unit:hover { transform: translateY(-2px); }
-.time-unit span { display: block; font-size: 16px; font-weight: 700; text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); }
-.time-unit small { font-size: 8px; text-transform: uppercase; opacity: 0.9; font-weight: 600; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+.counter-box { display: flex; justify-content: space-between; gap: 5px; margin-bottom: 10px; }
+.time-unit { background: rgba(0, 0, 0, 0.25); padding: 6px 4px; border-radius: 10px; flex: 1; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2); }
+.time-unit span { display: block; font-size: 14px; font-weight: 700; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); }
+.time-unit small { font-size: 7px; text-transform: uppercase; opacity: 0.9; font-weight: 600; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); }
 
 .love-btn {
-    background: white; color: #e73c7e; border: none; padding: 11px 20px; font-size: 13px; font-weight: 600; border-radius: 50px; cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 10px 20px rgba(0,0,0,0.15); width: 100%;
+    background: white; color: #e73c7e; border: none; padding: 10px 16px; font-size: 12px; font-weight: 600; border-radius: 40px; cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 8px 16px rgba(0,0,0,0.15); width: 100%;
 }
-.love-btn:hover { transform: scale(1.03); box-shadow: 0 15px 25px rgba(0,0,0,0.25); background: #fff0f5; }
+.love-btn:hover { transform: scale(1.02); background: #fff0f5; }
 .love-btn:active { transform: scale(0.98); }
 
 /* Menü Paneli */
@@ -425,29 +415,29 @@ h1 { font-size: 20px; font-weight: 700; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.
     opacity: 0;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 5px;
     margin-top: 0;
 }
 .menu-panel.acik {
-    max-height: 480px;
+    max-height: 420px;
     opacity: 1;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .menu-item {
     background: rgba(255, 255, 255, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.3);
     color: white;
-    padding: 10px 14px;
-    border-radius: 12px;
-    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 11px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.menu-item:hover { background: rgba(255, 255, 255, 0.35); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+.menu-item:hover { background: rgba(255, 255, 255, 0.35); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
 
-.menu-item-small { padding: 5px 10px !important; font-size: 10px !important; opacity: 0.85; border-radius: 10px !important; width: 70%; margin: 2px auto 0 auto; background: rgba(255, 255, 255, 0.12) !important; }
+.menu-item-small { padding: 4px 8px !important; font-size: 9px !important; opacity: 0.85; border-radius: 8px !important; width: 65%; margin: 2px auto 0 auto; background: rgba(255, 255, 255, 0.12) !important; }
 .menu-item-small:hover { opacity: 1; background: rgba(255, 255, 255, 0.25) !important; }
 
 /* Modal Animasyonları */
@@ -478,12 +468,12 @@ h1 { font-size: 20px; font-weight: 700; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.
     border-top: 1px solid rgba(255, 255, 255, 0.25);
     border-left: 1px solid rgba(255, 255, 255, 0.15);
     border-right: 1px solid rgba(255, 255, 255, 0.15);
-    padding: 25px 18px;
-    border-top-left-radius: 28px;
-    border-top-right-radius: 28px;
+    padding: 22px 16px;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
     width: 100%;
-    max-width: 450px;
-    height: 78vh;
+    max-width: 420px;
+    height: 75vh;
     text-align: center;
     color: white;
     position: relative;
@@ -501,42 +491,42 @@ h1 { font-size: 20px; font-weight: 700; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.
 }
 
 .close-btn {
-    position: absolute; top: 12px; right: 18px; font-size: 26px; cursor: pointer; color: rgba(255, 255, 255, 0.7); transition: color 0.2s, transform 0.2s;
+    position: absolute; top: 10px; right: 16px; font-size: 24px; cursor: pointer; color: rgba(255, 255, 255, 0.7); transition: color 0.2s, transform 0.2s;
 }
 .close-btn:hover { color: #ff4b5c; transform: scale(1.1); }
 
 .input-eye-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
-.input-eye-wrapper input { width: 100% !important; padding-right: 45px !important; box-sizing: border-box !important; }
-.eye-btn { position: absolute; right: 14px; cursor: pointer; font-size: 16px; opacity: 0.8; user-select: none; transition: opacity 0.2s; }
+.input-eye-wrapper input { width: 100% !important; padding-right: 40px !important; box-sizing: border-box !important; }
+.eye-btn { position: absolute; right: 12px; cursor: pointer; font-size: 15px; opacity: 0.8; user-select: none; transition: opacity 0.2s; }
 .eye-btn:hover { opacity: 1; }
 
-.song-list { display: flex; flex-direction: column; gap: 8px; flex: 1; overflow-y: auto; margin-top: 15px; padding-right: 3px; text-align: left; }
-.song-item { background: rgba(255, 255, 255, 0.12); padding: 12px 14px; border-radius: 12px; font-size: 12px; color: white; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s, transform 0.2s; border: 1px solid rgba(255, 255, 255, 0.1); }
+.song-list { display: flex; flex-direction: column; gap: 6px; flex: 1; overflow-y: auto; margin-top: 12px; padding-right: 3px; text-align: left; }
+.song-item { background: rgba(255, 255, 255, 0.12); padding: 10px 12px; border-radius: 10px; font-size: 11px; color: white; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s, transform 0.2s; border: 1px solid rgba(255, 255, 255, 0.1); }
 .song-item:hover { background: rgba(255, 255, 255, 0.22); transform: translateX(2px); }
 
-.song-title-click { flex: 1; cursor: pointer; margin-right: 8px; line-height: 1.4; }
-.delete-song-btn { background: none; border: none; cursor: pointer; font-size: 13px; opacity: 0.7; transition: opacity 0.2s, transform 0.2s; padding: 4px; }
+.song-title-click { flex: 1; cursor: pointer; margin-right: 6px; line-height: 1.4; }
+.delete-song-btn { background: none; border: none; cursor: pointer; font-size: 12px; opacity: 0.7; transition: opacity 0.2s, transform 0.2s; padding: 4px; }
 .delete-song-btn:hover { opacity: 1; transform: scale(1.2); }
 
-.add-song-box { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; width: 100%; box-sizing: border-box; }
-.add-song-box input, .add-song-box textarea { width: 100%; box-sizing: border-box; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 10px; color: white; font-size: 13px; outline: none; transition: border-color 0.2s; }
+.add-song-box { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; width: 100%; box-sizing: border-box; }
+.add-song-box input, .add-song-box textarea { width: 100%; box-sizing: border-box; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 9px; color: white; font-size: 12px; outline: none; transition: border-color 0.2s; }
 .add-song-box input:focus, .add-song-box textarea:focus { border-color: #ff4b5c; }
 .add-song-box input::placeholder, .add-song-box textarea::placeholder { color: rgba(255, 255, 255, 0.6); }
-.add-song-box button, .add-song-trigger { background: #ff4b5c; border: none; color: white; padding: 11px; border-radius: 12px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); margin-top: 4px; width: 100%; box-sizing: border-box; }
+.add-song-box button, .add-song-trigger { background: #ff4b5c; border: none; color: white; padding: 10px; border-radius: 10px; font-weight: 600; font-size: 12px; cursor: pointer; transition: 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); margin-top: 3px; width: 100%; box-sizing: border-box; }
 .add-song-box button:hover, .add-song-trigger:hover { background: #e03e4e; transform: scale(1.02); }
 
-.gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; flex: 1; overflow-y: auto; padding-bottom: 10px; }
-.gallery-card { position: relative; width: 100%; height: 130px; border-radius: 14px; overflow: hidden; transition: transform 0.2s; }
+.gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; flex: 1; overflow-y: auto; padding-bottom: 10px; }
+.gallery-card { position: relative; width: 100%; height: 110px; border-radius: 12px; overflow: hidden; transition: transform 0.2s; }
 .gallery-card img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; transition: transform 0.3s ease; transform: scaleX(-1); }
 .gallery-card img:hover { transform: scaleX(-1) scale(1.05); }
 
-.delete-photo-btn { position: absolute; top: 6px; right: 6px; background: rgba(0, 0, 0, 0.6); border: none; color: white; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; transition: background 0.2s, transform 0.2s; }
+.delete-photo-btn { position: absolute; top: 5px; right: 5px; background: rgba(0, 0, 0, 0.6); border: none; color: white; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; transition: background 0.2s, transform 0.2s; }
 .delete-photo-btn:hover { background: rgba(255, 75, 92, 0.9); transform: scale(1.15); }
 
 /* Lightbox */
 .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 3000; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
 .lightbox.acik { display: flex; opacity: 1; }
-.lightbox img { max-width: 90%; max-height: 80%; border-radius: 16px; box-shadow: 0 0 30px rgba(0, 0, 0, 0.8); animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.lightbox img { max-width: 90%; max-height: 80%; border-radius: 14px; box-shadow: 0 0 30px rgba(0, 0, 0, 0.8); animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
 /* Scrollbar Gizleme */
 .song-list::-webkit-scrollbar, .gallery-grid::-webkit-scrollbar { display: none; }
