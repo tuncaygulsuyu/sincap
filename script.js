@@ -246,7 +246,7 @@ function ozelGunSil(docId) {
     db.collection("ozel_gunler").doc(docId).delete();
 }
 
-// 🎡 Çarkıfelek
+// 🎡 Çarkıfelek (3 Saniye Hızlı Sonuçlanma)
 const surpriseCards = [
     "🤗 Bugün Tuncay sana kocaman sarılma borçlu!",
     "🍰 Yavru sincap sana en sevdiğin tatlıyı ısmarlayacak!",
