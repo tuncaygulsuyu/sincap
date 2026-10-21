@@ -11,7 +11,9 @@ pinInputs.forEach((input, index) => {
 
         if (input.value !== '') {
             if (index < pinInputs.length - 1) {
-                pinInputs[index + 1].focus();
+                setTimeout(() => {
+                    pinInputs[index + 1].focus();
+                }, 10);
             } else {
                 sifreKontrol();
             }
@@ -20,10 +22,24 @@ pinInputs.forEach((input, index) => {
 
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Backspace' && input.value === '' && index > 0) {
-            pinInputs[index - 1].focus();
+            setTimeout(() => {
+                pinInputs[index - 1].focus();
+            }, 10);
         }
     });
 });
+
+function toggleModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.toggle("acik");
+    
+    const acikModalVarMi = document.querySelector('.modal.acik');
+    if (acikModalVarMi) {
+        document.body.classList.add("modal-open");
+    } else {
+        document.body.classList.remove("modal-open");
+    }
+}
 
 function sifreKontrol() {
     let girilenSifre = "";
@@ -32,6 +48,7 @@ function sifreKontrol() {
     if (girilenSifre === OZEL_SIFRE) {
         lockScreen.classList.add("cozuldu");
         errorMsg.style.display = "none";
+        document.body.classList.remove("modal-open");
     } else {
         errorMsg.style.display = "block";
         pinInputs.forEach(input => input.value = "");
@@ -39,22 +56,49 @@ function sifreKontrol() {
     }
 }
 
+// İki Yeni Şifreyi Aynı Anda Göster / Gizle Fonksiyonu
+function yeniSifreleriGosterGizle(eyeBtn) {
+    const newPass = document.getElementById("newPassInput");
+    const confirmPass = document.getElementById("confirmPassInput");
+
+    if (newPass.type === "password") {
+        newPass.type = "text";
+        confirmPass.type = "text";
+        eyeBtn.innerText = "🙈";
+    } else {
+        newPass.type = "password";
+        confirmPass.type = "password";
+        eyeBtn.innerText = "👁️";
+    }
+}
+
 // Passcode Change Functions
 function sifreDegistirModalAcKapat() {
-    const modal = document.getElementById("changePassModal");
-    modal.classList.toggle("acik");
+    toggleModal("changePassModal");
+    document.getElementById("changePassError").style.display = "none";
 }
 
 function sifreGuncelle() {
     const oldPass = document.getElementById("oldPassInput").value;
     const newPass = document.getElementById("newPassInput").value;
+    const confirmPass = document.getElementById("confirmPassInput").value;
+    const errBox = document.getElementById("changePassError");
+
+    errBox.style.display = "none";
 
     if (oldPass !== OZEL_SIFRE) {
-        alert("Mevcut şifreniz hatalı!");
+        errBox.innerText = "Mevcut PIN şifreniz hatalı!";
+        errBox.style.display = "block";
         return;
     }
     if (newPass.length !== 4 || isNaN(newPass)) {
-        alert("Yeni şifre tam 4 haneli rakamlardan oluşmalıdır!");
+        errBox.innerText = "Yeni PIN 4 haneli rakam olmalıdır!";
+        errBox.style.display = "block";
+        return;
+    }
+    if (newPass !== confirmPass) {
+        errBox.innerText = "Yeni şifreler birbiriyle uyuşmuyor!";
+        errBox.style.display = "block";
         return;
     }
 
@@ -64,6 +108,7 @@ function sifreGuncelle() {
     
     document.getElementById("oldPassInput").value = "";
     document.getElementById("newPassInput").value = "";
+    document.getElementById("confirmPassInput").value = "";
     sifreDegistirModalAcKapat();
 }
 
@@ -167,9 +212,8 @@ function oncekiSarki() {
 }
 
 function sarkiListesiAcKapat() {
-    const modal = document.getElementById("musicModal");
-    modal.classList.toggle("acik");
-    if(modal.classList.contains("acik")) {
+    toggleModal("musicModal");
+    if (document.getElementById("musicModal").classList.contains("acik")) {
         sarkiListesiniCiz();
     }
 }
@@ -202,8 +246,7 @@ function linkAc(url) {
 }
 
 function sarkiEkleModalAcKapat() {
-    const modal = document.getElementById("addSongModal");
-    modal.classList.toggle("acik");
+    toggleModal("addSongModal");
 }
 
 function sarkiEkle() {
@@ -242,9 +285,8 @@ let notlarListesi = JSON.parse(localStorage.getItem("sincapEklenenNotlar")) || [
 ];
 
 function notlarAcKapat() {
-    const modal = document.getElementById("notesModal");
-    modal.classList.toggle("acik");
-    if(modal.classList.contains("acik")) {
+    toggleModal("notesModal");
+    if (document.getElementById("notesModal").classList.contains("acik")) {
         notlariCiz();
     }
 }
@@ -273,8 +315,7 @@ function notlariCiz() {
 }
 
 function notEkleModalAcKapat() {
-    const modal = document.getElementById("addNoteModal");
-    modal.classList.toggle("acik");
+    toggleModal("addNoteModal");
 }
 
 function notEkle() {
@@ -303,9 +344,8 @@ function notSil(index) {
 const toplamFotografSayisi = 16;
 
 function galeriAcKapat() {
-    const modal = document.getElementById("galleryModal");
-    modal.classList.toggle("acik");
-    if (modal.classList.contains("acik")) {
+    toggleModal("galleryModal");
+    if (document.getElementById("galleryModal").classList.contains("acik")) {
         galeriyiCiz();
     }
 }

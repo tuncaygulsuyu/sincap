@@ -9,7 +9,7 @@
 </head>
 <body>
 
-    <!-- 4 Haneli Şifreli Giriş Ekranı -->
+    <!-- 4 Haneli Şifreli Giriş Ekranı (Numpad Uyumlu) -->
     <div class="lock-screen" id="lockScreen">
         <div class="lock-card">
             <div class="lock-icon">🔒</div>
@@ -17,10 +17,10 @@
             <p>Devam etmek için 4 haneli pin kodumuzu gir:</p>
 
             <div class="pin-container" id="pinContainer">
-                <input type="password" maxlength="1" class="pin-box" autofocus>
-                <input type="password" maxlength="1" class="pin-box">
-                <input type="password" maxlength="1" class="pin-box">
-                <input type="password" maxlength="1" class="pin-box">
+                <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box" autocomplete="one-time-code" autofocus>
+                <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box" autocomplete="one-time-code">
+                <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box" autocomplete="one-time-code">
+                <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box" autocomplete="one-time-code">
             </div>
 
             <p id="passError" class="pass-error" style="display:none;">Hatalı şifre yavru sincabım! 🐿️</p>
@@ -72,7 +72,7 @@
                 <button class="menu-item" onclick="sarkiListesiAcKapat()">🎵 Şarkı Listemiz</button>
                 <button class="menu-item" onclick="galeriAcKapat()">📸 Anı Galerimiz</button>
                 <button class="menu-item" onclick="notlarAcKapat()">💌 Özel Notlar</button>
-                <button class="menu-item" onclick="sifreDegistirModalAcKapat()">⚙️ PIN Şifresini Değiştir</button>
+                <button class="menu-item menu-item-small" onclick="sifreDegistirModalAcKapat()">⚙️ PIN Şifresini Değiştir</button>
             </div>
         </div>
     </div>
@@ -122,14 +122,26 @@
         </div>
     </div>
 
-    <!-- Şifre Değiştir Pop-up -->
+    <!-- Şifre Değiştir Pop-up (Taşma Çözüldü & Tek Göz İkonlu) -->
     <div class="modal" id="changePassModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="sifreDegistirModalAcKapat()">&times;</span>
-            <h2>⚙️ Şifre Değiştir</h2>
+            <h2>⚙️ PIN Şifresini Değiştir</h2>
             <div class="add-song-box">
-                <input type="password" id="oldPassInput" maxlength="4" placeholder="Mevcut 4 Haneli PIN">
-                <input type="password" id="newPassInput" maxlength="4" placeholder="Yeni 4 Haneli PIN">
+                <!-- Mevcut PIN her zaman görünür (text) -->
+                <input type="text" inputmode="numeric" pattern="[0-9]*" id="oldPassInput" maxlength="4" placeholder="Mevcut 4 Haneli PIN">
+
+                <!-- Yeni PIN (Göz İkonlu) -->
+                <div class="input-eye-wrapper">
+                    <input type="password" inputmode="numeric" pattern="[0-9]*" id="newPassInput" maxlength="4" placeholder="Yeni 4 Haneli PIN">
+                    <span class="eye-btn" onclick="yeniSifreleriGosterGizle(this)">👁️</span>
+                </div>
+
+                <!-- Yeni PIN Tekrar -->
+                <input type="password" inputmode="numeric" pattern="[0-9]*" id="confirmPassInput" maxlength="4" placeholder="Yeni PIN (Tekrar)">
+
+                <p id="changePassError" class="pass-error" style="display:none;"></p>
+
                 <button onclick="sifreGuncelle()">Şifreyi Kaydet</button>
             </div>
         </div>
