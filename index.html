@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sincap & Sevgilisi ❤️</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Arka planda uçuşan kalpler için container -->
+    <div class="bg-animation" id="bgAnimation"></div>
+
+    <div class="main-wrapper">
+        <!-- Üst Spotify Tarzı Mini Müzik Widget'ı -->
+        <div class="top-music-widget">
+            <audio id="bgMusic" src="sarkilarimiz/Ajda_Pekkan_Sen_Olurdun_Yine.mp3" loop></audio>
+            <div class="song-info">
+                <span class="music-icon">🎵</span>
+                <div class="song-text">
+                    <span class="song-title" id="songTitle">Sen Olurdun Yine</span>
+                    <span class="song-artist" id="songArtist">Ajda Pekkan</span>
+                </div>
+            </div>
+            <div class="widget-controls">
+                <button class="widget-btn" onclick="oncekiSarki()">⏮️</button>
+                <button id="playBtn" class="widget-btn" onclick="muzikOynatDuraklat()">▶️</button>
+                <button class="widget-btn" onclick="sonrakiSarki()">⏭️</button>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.2" oninput="sesAyarla(this.value)">
+                <button id="muteBtn" class="widget-btn" onclick="sesSustur()">🔊</button>
+            </div>
+        </div>
+
+        <!-- Ana Kart -->
+        <div class="card">
+            <div class="profile-icon">
+                <img src="giris_sincaplar_gemini.jpg" alt="Sincaplar" class="sincap-img">
+            </div>
+            <h1>Bizim Hikayemiz</h1>
+            <p class="subtitle">Birlikte geçen her an çok özel...</p>
+
+            <div class="counter-box">
+                <div class="time-unit"><span id="gun">0</span><small>Gün</small></div>
+                <div class="time-unit"><span id="saat">0</span><small>Saat</small></div>
+                <div class="time-unit"><span id="dakika">0</span><small>Dakika</small></div>
+                <div class="time-unit"><span id="saniye">0</span><small>Saniye</small></div>
+            </div>
+
+            <button class="love-btn" onclick="kalpPatlat()">Seni Seviyorum ❤️</button>
+
+            <!-- Menü Paneli -->
+            <div class="menu-panel" id="menuPanel">
+                <button class="menu-item" onclick="sarkiListesiAcKapat()">🎵 Şarkı Listemiz</button>
+                
+                <!-- Gizli Şarkı Listesi -->
+                <div class="playlist-container" id="playlistContainer">
+                    <div id="songList" class="song-list"></div>
+                    <button class="add-song-trigger" onclick="sarkiEkleModalAcKapat()">➕ Yeni Şarkı Ekle</button>
+                </div>
+
+                <button class="menu-item" onclick="galeriAcKapat()">📸 Anı Galerimiz</button>
+                <button class="menu-item">💌 Özel Notlar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Şarkı Ekleme Pop-up Penceresi -->
+    <div class="modal" id="addSongModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="sarkiEkleModalAcKapat()">&times;</span>
+            <h2>🎵 Şarkı Ekle</h2>
+            <div class="add-song-box">
+                <input type="text" id="newSongName" placeholder="Şarkı / Şarkıcı Adı">
+                <input type="text" id="newSongUrl" placeholder="YouTube / Spotify Linki">
+                <button onclick="sarkiEkle()">Listeye Ekle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Anı Galerisi Pop-up Penceresi -->
+    <div class="modal" id="galleryModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="galeriAcKapat()">&times;</span>
+            <h2>📸 Anı Galerimiz</h2>
+            <div class="gallery-grid" id="galleryGrid"></div>
+        </div>
+    </div>
+
+    <!-- Lightbox (Büyük Resim ve Live Photo Video Gösterici) -->
+<div class="lightbox" id="lightbox" onclick="lightboxKapat()">
+    <img id="lightboxImg" src="" alt="Büyük Görsel" style="display:none;">
+    <video id="lightboxVideo" src="" autoplay loop controls style="display:none; max-width:90%; max-height:80%; border-radius:15px;"></video>
+</div>
+
+    <script src="script.js"></script>
+</body>
+</html>

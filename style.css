@@ -1,0 +1,249 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab, #ffdd59, #02c39a);
+    background-size: 600% 600%;
+    animation: gradientBG 35s ease infinite;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+    position: relative;
+    padding: 20px 0;
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    z-index: 10;
+    width: 100%;
+    max-width: 450px;
+}
+
+/* Üst Müzik Widget'ı */
+.top-music-widget {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    padding: 6px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 85%;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.song-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.song-text {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow: hidden;
+}
+
+.song-title {
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+
+.song-artist {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 10px;
+    font-weight: 300;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.widget-controls {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.widget-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: white;
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px !important;
+    padding: 0 !important;
+    transition: all 0.2s ease;
+}
+
+.widget-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+#volumeSlider {
+    width: 40px;
+    accent-color: #ff4b5c;
+    cursor: pointer;
+}
+
+/* Ana Kart */
+.card {
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 35px 25px;
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    color: #ffffff;
+    width: 90%;
+    animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+}
+
+.sincap-img {
+    width: 120px !important;
+    height: 120px !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+    border: 3px solid rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+    animation: pulse 2s infinite !important;
+    margin: 0 auto 10px auto !important;
+    display: block !important;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+h1 { font-size: 26px; font-weight: 700; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+.subtitle { font-size: 13px; opacity: 0.95; margin-bottom: 20px; text-shadow: 0 1px 5px rgba(0, 0, 0, 0.4); }
+
+.counter-box { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 20px; }
+.time-unit { background: rgba(0, 0, 0, 0.25); padding: 12px 8px; border-radius: 14px; flex: 1; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); }
+.time-unit span { display: block; font-size: 20px; font-weight: 700; text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); }
+.time-unit small { font-size: 10px; text-transform: uppercase; opacity: 0.9; font-weight: 600; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+
+.love-btn {
+    background: white; color: #e73c7e; border: none; padding: 14px 28px; font-size: 15px; font-weight: 600; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 10px 20px rgba(0,0,0,0.15); width: 100%;
+}
+.love-btn:hover { transform: scale(1.02); box-shadow: 0 15px 25px rgba(0,0,0,0.25); background: #fff0f5; }
+
+/* Menü Paneli */
+.menu-panel {
+    max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out; opacity: 0; display: flex; flex-direction: column; gap: 10px; margin-top: 15px;
+}
+.menu-panel.acik { max-height: 500px; opacity: 1; overflow-y: auto; }
+
+/* Scrollbar Gizleme */
+.menu-panel::-webkit-scrollbar,
+.song-list::-webkit-scrollbar,
+.gallery-grid::-webkit-scrollbar {
+    display: none;
+}
+.menu-panel, .song-list, .gallery-grid {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.menu-item {
+    background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 12px 15px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+}
+.menu-item:hover { background: rgba(255, 255, 255, 0.35); transform: translateY(-2px); }
+
+/* Şarkı Listesi Konteyneri */
+.playlist-container {
+    display: none; flex-direction: column; gap: 8px; background: rgba(0, 0, 0, 0.25); padding: 10px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.playlist-container.acik { display: flex; }
+
+.song-list { display: flex; flex-direction: column; gap: 6px; max-height: 160px; overflow-y: auto; text-align: left; }
+
+.song-item {
+    background: rgba(255, 255, 255, 0.12); padding: 8px 12px; border-radius: 10px; font-size: 12px; color: white; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s;
+}
+.song-item:hover { background: rgba(255, 255, 255, 0.22); }
+
+.song-title-click { flex: 1; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 8px; }
+
+.delete-song-btn {
+    background: none; border: none; cursor: pointer; font-size: 12px; opacity: 0.7; transition: opacity 0.2s; padding: 2px 4px;
+}
+.delete-song-btn:hover { opacity: 1; }
+
+.add-song-trigger {
+    background: rgba(255, 255, 255, 0.15); border: 1px dashed rgba(255, 255, 255, 0.4); color: white; padding: 8px; border-radius: 10px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 4px;
+}
+.add-song-trigger:hover { background: rgba(255, 255, 255, 0.25); }
+
+/* Modal (Pop-up) Yapıları */
+.modal {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center;
+}
+.modal.acik { display: flex; }
+
+.modal-content {
+    background: rgba(30, 30, 30, 0.85); border: 1px solid rgba(255, 255, 255, 0.2); padding: 20px; border-radius: 20px; width: 90%; max-width: 380px; text-align: center; color: white; position: relative; box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+}
+
+.close-btn { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; color: rgba(255, 255, 255, 0.7); }
+
+.add-song-box { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+.add-song-box input {
+    background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 10px; color: white; font-size: 13px; outline: none;
+}
+.add-song-box input::placeholder { color: rgba(255, 255, 255, 0.6); }
+.add-song-box button {
+    background: #ff4b5c; border: none; color: white; padding: 10px; border-radius: 10px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s; margin-top: 5px;
+}
+.add-song-box button:hover { background: #e03e4e; }
+
+.gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; max-height: 300px; overflow-y: auto; }
+.gallery-grid img { width: 100%; height: 120px; object-fit: cover; border-radius: 12px; cursor: pointer; transition: transform 0.2s, border 0.2s; border: 2px solid transparent; }
+.gallery-grid img:hover { transform: scale(1.04); border: 2px solid #ff4b5c; }
+
+/* Lightbox */
+.lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 1100; justify-content: center; align-items: center; }
+.lightbox.acik { display: flex; }
+.lightbox img { max-width: 90%; max-height: 80%; border-radius: 15px; box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); }
+
+/* Kalpler */
+.heart { position: absolute; color: rgba(255, 255, 255, 0.7); font-size: 20px; user-select: none; pointer-events: none; animation: moveHeart 6s linear infinite; }
+@keyframes moveHeart { 0% { transform: translateY(100vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; } }
