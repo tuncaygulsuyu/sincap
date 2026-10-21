@@ -39,7 +39,7 @@
             <h2 id="taskTitle">Günün Görevi</h2>
             <p id="taskDesc">Devam etmek için görevi tamamla:</p>
 
-            <!-- Görev A: Ruh Hali Slider -->
+            <!-- Görev A: Ruh Hali Slider + Yüzde Göstergesi -->
             <div id="taskSliderGame" class="task-box">
                 <p style="font-size:12px; margin-bottom:8px;">Sen kimsin ve şu an ruh halin nasıl?</p>
                 
@@ -48,7 +48,9 @@
                     <button id="btnUser2" class="user-select-btn" onclick="selectUser('Yavru Sincap')">🐿️ Yavru Sincap</button>
                 </div>
 
-                <div id="moodStatusText" style="font-size:14px; font-weight:700; color:#02c39a; margin-bottom:10px;">🥰 Çok Mutluyum!</div>
+                <div id="moodStatusText" style="font-size:14px; font-weight:700; color:#02c39a; margin-bottom:4px;">🥰 Çok Mutluyum!</div>
+                <div id="moodPercentBadge" style="font-size:10px; background:rgba(255,255,255,0.15); display:inline-block; padding:2px 8px; border-radius:10px; margin-bottom:10px; font-weight:600; color:#ffdd59;">%50</div>
+                
                 <input type="range" id="moodSlider" min="0" max="100" value="50" oninput="checkMoodSlider(this.value)">
                 <div style="display:flex; justify-content:space-between; font-size:10px; opacity:0.8; margin-top:5px;">
                     <span>😡 Sinirli</span>
@@ -114,6 +116,7 @@
 
             <!-- Menü Paneli -->
             <div class="menu-panel" id="menuPanel">
+                <button class="menu-item" onclick="ozelGunlerAcKapat()">⏳ Özel Günlerimiz</button>
                 <button class="menu-item" onclick="sarkiListesiAcKapat()">🎵 Şarkı Listemiz</button>
                 <button class="menu-item" onclick="galeriAcKapat()">📸 Anı Galerimiz</button>
                 <button class="menu-item" onclick="todoAcKapat()">📋 Yapılacaklar Listesi</button>
@@ -121,6 +124,29 @@
                 <button class="menu-item" onclick="notlarAcKapat()">💌 Özel Notlar</button>
                 <button class="menu-item" onclick="moodAcKapat()">🎭 Ruh Halimiz Log</button>
                 <button class="menu-item menu-item-small" onclick="sifreDegistirModalAcKapat()">⚙️ PIN Şifresini Değiştir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⏳ Özel Günlerimiz Modalı -->
+    <div class="modal" id="ozelGunModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="ozelGunlerAcKapat()">&times;</span>
+            <h2>⏳ Özel Günlerimiz</h2>
+            <div id="ozelGunList" class="song-list"></div>
+            <button class="add-song-trigger" onclick="ozelGunEkleModalAcKapat()">➕ Yeni Özel Gün Ekle</button>
+        </div>
+    </div>
+
+    <!-- Özel Gün Ekle Pop-up -->
+    <div class="modal" id="addOzelGunModal">
+        <div class="modal-content" style="height:auto;">
+            <span class="close-btn" onclick="ozelGunEkleModalAcKapat()">&times;</span>
+            <h2>⏳ Özel Gün Ekle</h2>
+            <div class="add-song-box">
+                <input type="text" id="yeniGunBaslik" placeholder="Örn: Özge'nin Doğum Günü 🎂">
+                <input type="date" id="yeniGunTarih">
+                <button onclick="ozelGunEkle()">Özel Günü Kaydet</button>
             </div>
         </div>
     </div>

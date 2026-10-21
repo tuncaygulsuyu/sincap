@@ -188,6 +188,74 @@ function toggleModal(modalId) {
     }
 }
 
+// ⏳ ÖZEL GÜNLER MOTORU (FIREBASE)
+let ozelGunlerListesi = [];
+
+db.collection("ozel_gunler").orderBy("tarih", "asc").onSnapshot((snapshot) => {
+    ozelGunlerListesi = [];
+    snapshot.forEach((doc) => { ozelGunlerListesi.push({ id: doc.id, ...doc.data() }); });
+    ozelGunCiz();
+});
+
+function ozelGunlerAcKapat() {
+    toggleModal("ozelGunModal");
+    if (document.getElementById("ozelGunModal").classList.contains("acik")) { ozelGunCiz(); }
+}
+
+function ozelGunCiz() {
+    const listDiv = document.getElementById("ozelGunList");
+    if (!listDiv) return;
+    listDiv.innerHTML = "";
+
+    if (ozelGunlerListesi.length === 0) {
+        listDiv.innerHTML = `<div style="font-size:11px; opacity:0.7; padding:5px;">Henüz özel gün eklenmemiş ⏳</div>`;
+        return;
+    }
+
+    const simdi = new Date();
+    ozelGunlerListesi.forEach((gun) => {
+        const item = document.createElement("div");
+        item.classList.add("song-item");
+
+        let hedefTarih = new Date(gun.tarih);
+        let farkGun = Math.ceil((hedefTarih - simdi) / (1000 * 60 * 60 * 24));
+        let kalanStr = farkGun >= 0 ? `${farkGun} gün kaldı 🎉` : `Geçti / Kutlandı ❤️`;
+
+        item.innerHTML = `
+            <div style="display:flex; flex-direction:column; text-align:left;">
+                <span style="font-weight:700; font-size:12px; color:#ffdd59;">✨ ${gun.baslik}</span>
+                <span style="font-size:11px; margin-top:2px;">📅 ${gun.tarih} (${kalanStr})</span>
+            </div>
+            <button class="delete-song-btn" onclick="ozelGunSil('${gun.id}')">🗑️</button>
+        `;
+        listDiv.appendChild(item);
+    });
+}
+
+function ozelGunEkleModalAcKapat() { toggleModal("addOzelGunModal"); }
+
+function ozelGunEkle() {
+    const baslikInput = document.getElementById("yeniGunBaslik");
+    const tarihInput = document.getElementById("yeniGunTarih");
+
+    if (baslikInput.value.trim() === "" || !tarihInput.value) return;
+
+    db.collection("ozel_gunler").add({
+        baslik: baslikInput.value,
+        tarih: tarihInput.value,
+        olusturma: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        baslikInput.value = "";
+        tarihInput.value = "";
+        ozelGunEkleModalAcKapat();
+    });
+}
+
+function ozelGunSil(docId) {
+    if (!confirm("Bu özel günü silmek istediğine emin misin?")) return;
+    db.collection("ozel_gunler").doc(docId).delete();
+}
+
 // 🎡 ÇARKIFELEK MOTORU
 const surpriseCards = [
     "🤗 Bugün Tuncay sana kocaman sarılma borçlu!",
