@@ -51,6 +51,36 @@ pinInput.addEventListener('input', (e) => {
     if (val.length === 4) {
         if (val === currentPin) {
             pinError.textContent = "";
+            
+            // Doğru PIN girildiğinde müziği %8 sesten başlatıp 10 saniyede %50'ye çıkarıyoruz
+            const audioPlayer = document.getElementById('audioPlayer');
+            if (audioPlayer) {
+                audioPlayer.volume = 0.08;
+                audioPlayer.play().then(() => {
+                    const quickPlayPauseBtn = document.getElementById('quickPlayPauseBtn');
+                    const modalPlayPauseBtn = document.getElementById('modalPlayPauseBtn');
+                    if (quickPlayPauseBtn) quickPlayPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                    if (modalPlayPauseBtn) modalPlayPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+
+                    let currentVol = 0.08;
+                    const targetVol = 0.50;
+                    const durationMs = 10000; 
+                    const intervalMs = 500;   
+                    const totalSteps = durationMs / intervalMs; 
+                    const volStep = (targetVol - currentVol) / totalSteps; 
+
+                    const fadeInterval = setInterval(() => {
+                        currentVol += volStep;
+                        if (currentVol >= targetVol || audioPlayer.paused) {
+                            audioPlayer.volume = targetVol;
+                            clearInterval(fadeInterval);
+                        } else {
+                            audioPlayer.volume = currentVol;
+                        }
+                    }, intervalMs);
+                }).catch(err => console.log("Müzik çalma engellendi:", err));
+            }
+
             setTimeout(() => {
                 goScreen('profileScreen');
                 updateDynamicGreeting();
@@ -97,11 +127,25 @@ const moods = [
     { emoji: '✨', text: 'Enerjik' }
 ];
 
+// Akışkan Slider Yapısı
 const moodSlider = document.getElementById('moodSlider');
 moodSlider.addEventListener('input', (e) => {
-    const index = parseInt(e.target.value) - 1;
-    document.getElementById('moodEmoji').textContent = moods[index].emoji;
-    document.getElementById('moodText').textContent = moods[index].text;
+    const val = parseFloat(e.target.value);
+    const roundedIndex = Math.round(val) - 1;
+    const clampedIndex = Math.max(0, Math.min(moods.length - 1, roundedIndex));
+    
+    document.getElementById('moodEmoji').textContent = moods[clampedIndex].emoji;
+    document.getElementById('moodText').textContent = moods[clampedIndex].text;
+});
+
+moodSlider.addEventListener('change', (e) => {
+    const val = parseFloat(e.target.value);
+    const nearestIndex = Math.round(val);
+    moodSlider.value = nearestIndex;
+    
+    const moodObj = moods[nearestIndex - 1];
+    document.getElementById('moodEmoji').textContent = moodObj.emoji;
+    document.getElementById('moodText').textContent = moodObj.text;
 });
 
 function handleLoginSave() {
@@ -136,13 +180,11 @@ function finalizeLogin() {
     renderCalendar();
     renderSpecialDays();
     renderMoodLogs();
-    renderGallery();
-    initRandomMemory();
-    startAutoFadeInMusic();
 }
 
 document.getElementById('logoutBtn').addEventListener('click', () => {
-    audioPlayer.pause();
+    const audioPlayer = document.getElementById('audioPlayer');
+    if (audioPlayer) audioPlayer.pause();
     pinInput.value = "";
     dots.forEach(d => d.classList.remove('filled'));
     goScreen('pinScreen');
@@ -209,25 +251,6 @@ const quickMuteBtn = document.getElementById('quickMuteBtn');
 const miniSeekBar = document.getElementById('miniSeekBar');
 const fullSeekBar = document.getElementById('fullSeekBar');
 
-function startAutoFadeInMusic() {
-    audioPlayer.volume = 0.0;
-    audioPlayer.play().then(() => {
-        quickPlayPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-        modalPlayPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-        
-        let step = 0;
-        const volumes = [0.1, 0.2, 0.3, 0.4, 0.5];
-        const fadeInterval = setInterval(() => {
-            if (step < volumes.length && !audioPlayer.paused) {
-                audioPlayer.volume = volumes[step];
-                step++;
-            } else {
-                clearInterval(fadeInterval);
-            }
-        }, 3000);
-    }).catch(() => { console.log("Tarayıcı otomatik oynatmayı kısıtladı."); });
-}
-
 document.getElementById('openMusicModal').addEventListener('click', () => musicModal.classList.add('active'));
 document.getElementById('closeMusicModal').addEventListener('click', () => musicModal.classList.remove('active'));
 
@@ -269,8 +292,23 @@ document.getElementById('toggleLyricsBtn').addEventListener('click', () => {
     box.style.display = box.style.display === 'none' ? 'block' : 'none';
 });
 
-// Şarkılarımız Sistemi (Düzeltildi ve Sağlamlaştırıldı)
-let customSongs = JSON.parse(localStorage.getItem('sincapCustomSongs')) || [{ title: "Sen Olurdun Yine", artist: "Ajda Pekkan" }];
+// ==========================================
+// FIREBASE SENKRONIZE: Şarkılarımız Sistemi
+// ==========================================
+let customSongs = [];
+
+window.addEventListener('firebase-ready', () => {
+    const { collection, onSnapshot } = window.fsModules;
+    onSnapshot(collection(window.db, "sarkilar"), (snapshot) => {
+        customSongs = [];
+        snapshot.forEach((docSnap) => {
+            customSongs.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        if (document.getElementById('songsWidgetModal').classList.contains('active')) {
+            renderSongsWidgetList();
+        }
+    });
+});
 
 function openSongsWidgetModal() {
     document.getElementById('songsWidgetModal').classList.add('active');
@@ -284,7 +322,7 @@ function renderSongsWidgetList() {
     const container = document.getElementById('songsWidgetListContainer');
     if (!container) return;
     container.innerHTML = '';
-    customSongs.forEach((s, index) => {
+    customSongs.forEach((s) => {
         const div = document.createElement('div');
         div.className = 'song-item-card';
         div.innerHTML = `
@@ -295,16 +333,19 @@ function renderSongsWidgetList() {
                     <p>${s.artist}</p>
                 </div>
             </div>
-            <button class="delete-item-btn" onclick="deleteSong(${index})"><i class="fa-solid fa-trash-can"></i></button>
+            <button class="delete-item-btn" onclick="deleteSong('${s.id}')"><i class="fa-solid fa-trash-can"></i></button>
         `;
         container.appendChild(div);
     });
 }
 
-function deleteSong(index) {
-    customSongs.splice(index, 1);
-    localStorage.setItem('sincapCustomSongs', JSON.stringify(customSongs));
-    renderSongsWidgetList();
+async function deleteSong(id) {
+    const { doc, deleteDoc } = window.fsModules;
+    try {
+        await deleteDoc(doc(window.db, "sarkilar", id));
+    } catch (e) {
+        console.error("Şarkı silinirken hata oluştu: ", e);
+    }
 }
 
 function openSongPlatformModal(title, artist) {
@@ -328,44 +369,78 @@ function closeAddSongModal() {
     document.getElementById('newSongTitleInput').value = '';
     document.getElementById('newSongArtistInput').value = '';
 }
-document.getElementById('saveNewSongBtn').addEventListener('click', () => {
+
+document.getElementById('saveNewSongBtn').addEventListener('click', async () => {
     const title = document.getElementById('newSongTitleInput').value.trim();
     const artist = document.getElementById('newSongArtistInput').value.trim();
     if (title && artist) {
-        customSongs.push({ title, artist });
-        localStorage.setItem('sincapCustomSongs', JSON.stringify(customSongs));
-        renderSongsWidgetList();
-        closeAddSongModal();
+        const { collection, addDoc } = window.fsModules;
+        try {
+            await addDoc(collection(window.db, "sarkilar"), { title, artist });
+            closeAddSongModal();
+        } catch (e) {
+            console.error("Şarkı eklenirken hata: ", e);
+        }
     } else {
         alert("Lütfen şarkı adı ve sanatçı girin!");
     }
 });
 
-let todoList = JSON.parse(localStorage.getItem('sincapTodoList')) || [
-    { text: "Birlikte kahve içilecek ☕", completed: false }, { text: "Akşam film gecesi yapılacak 🎬", completed: true }
-];
+// ==========================================
+// FIREBASE SENKRONIZE: Yapılacaklar Listesi
+// ==========================================
+let todoList = [];
+
+window.addEventListener('firebase-ready', () => {
+    const { collection, onSnapshot } = window.fsModules;
+    onSnapshot(collection(window.db, "todolist"), (snapshot) => {
+        todoList = [];
+        snapshot.forEach((docSnap) => {
+            todoList.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        if (document.getElementById('todoListModal').classList.contains('active')) {
+            renderTodoList();
+        }
+    });
+});
+
 function openTodoListModal() { document.getElementById('todoListModal').classList.add('active'); renderTodoList(); }
 function closeTodoListModal() { document.getElementById('todoListModal').classList.remove('active'); }
+
 function renderTodoList() {
     const container = document.getElementById('todoItemsContainer');
     if (!container) return;
     container.innerHTML = '';
-    todoList.forEach((todo, index) => {
+    todoList.forEach((todo) => {
         const div = document.createElement('div');
         div.className = 'todo-item-card';
-        div.innerHTML = `<span class="todo-text ${todo.completed ? 'completed' : ''}" onclick="toggleTodo(${index})">${todo.text}</span>
-            <button class="delete-item-btn" onclick="deleteTodo(${index})"><i class="fa-solid fa-trash-can"></i></button>`;
+        div.innerHTML = `<span class="todo-text ${todo.completed ? 'completed' : ''}" onclick="toggleTodo('${todo.id}', ${todo.completed})">${todo.text}</span>
+            <button class="delete-item-btn" onclick="deleteTodo('${todo.id}')"><i class="fa-solid fa-trash-can"></i></button>`;
         container.appendChild(div);
     });
 }
-document.getElementById('addTodoBtn').addEventListener('click', () => {
-    const input = document.getElementById('todoInput'); const text = input.value.trim();
-    if (text) { todoList.push({ text, completed: false }); localStorage.setItem('sincapTodoList', JSON.stringify(todoList)); input.value = ''; renderTodoList(); }
-});
-function toggleTodo(index) { todoList[index].completed = !todoList[index].completed; localStorage.setItem('sincapTodoList', JSON.stringify(todoList)); renderTodoList(); }
-function deleteTodo(index) { todoList.splice(index, 1); localStorage.setItem('sincapTodoList', JSON.stringify(todoList)); renderTodoList(); }
 
-// Gelişmiş Pro Özel Çark (Garanti Çizim Altyapısı)
+document.getElementById('addTodoBtn').addEventListener('click', async () => {
+    const input = document.getElementById('todoInput'); 
+    const text = input.value.trim();
+    if (text) {
+        const { collection, addDoc } = window.fsModules;
+        await addDoc(collection(window.db, "todolist"), { text, completed: false });
+        input.value = '';
+    }
+});
+
+async function toggleTodo(id, currentCompleted) {
+    const { doc, updateDoc } = window.fsModules;
+    await updateDoc(doc(window.db, "todolist", id), { completed: !currentCompleted });
+}
+
+async function deleteTodo(id) {
+    const { doc, deleteDoc } = window.fsModules;
+    await deleteDoc(doc(window.db, "todolist", id));
+}
+
+// Gelişmiş Pro Özel Çark
 let customWheelOptions = JSON.parse(localStorage.getItem('sincapCustomWheel')) || ["Film İzle 🎬", "Kahve İç ☕", "Yürüyüş Yap 🌳", "Sürpriz Öpücük 💋"];
 let proWheelRotationAngle = 0;
 
@@ -458,18 +533,30 @@ function spinProWheel() {
     }, 4000);
 }
 
-// Galeri (Tarih Bilgisiyle ve Kesin Yükleme Altyapısı)
-let rawGalleryData = JSON.parse(localStorage.getItem('sincapGalleryPhotos')) || [
-    { url: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&q=80", date: "15 Ağustos 2026" },
-    { url: "https://images.unsplash.com/photo-1494774157365-9e04c6720e47?w=400&q=80", date: "15 Ağustos 2026" }
-];
-let galleryPhotos = rawGalleryData.map(item => typeof item === 'string' ? { url: item, date: "Önceden Yüklendi" } : item);
-let activeLightboxIndex = null;
+// ==========================================
+// CLOUDINARY (sincap_cloud) & FIREBASE GALERİ
+// ==========================================
+let galleryPhotos = [];
+
+const CLOUD_NAME = "kokuno0e"; 
+const UPLOAD_PRESET = "sincap_cloud";
+
+window.addEventListener('firebase-ready', () => {
+    const { collection, onSnapshot } = window.fsModules;
+    onSnapshot(collection(window.db, "fotograflar"), (snapshot) => {
+        galleryPhotos = [];
+        snapshot.forEach((docSnap) => {
+            galleryPhotos.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        renderGallery();
+    });
+});
 
 function renderGallery() {
     const galleryGrid = document.getElementById('iosGalleryGrid');
     if (!galleryGrid) return;
     galleryGrid.innerHTML = '';
+    
     galleryPhotos.forEach((item, index) => {
         const wrap = document.createElement('div');
         wrap.className = 'gallery-thumb-wrap';
@@ -478,7 +565,6 @@ function renderGallery() {
     });
     initRandomMemory();
 }
-renderGallery();
 
 async function handleImageUpload(e) {
     const files = e.target.files;
@@ -490,24 +576,38 @@ async function handleImageUpload(e) {
 
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                galleryPhotos.push({ url: event.target.result, date: uploadDateStr });
-                resolve();
-            };
-            reader.readAsDataURL(file);
-        });
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', UPLOAD_PRESET);
+
+        try {
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (data.secure_url) {
+                const { collection, addDoc } = window.fsModules;
+                await addDoc(collection(window.db, "fotograflar"), {
+                    url: data.secure_url,
+                    date: uploadDateStr
+                });
+            }
+        } catch (err) {
+            console.error("Fotoğraf yükleme hatası:", err);
+            alert("Fotoğraf yüklenirken bir hata oluştu.");
+        }
     }
 
-    localStorage.setItem('sincapGalleryPhotos', JSON.stringify(galleryPhotos));
     if (indicator) indicator.style.display = 'none';
-    renderGallery();
     e.target.value = '';
 }
+
 document.getElementById('fileInput').addEventListener('change', handleImageUpload);
 document.getElementById('cameraInput').addEventListener('change', handleImageUpload);
 
+let activeLightboxIndex = null;
 function openLightbox(index) {
     activeLightboxIndex = index;
     document.getElementById('lightboxImg').src = galleryPhotos[index].url;
@@ -523,11 +623,16 @@ document.getElementById('lightboxShareBtn').addEventListener('click', () => {
 
 document.getElementById('lightboxDeleteBtn').addEventListener('click', () => { document.getElementById('deleteConfirmModal').classList.add('active'); });
 function closeDeleteConfirmModal() { document.getElementById('deleteConfirmModal').classList.remove('active'); }
-document.getElementById('confirmDeletePhotoBtn').addEventListener('click', () => {
+
+document.getElementById('confirmDeletePhotoBtn').addEventListener('click', async () => {
     if (activeLightboxIndex !== null) {
-        galleryPhotos.splice(activeLightboxIndex, 1);
-        localStorage.setItem('sincapGalleryPhotos', JSON.stringify(galleryPhotos));
-        renderGallery(); closeDeleteConfirmModal(); closeLightbox();
+        const photoToDelete = galleryPhotos[activeLightboxIndex];
+        if (photoToDelete.id) {
+            const { doc, deleteDoc } = window.fsModules;
+            await deleteDoc(doc(window.db, "fotograflar", photoToDelete.id));
+        }
+        closeDeleteConfirmModal(); 
+        closeLightbox();
     }
 });
 
@@ -579,7 +684,7 @@ document.getElementById('saveNewPinBtn').addEventListener('click', () => {
     pinModal.classList.remove('active'); document.getElementById('oldPinInput').value = ""; newPinInput1.value = ""; newPinInput2.value = ""; err.textContent = "";
 });
 
-// Takvim ve Gün Seçimi (Kesin Doldurma Garantili)
+// Takvim ve Gün Seçimi
 let realNow = new Date();
 let currentCalendarDate = new Date(realNow.getFullYear(), realNow.getMonth(), 1);
 
