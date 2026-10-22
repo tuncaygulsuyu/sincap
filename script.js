@@ -1,3 +1,12 @@
+const firebaseConfig = {
+    apiKey: "AIzaSyAPcu9V4PlYJbNpNmNEdzU9IadovSUJMcw",
+    authDomain: "mark2-sincap-app.firebaseapp.com",
+    projectId: "mark2-sincap-app",
+    storageBucket: "mark2-sincap-app.firebasestorage.app",
+    messagingSenderId: "169619314278",
+    appId: "1:169619314278:web:84b1306ef36dfb8753ffa7",
+    measurementId: "G-S7MB741JKF"
+};
 function goScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
