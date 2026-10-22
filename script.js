@@ -293,7 +293,7 @@ document.getElementById('toggleLyricsBtn').addEventListener('click', () => {
 });
 
 // ==========================================
-// FIREBASE SENKRONIZE: Şarkılarımız Sistemi
+// FIREBASE SENKRONIZE: Şarkılarımız Sistemi ("sarkilar")
 // ==========================================
 let customSongs = [];
 
@@ -387,7 +387,7 @@ document.getElementById('saveNewSongBtn').addEventListener('click', async () => 
 });
 
 // ==========================================
-// FIREBASE SENKRONIZE: Yapılacaklar Listesi
+// FIREBASE SENKRONIZE: Yapılacaklar Listesi ("todolist")
 // ==========================================
 let todoList = [];
 
@@ -534,7 +534,7 @@ function spinProWheel() {
 }
 
 // ==========================================
-// CLOUDINARY (sincap_cloud) & FIREBASE GALERİ
+// CLOUDINARY (sincap_cloud) & FIREBASE GALERİ ("fotograflar")
 // ==========================================
 let galleryPhotos = [];
 
