@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Tuncay & Özge - Romantik Dünyamız</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -12,8 +12,8 @@
     <!-- 1. Splash Ekranı -->
     <div id="splashScreen" class="screen active">
         <div class="splash-content">
-            <div class="logo-badge">S</div>
-            <h1>Tuncay & Özge</h1>
+            <img src="giris_sincaplar_gemini.jpg" class="splash-image" alt="Sincaplar">
+            <h1 class="splash-title">Tuncay & Özge</h1>
             <p class="subtitle">Bu Masala Giriş Yap</p>
             <button id="startBtn" class="primary-btn">Giriş Yap <i class="fa-solid fa-arrow-right"></i></button>
         </div>
@@ -39,7 +39,7 @@
     <!-- 3. Profil Seçimi & Ruh Hali -->
     <div id="profileScreen" class="screen">
         <div class="profile-container">
-            <h2>Kim Konuşuyor?</h2>
+            <h2 id="greetingText">Kim Konuşuyor?</h2>
             <p>Lütfen profilini seç ve anlık ruh halini belirt</p>
             
             <div class="profile-cards">
@@ -98,9 +98,10 @@
             
             <!-- Ana Sayfa Sekmesi -->
             <div class="tab-content active" id="tab-home">
-                <div class="card relationship-card">
+                <div class="card relationship-card" id="relationshipCardWrap">
                     <h3><i class="fa-solid fa-heart-pulse"></i> Birlikte Geçen Zamanımız</h3>
                     <div class="counter-display" id="relationshipCounter">Hesaplanıyor...</div>
+                    <div id="complimentDisplay" class="compliment-text">Sana tıklamaya doyamıyorum! ❤️</div>
                 </div>
 
                 <div class="card memory-card-large" id="memoryCard">
@@ -111,7 +112,7 @@
                     <div class="memory-photo-wrapper-large" id="randomMemoryWrapper">
                         <img id="randomMemoryImg" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=600&auto=format&fit=crop&q=80" alt="Günün Anısı">
                         <div class="photo-overlay-large">
-                            <p id="randomMemoryText">"Güzel anılarımızdan biri..."</p>
+                            <p id="randomMemoryText">Tarih yükleniyor...</p>
                         </div>
                     </div>
                 </div>
@@ -130,12 +131,6 @@
                         <span>Özel Çark</span>
                     </div>
                 </div>
-
-                <div class="quick-actions">
-                    <button class="pulse-btn" id="loveBtn">
-                        <i class="fa-solid fa-heart"></i> Seni Seviyorum ❤️
-                    </button>
-                </div>
             </div>
 
             <!-- Galeri Sekmesi -->
@@ -150,7 +145,7 @@
                         <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;">
                     </div>
                 </div>
-                <div id="uploadingIndicator" style="display:none; text-align:center; padding:10px; font-size:12px; color:var(--primary); font-weight:600;">
+                <div id="uploadingIndicator" class="loading-spinner" style="display:none;">
                     <i class="fa-solid fa-spinner fa-spin"></i> Fotoğraflar yükleniyor...
                 </div>
                 <div class="ios-gallery-grid" id="iosGalleryGrid"></div>
@@ -249,7 +244,7 @@
         </nav>
     </div>
 
-    <!-- Modaller (Arka plana tıklayınca kapanma özelliği eklendi) -->
+    <!-- Modaller (Arka plana tıklayarak kapatma özellikli) -->
     <div id="musicModal" class="modal" onclick="checkOutsideClick(event, 'musicModal')">
         <div class="modal-content">
             <div class="close-modal" id="closeMusicModal"><i class="fa-solid fa-xmark"></i></div>
@@ -277,7 +272,6 @@
                     <p>Bir rüzgar eser, aklımda sen...</p>
                     <p>Yine sensiz bu akşam, sen olurdun yine...</p>
                 </div>
-
                 <div class="external-links">
                     <a href="https://open.spotify.com" target="_blank" class="ext-btn spotify"><i class="fa-brands fa-spotify"></i> Spotify</a>
                     <a href="https://music.youtube.com" target="_blank" class="ext-btn youtube"><i class="fa-brands fa-youtube"></i> YouTube Music</a>
@@ -334,21 +328,22 @@
         <div class="modal-content" style="max-height:85vh; overflow-y:auto;">
             <div class="close-modal" onclick="closeCustomWheelAppModal()"><i class="fa-solid fa-xmark"></i></div>
             <h3><i class="fa-solid fa-dharmachakra"></i> Kendi Çarkını Yarat</h3>
-            <p style="font-size:11px; color:#888; margin-bottom:12px;">Kararsız kaldığınızda kendi seçeneklerinizi ekleyin ve çarkı çevirin!</p>
+            <p style="font-size:11px; color:#888; margin-bottom:12px;">Seçenekleri ekleyin, kararı çarka bırakın!</p>
             
             <div style="display:flex; gap:8px; margin-bottom:12px;">
-                <input type="text" id="newWheelOptionInput" placeholder="Yeni seçenek (örn: Film izleyelim)" style="flex:1; margin-bottom:0; font-size:12px; padding:8px;">
+                <input type="text" id="newWheelOptionInput" placeholder="Seçenek (örn: Film izle)" style="flex:1; margin-bottom:0; font-size:12px; padding:8px;">
                 <button onclick="addWheelOption()" class="primary-btn" style="width:auto; padding:8px 12px; font-size:12px;">Ekle</button>
             </div>
 
-            <div id="wheelOptionsListContainer" style="display:flex; flex-direction:column; gap:6px; max-height:140px; overflow-y:auto; text-align:left; margin-bottom:15px;"></div>
+            <div id="wheelOptionsListContainer" style="display:flex; flex-direction:column; gap:6px; max-height:110px; overflow-y:auto; text-align:left; margin-bottom:15px;"></div>
 
-            <div style="position:relative; width:120px; height:120px; margin:10px auto;">
-                <div style="position:absolute; top:-8px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:12px solid var(--text-color); z-index:10;"></div>
-                <div id="dynamicInteractiveWheel" style="width:100%; height:100%; border-radius:50%; border:3px solid var(--border-color); position:relative; overflow:hidden; transition: transform 4s cubic-bezier(0.15,0,0.15,1); background:var(--primary-light);"></div>
+            <!-- Gelişmiş Kusursuz Çark -->
+            <div style="position:relative; width:150px; height:150px; margin:15px auto;">
+                <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:10px solid transparent; border-right:10px solid transparent; border-top:16px solid var(--text-color); z-index:10;"></div>
+                <div id="proInteractiveWheel" style="width:100%; height:100%; border-radius:50%; border:4px solid var(--card-bg); box-shadow:0 5px 15px rgba(0,0,0,0.15); position:relative; transition: transform 4s cubic-bezier(0.15,0,0.15,1);"></div>
             </div>
-            <button onclick="spinDynamicWheel()" class="primary-btn" style="margin-top:12px;">Çarkı Çevir 🎡</button>
-            <div id="wheelResultDisplay" style="font-size:13px; font-weight:700; color:var(--primary); margin-top:10px;"></div>
+            <button onclick="spinProWheel()" class="primary-btn" style="margin-top:12px;">Çarkı Çevir 🎡</button>
+            <div id="wheelResultDisplay" style="font-size:14px; font-weight:700; color:var(--primary); margin-top:12px; min-height:20px;"></div>
         </div>
     </div>
 
@@ -400,20 +395,21 @@
         </div>
     </div>
 
-    <!-- Yeni Özel Gün Ekle (Önce Ay/Yıl, Sonra Gün Seçmeli Düzgün Modal) -->
+    <!-- Ortalanmış & Pratik Tarih Seçimli Özel Gün Ekle Modalı -->
     <div id="addSpecialDayModal" class="modal" onclick="checkOutsideClick(event, 'addSpecialDayModal')">
         <div class="modal-content">
             <div class="close-modal" onclick="closeAddSpecialDayModal()"><i class="fa-solid fa-xmark"></i></div>
             <h3>Yeni Özel Gün Ekle</h3>
-            <input type="text" id="specialDayTitleInput" placeholder="Etkinlik Adı (örn: Özge Doğum Günü)">
+            
+            <input type="text" id="specialDayTitleInput" placeholder="Etkinlik Adı (örn: Özge'nin Doğum Günü)">
             <input type="text" id="specialDayDescInput" placeholder="Açıklama / Not">
             
             <div class="date-picker-group">
-                <label style="font-size:11px; color:#888; display:block; text-align:left; margin-bottom:4px;">Yıl, Ay ve Gün Seçin:</label>
-                <div style="display:flex; gap:6px; margin-bottom:12px;">
-                    <select id="selectYear" style="flex:1; padding:10px; border-radius:8px; border:2px solid var(--border-color); background:var(--card-bg); color:var(--text-color); font-size:13px;"></select>
-                    <select id="selectMonth" style="flex:1.2; padding:10px; border-radius:8px; border:2px solid var(--border-color); background:var(--card-bg); color:var(--text-color); font-size:13px;"></select>
-                    <select id="selectDay" style="flex:0.8; padding:10px; border-radius:8px; border:2px solid var(--border-color); background:var(--card-bg); color:var(--text-color); font-size:13px;"></select>
+                <label style="font-size:11px; color:#888; display:block; text-align:left; margin-bottom:6px;">Yıl, Ay ve Gün Seçin:</label>
+                <div style="display:flex; gap:6px; margin-bottom:15px;">
+                    <select id="selectYear" style="flex:1.2; padding:12px 8px; border-radius:10px; border:2px solid var(--border-color); background:var(--card-bg); color:var(--text-color); font-size:14px; font-family:inherit;"></select>
+                    <select id="selectMonth" style="flex:1.5; padding:12px 8px; border-radius:10px; border:2px solid var(--border-color); background:var(--card-bg); color:var(--text-color); font-size:14px; font-family:inherit;"></select>
+                    <select id="selectDay" style="flex:1; padding:12px 8px; border-radius:10px; border:2px solid var(--border-color); background:var(--card-bg); color:var(--text-color); font-size:14px; font-family:inherit;"></select>
                 </div>
             </div>
 
