@@ -2,328 +2,310 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#ff758c">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Sincap & Sevgilisi ❤️</title>
-    <!-- 🤎 Özel Kahverengi S Logosu (Favicon) -->
-    <link rel="icon" type="image/png" href="s_logo.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tuncay & Özge - Romantik Dünyamız</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- 🔥 FIREBASE KÜTÜPHANELERİ -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
-
-    <!-- ✨ 1. YENİ SPLASH / KARŞILAMA EKRANI -->
-    <div class="splash-screen" id="splashScreen">
+    <!-- Splash / Karşılama Ekranı -->
+    <div id="splashScreen" class="screen active">
         <div class="splash-content">
-            <div class="splash-logo-box">
-                <img src="s_logo.png" alt="S Logo" class="splash-s-logo">
-            </div>
-            <h1>Sincap & Özge</h1>
-            <p class="splash-slogan">"Bu Masala Giriş Yap"</p>
-            <button class="love-btn splash-enter-btn" onclick="splashGecisYap()">Giriş Yap ✨</button>
+            <div class="logo-badge animate-pulse">S</div>
+            <h1>Tuncay & Özge</h1>
+            <p class="subtitle">Bu Masala Giriş Yap</p>
+            <button id="startBtn" class="primary-btn">Giriş Yap <i class="fa-solid fa-arrow-right"></i></button>
         </div>
     </div>
 
-    <!-- 🔒 2. PIN GİRİŞ EKRANI -->
-    <div class="lock-screen ios-hidden" id="lockScreen">
-        <div class="lock-card" id="pinStage">
-            <div class="lock-icon">🔒</div>
-            <h2>Sadece İkimize Özel ❤️</h2>
-            <p>Devam etmek için 4 haneli pin kodumuzu gir:</p>
-
-            <div class="pin-container" id="pinContainer">
-                <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box" autocomplete="one-time-code">
-                <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box" autocomplete="one-time-code">
-                <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box" autocomplete="one-time-code">
-                <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box" autocomplete="one-time-code">
+    <!-- PIN Doğrulama Ekranı -->
+    <div id="pinScreen" class="screen">
+        <div class="pin-box">
+            <div class="back-btn" onclick="goScreen('splashScreen')"><i class="fa-solid fa-chevron-left"></i></div>
+            <h2>Gizli Şifre</h2>
+            <p>4 haneli PIN şifrenizi girin</p>
+            <div class="pin-dots">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
             </div>
-
-            <p id="passError" class="pass-error" style="display:none;">Hatalı şifre yavru sincabım! 🐿️</p>
-        </div>
-
-        <!-- 🎭 3. RUH HALİ & KİM OLUŞ GÖREVİ -->
-        <div class="lock-card ios-hidden" id="taskStage">
-            <div class="lock-icon" id="taskIcon">🎭</div>
-            <h2 id="taskTitle">Ruh Hali Görevi</h2>
-            <p id="taskDesc">Devam etmek için ruh halini seç:</p>
-
-            <div id="taskSliderGame" class="task-box">
-                <p style="font-size:11px; margin-bottom:6px; font-weight:500;">Sen kimsin?</p>
-                
-                <div style="display:flex; gap:10px; justify-content:center; margin-bottom:10px;">
-                    <button id="btnUser1" class="user-select-pill" onclick="selectUser('Tuncay')">👦 Tuncay</button>
-                    <button id="btnUser2" class="user-select-pill" onclick="selectUser('Özge')">🐿️ Özge</button>
-                </div>
-                <div id="userWarningBubble" class="warning-bubble" style="display:none;">Kim olduğunu seçmelisin! ⚠️</div>
-
-                <div id="moodStatusText" style="font-size:13px; font-weight:700; color:#ffdd59; margin-bottom:2px;">🥰 Çok Mutluyum!</div>
-                <div id="moodPercentBadge" style="font-size:9px; background:rgba(255,255,255,0.15); display:inline-block; padding:2px 6px; border-radius:8px; margin-bottom:8px; font-weight:600; color:#ffdd59;">%50</div>
-                
-                <input type="range" id="moodSlider" min="0" max="100" value="50" oninput="checkMoodSlider(this.value)">
-                <div style="display:flex; justify-content:space-between; font-size:9px; opacity:0.8; margin-top:3px;">
-                    <span>😡 Sinirli</span>
-                    <span>🥺 Üzgün</span>
-                    <span>🥰 Mutlu</span>
-                </div>
-                <button class="love-btn" style="margin-top:12px;" onclick="saveMoodAndEnter()">Kaydet & Giriş Yap 🗝️</button>
-                <button class="skip-btn-glass" onclick="kilitCoz()">Bu seferlik atla ➡️</button>
-            </div>
+            <input type="password" id="pinInput" maxlength="4" pattern="[0-9]*" inputmode="numeric">
+            <p id="pinError" class="error-msg"></p>
         </div>
     </div>
 
-    <!-- 🔔 ÜST BİLDİRİM BALONCUĞU -->
-    <div class="live-toast" id="liveToast">
-        <span id="toastText">Yeni bir bildirim var! 💌</span>
-    </div>
-
-    <!-- Arka plan kalpler -->
-    <div class="bg-animation" id="bgAnimation"></div>
-
-    <div class="main-wrapper">
-        <!-- 🎵 ÜST GELİŞMİŞ MÜZİK WIDGET'I (Seek Bar + Şarkı Sözü Tıklamalı) -->
-        <div class="top-music-widget" onclick="sarkiSozleriAcKapat()">
-            <audio id="bgMusic" src="sarkilarimiz/Ajda_Pekkan_Sen_Olurdun_Yine.mp3" loop></audio>
-            <div class="song-info">
-                <span class="music-icon">🎵</span>
-                <div class="song-text">
-                    <span class="song-title" id="songTitle">Sen Olurdun Yine</span>
-                    <span class="song-artist" id="songArtist">Ajda Pekkan (Sözler için dokun 📜)</span>
-                </div>
-            </div>
-            <div class="widget-controls" onclick="event.stopPropagation()">
-                <button id="playBtn" class="widget-btn-main" onclick="muzikOynatDuraklat()">▶️</button>
-                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.2" oninput="sesAyarla(this.value)" title="Ses">
-                <button id="muteBtn" class="widget-btn" onclick="sesSustur()">🔊</button>
-            </div>
-            <!-- Seek / İlerleme Çubuğu -->
-            <div class="music-progress-container" onclick="event.stopPropagation()">
-                <span id="currentTime" class="time-label">0:00</span>
-                <input type="range" id="songProgressBar" min="0" max="100" value="0" oninput="sarkiIlerle(this.value)">
-                <span id="totalTime" class="time-label">0:00</span>
-            </div>
-        </div>
-
-        <!-- 📸 WIDGET: Günün Anısı Köşesi -->
-        <div class="daily-photo-widget" id="dailyPhotoWidget" onclick="gununAnisinaGit()">
-            <div class="widget-badge">📸 Günün Anısı (Gitmek için tıkla)</div>
-            <img id="dailyWidgetImg" src="giris_sincaplar_gemini.jpg" alt="Günün Anısı">
-        </div>
-
-        <!-- Ana Kart -->
-        <div class="card">
-            <div class="profile-icon">
-                <img src="s_logo.png" alt="Logo" class="sincap-img">
-            </div>
-            <h1>Bizim Hikayemiz</h1>
-            <p class="subtitle">Birlikte geçen her an çok özel...</p>
-
-            <div class="counter-box">
-                <div class="time-unit"><span id="gun">0</span><small>Gün</small></div>
-                <div class="time-unit"><span id="saat">0</span><small>Saat</small></div>
-                <div class="time-unit"><span id="dakika">0</span><small>Dakika</small></div>
-                <div class="time-unit"><span id="saniye">0</span><small>Saniye</small></div>
-            </div>
-
-            <!-- 💖 HAREKETLİ DİKKAT ÇEKİCİ BUTON -->
-            <button class="love-btn pulse-love-btn" onclick="kalpPatlat()">Seni Seviyorum ❤️</button>
-
-            <!-- Menü Paneli -->
-            <div class="menu-panel" id="menuPanel">
-                <button class="menu-item" onclick="ozelGunlerAcKapat()">⏳ Özel Günlerimiz</button>
-                <button class="menu-item" onclick="sarkiListesiAcKapat()">🎵 Şarkı Listemiz</button>
-                <button class="menu-item" onclick="galeriAcKapat()">📸 Anı Galerimiz</button>
-                <button class="menu-item" onclick="todoAcKapat()">📋 Yapılacaklar Listesi</button>
-                <button class="menu-item" onclick="wheelAcKapat()">🎡 Aşk Çarkıfeleği</button>
-                <button class="menu-item" onclick="notlarAcKapat()">💌 Özel Notlar</button>
-                
-                <!-- ⚙️ YAN YANA SAĞLI SOLLU KÜÇÜK BUTONLAR -->
-                <div class="menu-row-double">
-                    <button class="menu-item menu-item-small" onclick="moodAcKapat()">🎭 Ruh Hali Log</button>
-                    <button class="menu-item menu-item-small" onclick="sifreDegistirModalAcKapat()">⚙️ PIN Değiştir</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 📜 ŞARKI SÖZLERİ MODALI -->
-    <div class="modal ios-modal" id="lyricsModal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="sarkiSozleriAcKapat()">&times;</span>
-            <h2>📜 Şarkı Sözleri</h2>
-            <div class="lyrics-box" id="lyricsContent">
-                <p><b>Sen Olurdun Yine</b></p>
-                <p>Gözlerinde kaybolduğum o gün,<br>Dünyanın en güzel rengiydi.<br>Birlikte attı kalbimiz bütün,<br>Her şarkının sonunda sen oldun...</p>
-                <p style="margin-top:10px; font-size:10px; opacity:0.8;">İkimize yazılan bu şarkı hiç bitmesin ❤️</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- ⏳ ÖZEL GÜNLER MODALI -->
-    <div class="modal ios-modal" id="ozelGunModal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="ozelGunlerAcKapat()">&times;</span>
-            <h2>⏳ Özel Günlerimiz</h2>
-            <div id="ozelGunList" class="song-list"></div>
-            <button class="add-song-trigger" onclick="ozelGunEkleModalAcKapat()">➕ Yeni Özel Gün Ekle</button>
-        </div>
-    </div>
-
-    <div class="modal ios-modal" id="addOzelGunModal">
-        <div class="modal-content" style="height:auto;">
-            <span class="close-btn" onclick="ozelGunEkleModalAcKapat()">&times;</span>
-            <h2>⏳ Özel Gün Ekle</h2>
-            <div class="add-song-box">
-                <input type="text" id="yeniGunBaslik" placeholder="Örn: Özge'nin Doğum Günü 🎂">
-                <input type="date" id="yeniGunTarih">
-                <button onclick="ozelGunEkle()">Özel Günü Kaydet</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 🎡 AŞK ÇARKIFELEĞİ MODALI (Direkt Çarka Tıklayarak Hızlı Dönüş) -->
-    <div class="modal ios-modal" id="wheelModal">
-        <div class="modal-content" style="height:auto;">
-            <span class="close-btn" onclick="wheelAcKapat()">&times;</span>
-            <h2>🎡 Aşk Çarkıfeleği</h2>
-            <p style="font-size:11px; opacity:0.8; margin-bottom:8px;">Çarka dokun ve kaderindeki sürprizi gör! 🎯</p>
+    <!-- Profil Seçimi & Ruh Hali Ekranı -->
+    <div id="profileScreen" class="screen">
+        <div class="profile-container">
+            <h2>Kim Konuşuyor?</h2>
+            <p>Lütfen profilini seç ve anlık ruh halini belirt</p>
             
-            <div class="wheel-container" id="wheelContainer" onclick="spinWheel()">
-                <div class="wheel-pointer">▼</div>
-                <div class="wheel-disk" id="wheelDisk"><span class="wheel-label">DOKUN 🎲</span></div>
-            </div>
-
-            <div class="surprise-card-box" id="surpriseCardBox" style="margin-top:10px;">
-                <span id="surpriseText" style="font-size:13px; font-weight:600; color:#ffdd59;">Hadi çarka dokun ve şansını dene! 🎁</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- 🎭 RUH HALİ LOG MODALI -->
-    <div class="modal ios-modal" id="moodModal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="moodAcKapat()">&times;</span>
-            <h2>🎭 Ruh Hali Geçmişimiz</h2>
-            <div id="moodList" class="song-list"></div>
-        </div>
-    </div>
-
-    <!-- 🎵 ŞARKI LİSTESİ MODALI -->
-    <div class="modal ios-modal" id="musicModal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="sarkiListesiAcKapat()">&times;</span>
-            <h2>🎵 Ortak Şarkı Listemiz</h2>
-            <div id="songList" class="song-list"></div>
-            <button class="add-song-trigger" onclick="sarkiEkleModalAcKapat()">➕ Yeni Şarkı Ekle</button>
-        </div>
-    </div>
-
-    <!-- 🎧 PLATFORM SEÇİM MODALI -->
-    <div class="modal ios-modal" id="platformSelectModal">
-        <div class="modal-content" style="height:auto;">
-            <span class="close-btn" onclick="platformModalAcKapat()">&times;</span>
-            <h2 id="selectedSongName">Şarkı Dinle</h2>
-            <p style="font-size: 11px; opacity:0.8; margin-bottom:10px;">Hangi uygulamada açmak istersin?</p>
-            <div class="add-song-box">
-                <button style="background: #1DB954;" onclick="openPlatform('spotify')">🟢 Spotify'da Aç</button>
-                <button style="background: #FF0000;" onclick="openPlatform('ytmusic')">🔴 YouTube Music'te Aç</button>
-                <button style="background: #FF0000; opacity:0.85;" onclick="openPlatform('youtube')">▶️ YouTube'da Aç</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 📋 YAPILACAKLAR MODALI -->
-    <div class="modal ios-modal" id="todoModal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="todoAcKapat()">&times;</span>
-            <h2>📋 Yapılacaklar Listemiz</h2>
-            <div id="todoList" class="song-list"></div>
-            <button class="add-song-trigger" onclick="todoEkleModalAcKapat()">➕ Yeni Plan Ekle</button>
-        </div>
-    </div>
-
-    <div class="modal ios-modal" id="addTodoModal">
-        <div class="modal-content" style="height:auto;">
-            <span class="close-btn" onclick="todoEkleModalAcKapat()">&times;</span>
-            <h2>📋 Plan / Hedef Ekle</h2>
-            <div class="add-song-box">
-                <input type="text" id="newTodoText" placeholder="Örn: Birlikte Kapadokya'ya gitmek 🎈">
-                <button onclick="todoEkle()">Listeye Ekle</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 💌 NOTLAR MODALI -->
-    <div class="modal ios-modal" id="notesModal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="notlarAcKapat()">&times;</span>
-            <h2>💌 Özel Notlarımız</h2>
-            <div id="notesList" class="song-list"></div>
-            <button class="add-song-trigger" onclick="notEkleModalAcKapat()">✍️ Yeni Not Ekle</button>
-        </div>
-    </div>
-
-    <div class="modal ios-modal" id="addSongModal">
-        <div class="modal-content" style="height:auto;">
-            <span class="close-btn" onclick="sarkiEkleModalAcKapat()">&times;</span>
-            <h2>🎵 Şarkı Ekle</h2>
-            <div class="add-song-box">
-                <input type="text" id="newSongName" placeholder="Şarkı / Sanatçı Adı">
-                <button onclick="sarkiEkle()">Listeye Ekle</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal ios-modal" id="addNoteModal">
-        <div class="modal-content" style="height:auto;">
-            <span class="close-btn" onclick="notEkleModalAcKapat()">&times;</span>
-            <h2>💌 Özel Not Ekle</h2>
-            <div class="add-song-box">
-                <textarea id="newNoteText" placeholder="Notunu yaz sevgilim..." rows="3"></textarea>
-                <button onclick="notEkle()">Notu Kaydet</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ⚙️ ŞİFRE DEĞİŞTİRME MODALI -->
-    <div class="modal ios-modal" id="changePassModal">
-        <div class="modal-content" style="height:auto;">
-            <span class="close-btn" onclick="sifreDegistirModalAcKapat()">&times;</span>
-            <h2>⚙️ PIN Şifresini Değiştir</h2>
-            <div class="add-song-box">
-                <input type="text" inputmode="numeric" pattern="[0-9]*" id="oldPassInput" maxlength="4" placeholder="Mevcut 4 Haneli PIN">
-                <div class="input-eye-wrapper">
-                    <input type="password" inputmode="numeric" pattern="[0-9]*" id="newPassInput" maxlength="4" placeholder="Yeni 4 Haneli PIN">
-                    <span class="eye-btn" onclick="yeniSifreleriGosterGizle(this)">👁️</span>
+            <div class="profile-cards">
+                <div class="profile-card" data-profile="Tuncay">
+                    <div class="avatar"><i class="fa-solid fa-user-tie"></i></div>
+                    <span>Tuncay</span>
                 </div>
-                <input type="password" inputmode="numeric" pattern="[0-9]*" id="confirmPassInput" maxlength="4" placeholder="Yeni PIN (Tekrar)">
-                <p id="changePassError" class="pass-error" style="display:none;"></p>
-                <button onclick="sifreGuncelle()">Şifreyi Kaydet</button>
+                <div class="profile-card" data-profile="Özge">
+                    <div class="avatar"><i class="fa-solid fa-heart"></i></div>
+                    <span>Özge</span>
+                </div>
+            </div>
+
+            <div class="mood-section">
+                <label>Anlık Ruh Halin:</label>
+                <div class="mood-slider-wrapper">
+                    <input type="range" id="moodSlider" min="1" max="5" value="3">
+                    <div id="moodEmoji" class="mood-emoji">😊</div>
+                </div>
+                <span id="moodText" class="mood-text">Mutlu / Huzurlu</span>
+            </div>
+
+            <button id="saveProfileBtn" class="primary-btn">Kaydet & Giriş Yap</button>
+            <div id="profileWarning" class="warning-tooltip">Kim olduğunu seçmelisin!</div>
+        </div>
+    </div>
+
+    <!-- Ana Uygulama Ekranı -->
+    <div id="mainAppScreen" class="screen">
+        <!-- Üst Bar & Gelişmiş Müzik Widget (İleri Sar, Oynat/Durdur, Ses Aç/Kapat) -->
+        <header class="app-header">
+            <div class="music-widget-full">
+                <div class="music-top-row">
+                    <div class="music-left-info" id="openMusicModal">
+                        <i class="fa-solid fa-music"></i>
+                        <div>
+                            <span class="song-title">Sen Olurdun Yine</span>
+                            <span class="artist-name">Ajda Pekkan</span>
+                        </div>
+                    </div>
+                    <div class="music-quick-controls">
+                        <button id="quickPlayPauseBtn"><i class="fa-solid fa-play"></i></button>
+                        <button id="quickMuteBtn"><i class="fa-solid fa-volume-high"></i></button>
+                    </div>
+                </div>
+                <!-- Mini İleri Sarma Çubuğu -->
+                <div class="seek-bar-mini-container">
+                    <input type="range" id="miniSeekBar" value="0" max="100" step="0.1">
+                </div>
+            </div>
+        </header>
+
+        <!-- İçerik Akışı -->
+        <main class="app-content">
+            
+            <!-- 1. ANA SAYFA -->
+            <div class="tab-content active" id="tab-home">
+                <div class="card relationship-card">
+                    <h3><i class="fa-solid fa-heart-pulse"></i> Birlikte Geçen Zamanımız</h3>
+                    <div class="counter-display" id="relationshipCounter">Hesaplanıyor...</div>
+                </div>
+
+                <div class="card memory-card" id="memoryCard">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-camera-retro"></i> Günün Anısı</h3>
+                        <span class="date-badge">Bugün</span>
+                    </div>
+                    <div class="memory-photo-wrapper">
+                        <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=600&auto=format&fit=crop&q=80" alt="Günün Anısı">
+                        <div class="photo-overlay">
+                            <p>"İlkbahar bahçesindeki o tatlı anımız..."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Küçültülmüş Aşk Çarkıfeleği -->
+                <div class="card wheel-card-compact">
+                    <div class="wheel-header-compact">
+                        <h3><i class="fa-solid fa-dharmachakra"></i> Aşk Çarkı</h3>
+                        <button id="spinWheelBtn" class="secondary-btn-sm">Çevir</button>
+                    </div>
+                    <div class="wheel-wrapper-sm">
+                        <div class="wheel-pointer-sm"></div>
+                        <div class="wheel-sm" id="loveWheel">
+                            <div class="slice" style="--i:1; background:#ff6b81;"><span>Kahve</span></div>
+                            <div class="slice" style="--i:2; background:#ff4757;"><span>Film</span></div>
+                            <div class="slice" style="--i:3; background:#2ed573;"><span>Öpücük</span></div>
+                            <div class="slice" style="--i:4; background:#1e90ff;"><span>Masaj</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <button class="pulse-btn" id="loveBtn">
+                        <i class="fa-solid fa-heart"></i> Seni Seviyorum ❤️
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. GALERİ (iOS Grid, Yeniler En Altta, Tıklayınca Tam Ekran) -->
+            <div class="tab-content" id="tab-gallery">
+                <div class="section-title-bar">
+                    <h2>Anı Galerimiz</h2>
+                    <button class="add-photo-btn" id="openUploadModal"><i class="fa-solid fa-plus"></i> Fotoğraf Ekle</button>
+                </div>
+                <div class="ios-gallery-grid" id="iosGalleryGrid">
+                    <!-- Dinamik olarak yeniler en altta eklenecek -->
+                    <div class="gallery-thumb" onclick="openLightbox('https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&q=80')">
+                        <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&q=80" alt="Galeri 1">
+                    </div>
+                    <div class="gallery-thumb" onclick="openLightbox('https://images.unsplash.com/photo-1494774157365-9e04c6720e47?w=800&q=80')">
+                        <img src="https://images.unsplash.com/photo-1494774157365-9e04c6720e47?w=400&q=80" alt="Galeri 2">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. ÖZEL GÜNLER / TAKVİM (Ay Değiştirme, Gün Seçip Not Ekleme, Artan Sıralama) -->
+            <div class="tab-content" id="tab-days">
+                <div class="section-title-bar">
+                    <h2>Özel Günlerimiz</h2>
+                </div>
+                
+                <div class="card calendar-card">
+                    <div class="calendar-header-nav">
+                        <button id="prevMonthBtn"><i class="fa-solid fa-chevron-left"></i></button>
+                        <span id="currentMonthYear">Ağustos 2026</span>
+                        <button id="nextMonthBtn"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-grid-header">
+                        <span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span><span>Paz</span>
+                    </div>
+                    <div class="calendar-grid-days" id="calendarDaysGrid"></div>
+                </div>
+
+                <div class="special-days-list" id="specialDaysList"></div>
+            </div>
+
+            <!-- 4. AYARLAR (Güvenli PIN Değiştirme, Göz Açma/Kapama) -->
+            <div class="tab-content" id="tab-settings">
+                <div class="section-title-bar">
+                    <h2>Ayarlar</h2>
+                </div>
+                <div class="settings-group">
+                    <div class="setting-item" id="openChangePinModal">
+                        <div class="setting-info">
+                            <i class="fa-solid fa-key"></i>
+                            <div>
+                                <h4>PIN Şifresini Değiştir</h4>
+                                <p>Güvenli şifre güncelleme</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fa-solid fa-bell"></i>
+                            <div>
+                                <h4>Canlı Bildirimler</h4>
+                                <p>Anlık ruh hali ve anı bildirimleri</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="notifToggle" checked>
+                            <span class="slider-round"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <i class="fa-solid fa-calendar-heart"></i>
+                            <div>
+                                <h4>İlişki Başlangıç Tarihi</h4>
+                                <p>15 Ağustos 2026</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-pen"></i>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Alt Navigasyon -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-tab="tab-home"><i class="fa-solid fa-house"></i><span>Ana Sayfa</span></button>
+            <button class="nav-item" data-tab="tab-gallery"><i class="fa-solid fa-images"></i><span>Galeri</span></button>
+            <button class="nav-item" data-tab="tab-days"><i class="fa-solid fa-calendar-days"></i><span>Özel Günler</span></button>
+            <button class="nav-item" data-tab="tab-settings"><i class="fa-solid fa-gear"></i><span>Ayarlar</span></button>
+        </nav>
+    </div>
+
+    <!-- Müzik Detay & Şarkı Sözleri Modalı -->
+    <div id="musicModal" class="modal">
+        <div class="modal-content glass">
+            <div class="close-modal" id="closeMusicModal"><i class="fa-solid fa-xmark"></i></div>
+            <h3>Ortak Şarkı Listemiz</h3>
+            <div class="player-controls-box">
+                <audio id="audioPlayer" src="Ajda_Pekkan_Sen_Olurdun_Yine.mp3"></audio>
+                <div class="song-details-lg">
+                    <h4>Sen Olurdun Yine</h4>
+                    <p>Ajda Pekkan</p>
+                </div>
+                <div class="seek-bar-container">
+                    <span id="currentTime">0:00</span>
+                    <input type="range" id="fullSeekBar" value="0" max="100" step="0.1">
+                    <span id="durationTime">3:45</span>
+                </div>
+                <div class="player-buttons">
+                    <button><i class="fa-solid fa-backward-step"></i></button>
+                    <button id="modalPlayPauseBtn" class="play-big"><i class="fa-solid fa-play"></i></button>
+                    <button><i class="fa-solid fa-forward-step"></i></button>
+                </div>
+                
+                <!-- Şarkı Sözleri Butonu -->
+                <button id="toggleLyricsBtn" class="secondary-btn" style="margin-bottom: 12px;"><i class="fa-solid fa-align-center"></i> Şarkı Sözlerini Göster</button>
+                <div id="lyricsContainer" class="lyrics-box" style="display: none;">
+                    <p>Gözlerim yollarda, kalbim sende...</p>
+                    <p>Bir rüzgar eser, aklımda sen...</p>
+                    <p>Yine sensiz bu akşam, sen olurdun yine...</p>
+                </div>
+
+                <div class="external-links">
+                    <a href="https://open.spotify.com" target="_blank" class="ext-btn spotify"><i class="fa-brands fa-spotify"></i> Spotify</a>
+                    <a href="https://music.youtube.com" target="_blank" class="ext-btn youtube"><i class="fa-brands fa-youtube"></i> YouTube</a>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- 📸 GALERİ MODALI -->
-    <div class="modal ios-modal" id="galleryModal">
+    <!-- PIN Değiştirme Modalı (Eski şifre + 2 yeni şifre + göz açma/kapama) -->
+    <div id="pinModal" class="modal">
         <div class="modal-content">
-            <span class="close-btn" onclick="galeriAcKapat()">&times;</span>
-            <h2>📸 Anı Galerimiz</h2>
-            <div style="margin-top:6px;">
-                <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="fotografYukle(event)">
-                <button class="add-song-trigger" onclick="document.getElementById('photoInput').click()">📸 Fotoğraf Yükle</button>
-                <p id="uploadStatus" style="font-size:10px; color:#ff4b5c; margin-top:3px; display:none;">Yükleniyor...</p>
+            <div class="close-modal" id="closePinModal"><i class="fa-solid fa-xmark"></i></div>
+            <h3>PIN Şifresini Değiştir</h3>
+            <div class="pin-change-form">
+                <input type="password" id="oldPinInput" placeholder="Mevcut PIN (1508)" maxlength="4" pattern="[0-9]*" inputmode="numeric">
+                
+                <div class="password-field-wrapper">
+                    <input type="password" id="newPinInput1" placeholder="Yeni 4 Haneli PIN" maxlength="4" pattern="[0-9]*" inputmode="numeric">
+                    <i class="fa-solid fa-eye toggle-password" id="togglePasswordBtn"></i>
+                </div>
+                <input type="password" id="newPinInput2" placeholder="Yeni PIN (Tekrar)" maxlength="4" pattern="[0-9]*" inputmode="numeric">
+                
+                <p id="pinChangeError" class="error-msg"></p>
+                <button id="saveNewPinBtn" class="primary-btn" style="margin-top: 10px;">Şifreyi Kaydet</button>
             </div>
-            <div class="gallery-grid" id="galleryGrid"></div>
         </div>
     </div>
 
-    <!-- 🔍 BÜYÜK RESİM LIGHTBOX -->
-    <div class="lightbox" id="lightbox" onclick="lightboxKapat()">
-        <img id="lightboxImg" src="" alt="Büyük Görsel">
+    <!-- Fotoğraf Tam Ekran (Lightbox) Modalı -->
+    <div id="lightboxModal" class="modal" onclick="closeLightbox()">
+        <div class="lightbox-content">
+            <img id="lightboxImg" src="" alt="Tam Ekran Önizleme">
+        </div>
+    </div>
+
+    <!-- Takvim Gün Not Ekleme Modalı -->
+    <div id="dayNoteModal" class="modal">
+        <div class="modal-content">
+            <div class="close-modal" onclick="closeDayNoteModal()"><i class="fa-solid fa-xmark"></i></div>
+            <h3 id="selectedDateTitle">Özel Gün Ekle</h3>
+            <input type="text" id="noteTitleInput" placeholder="Etkinlik Başlığı (Örn: Yıldönümümüz)" style="width:100%; padding:10px; margin:10px 0; border:1px solid #ddd; border-radius:8px;">
+            <input type="text" id="noteDescInput" placeholder="Açıklama" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ddd; border-radius:8px;">
+            <button id="saveDayNoteBtn" class="primary-btn">Kaydet</button>
+        </div>
     </div>
 
     <script src="script.js"></script>

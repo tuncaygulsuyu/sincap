@@ -1,339 +1,856 @@
-html {
+:root {
+    --primary: #ff4757;
+    --primary-light: #ff6b81;
+    --bg-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+    --text-color: #2f3542;
+    --border-radius: 20px;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+* {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    background: transparent;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
-    margin: 0;
-    padding: 0;
-    background: linear-gradient(-45deg, #ff758c, #ff7eb3, #a1c4fd, #c2e9fb, #fbc531, #00d2d3);
-    background-size: 600% 600%;
-    animation: gradientBG 30s ease infinite;
-    width: 100vw;
-    height: 100vh;
+    background: var(--bg-gradient);
+    color: var(--text-color);
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    position: fixed;
-    box-sizing: border-box;
     overflow: hidden;
-    -webkit-font-smoothing: antialiased;
-    transform: translateZ(0);
 }
 
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+.screen {
+    position: absolute;
+    width: 100%;
+    max-width: 430px;
+    height: 100vh;
+    max-height: 932px;
+    background: #f8f9fa;
+    display: none;
+    flex-direction: column;
+    box-shadow: var(--shadow);
+    overflow: hidden;
 }
 
-body.modal-open { overflow: hidden !important; }
-
-/* ✨ SPLASH EKRANI */
-.splash-screen {
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(15, 15, 15, 0.96);
-    backdrop-filter: blur(25px);
-    z-index: 10000;
+.screen.active {
     display: flex;
+}
+
+@media(min-width: 434px) {
+    .screen {
+        border-radius: 40px;
+        border: 12px solid #2f3542;
+        height: 88vh;
+    }
+}
+
+/* Splash Ekranı */
+#splashScreen {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%);
     justify-content: center;
     align-items: center;
-    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.5s ease;
+    text-align: center;
+    padding: 30px;
 }
-.splash-screen.gizle { opacity: 0; visibility: hidden; pointer-events: none; }
-.splash-content { text-align: center; color: white; width: 85%; max-width: 300px; }
-.splash-logo-box { width: 75px; height: 75px; margin: 0 auto 12px auto; background: rgba(255,255,255,0.1); border-radius: 20px; border: 1px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
-.splash-s-logo { width: 45px; height: 45px; object-fit: contain; }
-.splash-content h1 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-.splash-slogan { font-size: 11px; opacity: 0.85; margin-bottom: 18px; font-style: italic; color: #ffdd59; }
-.splash-enter-btn { width: 100%; font-size: 12px; padding: 10px; border-radius: 25px; background: linear-gradient(135deg, #ff4b5c, #ff758c); color: white; border: none; font-weight: 600; cursor: pointer; box-shadow: 0 6px 20px rgba(255,75,92,0.4); }
 
-/* 🔔 CANLI BİLDİRİM TOAST */
-.live-toast {
-    position: fixed;
-    top: 15px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-100px);
-    background: rgba(20, 20, 20, 0.9);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255,255,255,0.25);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 30px;
-    font-size: 10px;
+.logo-badge {
+    width: 90px;
+    height: 90px;
+    background: white;
+    color: var(--primary);
+    font-size: 45px;
+    font-weight: 700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 10px 25px rgba(255, 71, 87, 0.3);
+}
+
+.splash-content h1 {
+    font-size: 28px;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 15px;
+    margin-bottom: 35px;
+}
+
+.primary-btn {
+    background: #fff;
+    color: var(--primary);
+    border: none;
+    padding: 15px 35px;
+    font-size: 16px;
     font-weight: 600;
-    z-index: 15000;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    white-space: nowrap;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    width: 100%;
 }
-.live-toast.goster { transform: translateX(-50%) translateY(0); }
 
-/* 🎵 GELİŞMİŞ MÜZİK WIDGET'I */
-.top-music-widget {
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 20px;
+/* PIN Ekranı */
+.pin-box {
+    padding: 40px 25px;
+    text-align: center;
+    position: relative;
+    margin: auto;
+    width: 100%;
+}
+
+.back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 18px;
+    cursor: pointer;
+    color: #57606f;
+}
+
+.pin-dots {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 30px 0;
+}
+
+.dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+}
+
+.dot.filled {
+    background: var(--primary);
+}
+
+#pinInput {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.error-msg {
+    color: #ff4757;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+/* Profil Ekranı */
+.profile-container {
+    padding: 30px 20px;
+    margin: auto;
+    width: 100%;
+    text-align: center;
+}
+
+.profile-cards {
+    display: flex;
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.profile-card {
+    flex: 1;
+    background: white;
+    border: 2px solid #dfe4ea;
+    border-radius: var(--border-radius);
+    padding: 20px;
+    cursor: pointer;
+}
+
+.profile-card.selected {
+    border-color: var(--primary);
+    background: rgba(255, 71, 87, 0.05);
+}
+
+.profile-card .avatar {
+    font-size: 32px;
+    color: var(--primary);
+    margin-bottom: 10px;
+}
+
+.mood-section {
+    background: white;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.mood-slider-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+#moodSlider {
+    flex: 1;
+    accent-color: var(--primary);
+}
+
+.mood-emoji {
+    font-size: 28px;
+}
+
+.warning-tooltip {
+    background: #ff4757;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 10px;
+    font-size: 13px;
+    margin-top: 15px;
+    display: none;
+}
+
+/* Üst Bar & Gelişmiş Müzik Widget */
+.app-header {
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
     padding: 8px 12px;
+    z-index: 10;
+}
+
+.music-widget-full {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    width: 100%;
-    box-sizing: border-box;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
-    flex-shrink: 0;
-    cursor: pointer;
-}
-.top-music-widget:active { transform: scale(0.98); transition: transform 0.2s ease; }
-
-.song-info { display: flex; align-items: center; gap: 6px; width: 100%; min-width: 0; }
-.song-text { display: flex; flex-direction: column; width: 100%; overflow: hidden; }
-.song-title { color: white; font-size: 10px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.song-artist { color: rgba(255, 255, 255, 0.7); font-size: 8px; font-weight: 300; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.widget-controls { display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.08); padding: 2px 6px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.12); align-self: flex-end; margin-top: -24px; }
-.widget-btn-main { background: #ff4b5c; border: none; color: white; width: 22px !important; height: 22px !important; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 8px !important; padding: 0 !important; }
-.widget-btn { background: rgba(255, 255, 255, 0.15); border: none; color: white; width: 18px !important; height: 18px !important; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 7px !important; padding: 0 !important; }
-#volumeSlider { width: 40px; height: 3px; accent-color: #ff4b5c; cursor: pointer; }
-
-/* Seek / İlerleme Çubuğu */
-.music-progress-container { display: flex; align-items: center; gap: 6px; width: 100%; margin-top: 2px; }
-.time-label { font-size: 7px; color: rgba(255,255,255,0.7); width: 22px; text-align: center; font-weight: 500; }
-#songProgressBar { flex: 1; height: 3px; accent-color: #ff4b5c; cursor: pointer; background: rgba(255,255,255,0.2); border-radius: 2px; }
-
-/* 📸 GÜNÜN ANISI WIDGET */
-.daily-photo-widget {
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: #f8f9fa;
+    padding: 8px 12px;
     border-radius: 14px;
-    padding: 5px;
-    width: 100%;
-    box-sizing: border-box;
-    position: relative;
-    cursor: pointer;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.25);
-    flex-shrink: 0;
-}
-.widget-badge { position: absolute; top: 10px; left: 10px; background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(8px); color: #ffdd59; font-size: 8px; font-weight: 700; padding: 2px 6px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.2); z-index: 2; }
-#dailyWidgetImg { width: 100%; height: 85px; object-fit: cover; border-radius: 10px; display: block; transform: scaleX(-1); }
-
-/* 💖 HAREKETLİ PULSE "SENİ SEVİYORUM" BUTONU */
-.pulse-love-btn {
-    animation: pulseLove 1.8s infinite ease-in-out;
-}
-@keyframes pulseLove {
-    0% { transform: scale(1); box-shadow: 0 5px 15px rgba(231,60,126,0.3); }
-    50% { transform: scale(1.04); box-shadow: 0 8px 25px rgba(231,60,126,0.6); }
-    100% { transform: scale(1); box-shadow: 0 5px 15px rgba(231,60,126,0.3); }
+    border: 1px solid #eee;
 }
 
-/* 🔒 KİLİT EKRANI */
-.lock-screen {
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(15, 15, 15, 0.95);
-    backdrop-filter: blur(20px);
-    z-index: 9999;
+.music-top-row {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    transition: opacity 0.4s ease, visibility 0.4s ease;
 }
-.lock-screen.cozuldu { opacity: 0; visibility: hidden; pointer-events: none; }
-.ios-hidden { display: none !important; }
 
-.lock-card {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 20px 16px;
-    border-radius: 20px;
+.music-left-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    flex: 1;
+}
+
+.music-left-info i {
+    color: var(--primary);
+    font-size: 16px;
+}
+
+.song-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-color);
+    display: block;
+}
+
+.artist-name {
+    font-size: 10px;
+    font-weight: 300;
+    color: #666;
+    display: block;
+}
+
+.music-quick-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.music-quick-controls button {
+    background: white;
+    border: 1px solid #ddd;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    color: var(--primary);
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.seek-bar-mini-container {
+    margin-top: 6px;
+    width: 100%;
+}
+
+.seek-bar-mini-container input {
+    width: 100%;
+    height: 4px;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+/* Ana İçerik Akışı */
+.app-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    padding-bottom: 85px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+.card h3 {
+    font-size: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary);
+}
+
+/* İlişki Sayaç */
+.relationship-card .counter-display {
+    font-size: 14px;
+    font-weight: 600;
     text-align: center;
-    color: white;
-    width: 85%;
-    max-width: 300px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    color: #333;
+    padding: 5px 0;
 }
-.lock-icon { font-size: 28px; margin-bottom: 4px; }
-.lock-card h2 { font-size: 15px; margin-bottom: 4px; }
-.lock-card p { font-size: 10px; opacity: 0.8; margin-bottom: 12px; }
 
-.pin-container { display: flex; justify-content: center; gap: 6px; margin-bottom: 8px; }
-.pin-box { width: 35px; height: 43px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.25); background: rgba(0, 0, 0, 0.35); color: #ff4b5c; font-size: 18px; font-weight: 700; text-align: center; outline: none; }
-.pin-box:focus { border-color: #ff4b5c; background: rgba(255, 255, 255, 0.1); }
+/* Günün Anısı */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
 
-/* Yuvarlağımsı ve Belirgin Profil Seçim Butonları */
-.user-select-pill {
-    background: rgba(255, 255, 255, 0.12);
-    border: 2px solid rgba(255, 255, 255, 0.25);
+.date-badge {
+    font-size: 11px;
+    color: #888;
+}
+
+.memory-photo-wrapper {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 150px;
+}
+
+.memory-photo-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
     color: white;
-    padding: 8px 14px;
-    border-radius: 20px;
+    padding: 10px;
+    font-size: 12px;
+}
+
+/* Küçültülmüş Aşk Çarkıfeleği */
+.wheel-card-compact {
+    padding: 12px 15px;
+}
+
+.wheel-header-compact {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.secondary-btn-sm {
+    background: #f1f2f6;
+    color: #57606f;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 8px;
     font-size: 11px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.25s ease;
 }
-.user-select-pill.active {
-    background: #ff4b5c;
-    border-color: #ff4b5c;
-    box-shadow: 0 4px 15px rgba(255,75,92,0.4);
+
+.wheel-wrapper-sm {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    margin: 0 auto;
+}
+
+.wheel-pointer-sm {
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 10px solid #2f3542;
+    z-index: 10;
+}
+
+.wheel-sm {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+    border: 3px solid #dfe4ea;
+    transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+}
+
+.slice {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    transform-origin: 100% 100%;
+    left: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: white;
+}
+.slice:nth-child(1) { transform: rotate(0deg) skewY(-30deg); }
+.slice:nth-child(2) { transform: rotate(90deg) skewY(-30deg); }
+.slice:nth-child(3) { transform: rotate(180deg) skewY(-30deg); }
+.slice:nth-child(4) { transform: rotate(270deg) skewY(-30deg); }
+
+/* Nabız Buton */
+.quick-actions {
+    margin-top: 10px;
+}
+
+.pulse-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 12px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+}
+
+/* iOS Galeri (Küçük kareler yan yana, yeniler en altta, lightbox) */
+.section-title-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.section-title-bar h2 {
+    font-size: 16px;
+    color: var(--text-color);
+}
+
+.add-photo-btn {
+    background: rgba(255, 71, 87, 0.1);
+    color: var(--primary);
+    border: none;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.ios-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    display: flex;
+    flex-direction: column; /* Akışı esnetiyoruz */
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.gallery-thumb {
+    aspect-ratio: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #ddd;
+}
+
+.gallery-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: 0.2s;
+}
+
+.gallery-thumb img:hover {
     transform: scale(1.05);
 }
 
-/* Uyarı Baloncuğu & Ekran Titreme */
-.warning-bubble {
-    background: #ff4b5c;
-    color: white;
-    font-size: 9px;
+/* Takvim & Özel Günler */
+.calendar-card {
+    background: white;
+    padding: 15px;
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
+}
+
+.calendar-header-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
     font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 12px;
+}
+
+.calendar-header-nav button {
+    background: #f1f2f6;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #57606f;
+}
+
+.calendar-grid-header, .calendar-grid-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 11px;
+}
+
+.calendar-grid-header {
+    color: #999;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.calendar-grid-days span {
+    padding: 8px 0;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.calendar-grid-days span:hover {
+    background: rgba(255, 71, 87, 0.1);
+}
+
+.calendar-grid-days span.has-event {
+    background: rgba(255, 71, 87, 0.2);
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.special-days-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.special-day-item {
+    background: white;
+    padding: 12px 15px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.special-day-info h4 {
+    font-size: 13px;
+    color: var(--text-color);
+}
+
+.special-day-info p {
+    font-size: 11px;
+    color: #888;
+}
+
+.special-day-badge {
+    font-size: 11px;
+    background: rgba(255, 71, 87, 0.1);
+    color: var(--primary);
     padding: 4px 8px;
     border-radius: 8px;
-    margin: 4px auto;
-    display: inline-block;
-    animation: bounceBubble 0.4s infinite alternate;
-}
-@keyframes bounceBubble {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(-3px); }
+    font-weight: 600;
 }
 
-.screen-shake {
-    animation: shakeCard 0.3s ease-in-out;
-}
-@keyframes shakeCard {
-    0%, 100% { transform: translateX(0); }
-    20%, 60% { transform: translateX(-6px); }
-    40%, 80% { transform: translateX(6px); }
+/* Ayarlar & Şifre Değiştirme */
+.settings-group {
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
 }
 
-#moodSlider { width: 100%; accent-color: #ff4b5c; cursor: pointer; }
-.skip-btn-glass { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.25); color: rgba(255, 255, 255, 0.85); font-size: 10px; padding: 6px 12px; border-radius: 15px; cursor: pointer; margin-top: 8px; backdrop-filter: blur(8px); width: 100%; box-sizing: border-box; }
-.pass-error { color: #ff6b6b !important; font-size: 10px !important; margin-top: 6px !important; }
-
-/* 🎴 ANA KART & WIDGETLAR */
-.main-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; z-index: 10; width: 100%; max-width: 380px; height: 100vh; padding: 10px; box-sizing: border-box; }
-.card { background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 14px; border-radius: 18px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); text-align: center; color: #ffffff; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; flex-shrink: 0; }
-.sincap-img { width: 55px !important; height: 55px !important; object-fit: contain !important; border-radius: 16px !important; border: 2px solid rgba(255, 255, 255, 0.8) !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important; margin: 0 auto 4px auto !important; display: block !important; background: rgba(255,255,255,0.15); padding: 3px; }
-
-h1 { font-size: 15px; font-weight: 700; margin: 2px 0; }
-.subtitle { font-size: 9px; opacity: 0.95; margin-bottom: 6px; }
-
-.counter-box { display: flex; justify-content: space-between; gap: 4px; margin-bottom: 6px; }
-.time-unit { background: rgba(0, 0, 0, 0.25); padding: 5px 3px; border-radius: 8px; flex: 1; border: 1px solid rgba(255, 255, 255, 0.15); }
-.time-unit span { display: block; font-size: 12px; font-weight: 700; }
-.time-unit small { font-size: 6px; text-transform: uppercase; opacity: 0.9; font-weight: 600; }
-
-.love-btn { background: white; color: #e73c7e; border: none; padding: 7px 14px; font-size: 10px; font-weight: 600; border-radius: 30px; cursor: pointer; box-shadow: 0 5px 12px rgba(0,0,0,0.15); width: 100%; }
-
-.menu-panel { max-height: 0; overflow-y: auto; transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease; opacity: 0; display: flex; flex-direction: column; gap: 3px; margin-top: 0; -webkit-overflow-scrolling: touch; }
-.menu-panel.acik { max-height: 200px; opacity: 1; margin-top: 6px; padding-bottom: 4px; }
-.menu-panel::-webkit-scrollbar { width: 3px; }
-.menu-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
-
-.menu-item { background: rgba(255, 255, 255, 0.16); border: 1px solid rgba(255, 255, 255, 0.22); color: white; padding: 5px 10px; border-radius: 8px; font-size: 10px; font-weight: 600; cursor: pointer; flex-shrink: 0; transition: background 0.2s ease; }
-.menu-item:active { background: rgba(255,255,255,0.3); }
-
-/* Ruh Hali & PIN Değiştir Sağlı Sollu Satır */
-.menu-row-double { display: flex; gap: 4px; width: 100%; margin-top: 1px; }
-.menu-item-small { flex: 1; padding: 4px 6px !important; font-size: 8px !important; opacity: 0.9; border-radius: 6px !important; margin: 0 !important; background: rgba(255, 255, 255, 0.1) !important; text-align: center; }
-
-/* 🎯 EKRANIN TAM ORTASINDA BELİREN IPHONE / iOS TARZI MODALLAR */
-.modal {
-    position: fixed; 
-    top: 0; left: 0; 
-    width: 100vw; height: 100vh;
-    background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(12px);
-    z-index: 2000;
-    display: flex; 
-    justify-content: center; 
-    align-items: center; /* Tam ortalama */
-    opacity: 0; visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 15px;
-    box-sizing: border-box;
+    border-bottom: 1px solid #f1f2f6;
+    cursor: pointer;
 }
-.modal.acik { opacity: 1; visibility: visible; }
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.setting-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.setting-info i {
+    font-size: 18px;
+    color: var(--primary);
+}
+
+.setting-info h4 {
+    font-size: 13px;
+    color: var(--text-color);
+}
+
+.setting-info p {
+    font-size: 11px;
+    color: #888;
+}
+
+.pin-change-form input {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.password-field-wrapper {
+    position: relative;
+}
+
+.password-field-wrapper input {
+    margin-bottom: 0;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #888;
+}
+
+/* Toggle Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider-round {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .3s;
+    border-radius: 24px;
+}
+
+.slider-round:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider-round { background-color: var(--primary); }
+input:checked + .slider-round:before { transform: translateX(20px); }
+
+/* Alt Navigasyon */
+.bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+}
+
+.nav-item {
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    color: #a4b0be;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.nav-item i { font-size: 16px; }
+.nav-item.active { color: var(--primary); }
+
+/* Modaller */
+.modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    z-index: 100;
+}
+
+.modal.active { display: flex; }
 
 .modal-content {
-    background: rgba(20, 20, 20, 0.96);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    padding: 16px 14px;
-    border-radius: 20px;
+    background: white;
     width: 100%;
-    max-width: 320px;
-    max-height: 75vh;
-    height: auto;
-    text-align: center;
-    color: white;
+    max-width: 330px;
+    padding: 20px;
+    border-radius: var(--border-radius);
     position: relative;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
-    transform: scale(0.85); /* Ortadan büyüme efekti için küçültüldü */
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); /* iOS Spring hissi */
-    display: flex; 
-    flex-direction: column;
-    box-sizing: border-box;
+    text-align: center;
+}
+
+.close-modal {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    color: #a4b0be;
+}
+
+.lightbox-content img {
+    max-width: 90%;
+    max-height: 80vh;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.lyrics-box {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    color: #57606f;
+    margin-bottom: 15px;
+    max-height: 120px;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-}
-.modal.acik .modal-content { transform: scale(1); } /* Ortada tam boyuta gelme */
-
-.close-btn { position: absolute; top: 10px; right: 14px; font-size: 20px; cursor: pointer; color: rgba(255, 255, 255, 0.7); z-index: 10; }
-
-.input-eye-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
-.input-eye-wrapper input { width: 100% !important; padding-right: 35px !important; box-sizing: border-box !important; }
-.eye-btn { position: absolute; right: 10px; cursor: pointer; font-size: 14px; opacity: 0.8; }
-
-.song-list { display: flex; flex-direction: column; gap: 5px; max-height: 40vh; overflow-y: auto; margin-top: 10px; text-align: left; -webkit-overflow-scrolling: touch; }
-.song-item { background: rgba(255, 255, 255, 0.12); padding: 8px 10px; border-radius: 8px; font-size: 10px; color: white; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255, 255, 255, 0.1); flex-shrink: 0; }
-.song-title-click { flex: 1; cursor: pointer; margin-right: 6px; }
-.delete-song-btn { background: none; border: none; cursor: pointer; font-size: 11px; opacity: 0.7; padding: 3px; }
-
-.add-song-box { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; width: 100%; box-sizing: border-box; }
-.add-song-box input, .add-song-box textarea { width: 100%; box-sizing: border-box; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 8px; color: white; font-size: 11px; outline: none; }
-.add-song-box button, .add-song-trigger { background: #ff4b5c; border: none; color: white; padding: 8px; border-radius: 8px; font-weight: 600; font-size: 11px; cursor: pointer; width: 100%; box-sizing: border-box; flex-shrink: 0; margin-top: 6px; }
-
-.lyrics-box { background: rgba(255,255,255,0.08); padding: 12px; border-radius: 12px; font-size: 11px; line-height: 1.5; text-align: center; border: 1px solid rgba(255,255,255,0.15); max-height: 40vh; overflow-y: auto; margin-top: 8px; }
-
-/* Çarkıfelek Tasarımı */
-.wheel-container { position: relative; width: 100px; height: 100px; margin: 8px auto; display: flex; justify-content: center; align-items: center; cursor: pointer; }
-.wheel-pointer { position: absolute; top: -6px; z-index: 10; color: #ff4b5c; font-size: 16px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
-.wheel-disk { width: 100%; height: 100%; border-radius: 50%; background: conic-gradient(#ff4b5c, #ffdd59, #23a6d5, #23d5ab, #e73c7e, #ff4b5c); border: 3px solid rgba(255,255,255,0.9); display: flex; justify-content: center; align-items: center; transition: transform 3s cubic-bezier(0.15, 0.9, 0.2, 1); box-shadow: 0 5px 15px rgba(0,0,0,0.4); }
-.wheel-label { background: rgba(0,0,0,0.75); padding: 5px 8px; border-radius: 50%; font-size: 8px; font-weight: 700; color: white; border: 2px solid white; }
-
-.surprise-card-box { background: rgba(255, 255, 255, 0.12); border: 1px dashed rgba(255, 255, 255, 0.3); border-radius: 14px; padding: 10px; min-height: 45px; display: flex; justify-content: center; align-items: center; text-align: center; }
-
-/* Galeri & Yanıp Sönme (Flash) Efekti */
-.gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 10px; max-height: 40vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.gallery-card { position: relative; width: 100%; height: 85px; border-radius: 10px; overflow: hidden; flex-shrink: 0; transition: transform 0.2s ease; }
-.gallery-card img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; transform: scaleX(-1); }
-.delete-photo-btn { position: absolute; top: 4px; right: 4px; background: rgba(0, 0, 0, 0.6); border: none; color: white; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 9px; }
-
-.flash-highlight {
-    animation: flashCard 0.8s ease 3;
-    border: 2px solid #ffdd59 !important;
-    box-shadow: 0 0 15px #ffdd59 !important;
-}
-@keyframes flashCard {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(1.05); }
+    line-height: 1.5;
 }
 
-.lightbox { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.95); z-index: 3000; justify-content: center; align-items: center; }
-.lightbox.acik { display: flex; }
-.lightbox img { max-width: 90%; max-height: 80%; border-radius: 12px; }
+.seek-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #888;
+    margin: 15px 0;
+}
 
-.song-list::-webkit-scrollbar, .gallery-grid::-webkit-scrollbar, .modal-content::-webkit-scrollbar { width: 3px; }
-.song-list::-webkit-scrollbar-thumb, .gallery-grid::-webkit-scrollbar-thumb, .modal-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
+.seek-bar-container input {
+    flex: 1;
+    accent-color: var(--primary);
+}
 
-.heart { position: absolute; color: rgba(255, 255, 255, 0.75); font-size: 15px; user-select: none; pointer-events: none; animation: moveHeart 5s linear infinite; }
-@keyframes moveHeart { 0% { transform: translateY(100vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; } }
+.player-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.player-buttons button {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #57606f;
+    cursor: pointer;
+}
+
+.player-buttons .play-big {
+    width: 45px;
+    height: 45px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.external-links {
+    display: flex;
+    gap: 8px;
+}
+
+.ext-btn {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+}
+
+.ext-btn.spotify { background: #1DB954; }
+.ext-btn.youtube { background: #FF0000; }

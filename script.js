@@ -1,682 +1,339 @@
-// 1. Firebase Yapılandırması
-const firebaseConfig = {
-    apiKey: "AIzaSyAER4JxoS772x2eDkRhIj_xtzcJXy9SpU0",
-    authDomain: "sincap-app-92914.firebaseapp.com",
-    projectId: "sincap-app-92914",
-    storageBucket: "sincap-app-92914.firebasestorage.app",
-    messagingSenderId: "646513752342",
-    appId: "1:646513752342:web:d5ac8ed855c4e3520af837",
-    measurementId: "G-XBS4C7K40G"
-};
-
-if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-const db = firebase.firestore();
-
-const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/kokuno0e/image/upload";
-const CLOUDINARY_PRESET = "sincap_cloud";
-
-let OZEL_SIFRE = localStorage.getItem("sincapOzelSifre") || "1508"; 
-let aktifKullanici = localStorage.getItem("sincapAktifKullanici") || "";
-
-// Splash -> PIN Ekranı Geçişi
-function splashGecisYap() {
-    document.getElementById("splashScreen").classList.add("gizle");
-    document.getElementById("lockScreen").classList.remove("ios-hidden");
-    setTimeout(() => { pinInputs[0].focus(); }, 100);
+function goScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
 }
 
-// PIN Kontrolü ve Otomatik Klavye Odaklanma
-const pinInputs = document.querySelectorAll('.pin-box');
-const pinStage = document.getElementById("pinStage");
-const taskStage = document.getElementById("taskStage");
-const lockScreen = document.getElementById("lockScreen");
-const errorMsg = document.getElementById("passError");
+// Splash Giriş
+document.getElementById('startBtn').addEventListener('click', () => {
+    goScreen('pinScreen');
+    document.getElementById('pinInput').focus();
+});
 
-pinInputs.forEach((input, index) => {
-    input.addEventListener('input', () => {
-        input.value = input.value.replace(/[^0-9]/g, '');
-        if (input.value !== '') {
-            if (index < pinInputs.length - 1) {
-                setTimeout(() => { pinInputs[index + 1].focus(); }, 10);
-            } else {
-                sifreKontrol();
-            }
-        }
+// PIN Doğrulama
+let currentPin = localStorage.getItem('sincapPin') || "1508";
+const pinInput = document.getElementById('pinInput');
+const dots = document.querySelectorAll('.dot');
+const pinError = document.getElementById('pinError');
+
+document.getElementById('pinScreen').addEventListener('click', () => pinInput.focus());
+
+pinInput.addEventListener('input', (e) => {
+    const val = e.target.value;
+    dots.forEach((dot, index) => {
+        if (index < val.length) dot.classList.add('filled');
+        else dot.classList.remove('filled');
     });
 
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Backspace' && input.value === '' && index > 0) {
-            setTimeout(() => { pinInputs[index - 1].focus(); }, 10);
+    if (val.length === 4) {
+        if (val === currentPin) {
+            pinError.textContent = "";
+            setTimeout(() => goScreen('profileScreen'), 200);
+        } else {
+            pinError.textContent = "Hatalı PIN! Tekrar dene.";
+            setTimeout(() => {
+                pinInput.value = "";
+                dots.forEach(d => d.classList.remove('filled'));
+            }, 400);
         }
+    }
+});
+
+// Profil Seçimi & Ruh Hali
+let selectedProfile = null;
+const profileCards = document.querySelectorAll('.profile-card');
+const warningTooltip = document.getElementById('profileWarning');
+
+profileCards.forEach(card => {
+    card.addEventListener('click', () => {
+        profileCards.forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectedProfile = card.getAttribute('data-profile');
+        warningTooltip.style.display = 'none';
     });
 });
 
-function sifreKontrol() {
-    let girilenSifre = "";
-    pinInputs.forEach(input => girilenSifre += input.value);
-
-    if (girilenSifre === OZEL_SIFRE) {
-        errorMsg.style.display = "none";
-        pinStage.classList.add("ios-hidden");
-        taskStage.classList.remove("ios-hidden");
-    } else {
-        errorMsg.style.display = "block";
-        pinInputs.forEach(input => input.value = "");
-        pinInputs[0].focus();
-    }
-}
-
-// Şifre Değiştirme
-function yeniSifreleriGosterGizle(eyeBtn) {
-    const newPass = document.getElementById("newPassInput");
-    const confirmPass = document.getElementById("confirmPassInput");
-    if (newPass.type === "password") {
-        newPass.type = "text"; confirmPass.type = "text"; eyeBtn.innerText = "🙈";
-    } else {
-        newPass.type = "password"; confirmPass.type = "password"; eyeBtn.innerText = "👁️";
-    }
-}
-
-function sifreDegistirModalAcKapat() {
-    toggleModal("changePassModal");
-    document.getElementById("changePassError").style.display = "none";
-}
-
-function sifreGuncelle() {
-    const oldPass = document.getElementById("oldPassInput").value;
-    const newPass = document.getElementById("newPassInput").value;
-    const confirmPass = document.getElementById("confirmPassInput").value;
-    const errBox = document.getElementById("changePassError");
-    errBox.style.display = "none";
-
-    if (oldPass !== OZEL_SIFRE) { errBox.innerText = "Mevcut PIN şifreniz hatalı!"; errBox.style.display = "block"; return; }
-    if (newPass.length !== 4 || isNaN(newPass)) { errBox.innerText = "Yeni PIN 4 haneli rakam olmalıdır!"; errBox.style.display = "block"; return; }
-    if (newPass !== confirmPass) { errBox.innerText = "Yeni şifreler birbiriyle uyuşmuyor!"; errBox.style.display = "block"; return; }
-
-    OZEL_SIFRE = newPass;
-    localStorage.setItem("sincapOzelSifre", newPass);
-    alert("PIN şifreniz başarıyla değiştirildi! 🎉");
-    sifreDegistirModalAcKapat();
-}
-
-// 🎭 Ruh Hali & Zorunlu Profil Seçimi (Başta Seçili Yok)
-let selectedUser = "";
-let currentMood = "🥰 Çok Mutluyum!";
-let currentMoodPercent = 50;
-
-function selectUser(user) {
-    selectedUser = user;
-    localStorage.setItem("sincapAktifKullanici", user);
-    document.getElementById("btnUser1").classList.toggle("active", user === 'Tuncay');
-    document.getElementById("btnUser2").classList.toggle("active", user === 'Özge');
-    document.getElementById("userWarningBubble").style.display = "none";
-}
-
-function checkMoodSlider(val) {
-    currentMoodPercent = val;
-    const textEl = document.getElementById("moodStatusText");
-    const percentEl = document.getElementById("moodPercentBadge");
-    percentEl.innerText = `%${val}`;
-
-    if (val <= 30) {
-        currentMood = "😡 Çok Sinirliyim!";
-        textEl.style.color = "#ff4b5c";
-    } else if (val <= 70) {
-        currentMood = "🥺 Biraz Üzgünüm / Kırgınım";
-        textEl.style.color = "#ffdd59";
-    } else {
-        currentMood = "🥰 Çok Mutluyum!";
-        textEl.style.color = "#02c39a";
-    }
-    textEl.innerText = currentMood;
-}
-
-function saveMoodAndEnter() {
-    if (!selectedUser) {
-        const card = document.getElementById("taskStage");
-        card.classList.add("screen-shake");
-        setTimeout(() => { card.classList.remove("screen-shake"); }, 300);
-        document.getElementById("userWarningBubble").style.display = "block";
-        return;
-    }
-
-    db.collection("ruh_hali").add({
-        kisi: selectedUser,
-        durum: currentMood,
-        yuzde: currentMoodPercent,
-        tarih: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-        if (currentMoodPercent <= 70) {
-            bildirimGonder(`${selectedUser} şu an ${currentMood} hissediyor! 🥺`);
-        }
-        kilitCoz();
-    });
-}
-
-function kilitCoz() {
-    lockScreen.classList.add("cozuldu");
-    document.body.classList.remove("modal-open");
-}
-
-function toggleModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.classList.toggle("acik");
-    if (document.querySelector('.modal.acik')) {
-        document.body.classList.add("modal-open");
-    } else {
-        document.body.classList.remove("modal-open");
-    }
-}
-
-// 📜 Şarkı Sözleri Modalı
-function sarkiSozleriAcKapat() { toggleModal("lyricsModal"); }
-
-// ⏳ Özel Günler
-let ozelGunlerListesi = [];
-db.collection("ozel_gunler").orderBy("tarih", "asc").onSnapshot((snapshot) => {
-    ozelGunlerListesi = [];
-    snapshot.forEach((doc) => { ozelGunlerListesi.push({ id: doc.id, ...doc.data() }); });
-    ozelGunCiz();
-});
-
-function ozelGunlerAcKapat() {
-    toggleModal("ozelGunModal");
-    if (document.getElementById("ozelGunModal").classList.contains("acik")) { ozelGunCiz(); }
-}
-
-function ozelGunCiz() {
-    const listDiv = document.getElementById("ozelGunList");
-    if (!listDiv) return;
-    listDiv.innerHTML = "";
-    if (ozelGunlerListesi.length === 0) {
-        listDiv.innerHTML = `<div style="font-size:10px; opacity:0.7; padding:4px;">Henüz özel gün eklenmemiş ⏳</div>`;
-        return;
-    }
-    const simdi = new Date();
-    ozelGunlerListesi.forEach((gun) => {
-        let hedefTarih = new Date(gun.tarih);
-        let buYilHedef = new Date(simdi.getFullYear(), hedefTarih.getMonth(), hedefTarih.getDate());
-        if (buYilHedef < simdi) {
-            buYilHedef.setFullYear(simdi.getFullYear() + 1);
-        }
-        let farkGun = Math.ceil((buYilHedef - simdi) / (1000 * 60 * 60 * 24));
-
-        const item = document.createElement("div");
-        item.classList.add("song-item");
-        item.innerHTML = `
-            <div style="display:flex; flex-direction:column; text-align:left;">
-                <span style="font-weight:700; font-size:11px; color:#ffdd59;">✨ ${gun.baslik}</span>
-                <span style="font-size:10px; margin-top:2px;">📅 ${gun.tarih} (${farkGun} gün kaldı 🎉)</span>
-            </div>
-            <button class="delete-song-btn" onclick="ozelGunSil('${gun.id}')">🗑️</button>
-        `;
-        listDiv.appendChild(item);
-    });
-}
-
-function ozelGunEkleModalAcKapat() { toggleModal("addOzelGunModal"); }
-
-function ozelGunEkle() {
-    const baslikInput = document.getElementById("yeniGunBaslik");
-    const tarihInput = document.getElementById("yeniGunTarih");
-    if (baslikInput.value.trim() === "" || !tarihInput.value) return;
-    db.collection("ozel_gunler").add({
-        baslik: baslikInput.value,
-        tarih: tarihInput.value,
-        olusturma: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-        baslikInput.value = "";
-        tarihInput.value = "";
-        ozelGunEkleModalAcKapat();
-        bildirimGonder(`Yeni özel gün eklendi: ${baslikInput.value} ⏳`);
-    });
-}
-
-function ozelGunSil(docId) {
-    if (!confirm("Bu özel günü silmek istediğine emin misin?")) return;
-    db.collection("ozel_gunler").doc(docId).delete();
-}
-
-// 🎡 Çarkıfelek
-const surpriseCards = [
-    "🤗 Bugün birbirinize kocaman sarılma borcunuz var!",
-    "🍰 En sevdiğiniz tatlıyı ısmarlama zamanı!",
-    "💆‍♂️ 10 dakikalık masaj hakkı kazandın!",
-    "🎬 Bu akşamki filmi/diziyi seçme hakkı sende!",
-    "🍕 En sevdiğiniz yemeği söyleme sırası sende!",
-    "💋 5 saniyelik uzun öpücük hakkı!",
-    "☕ Kahveleri hazırlama sırası değişti!",
-    "🎵 Gün boyunca sadece ortak şarkılarımız çalacak!",
-    "💌 Telefonuna en tatlı iltifat mesajı yazılacak!"
+const moods = [
+    { emoji: '😢', text: 'Üzgün' },
+    { emoji: '😠', text: 'Sinirli' },
+    { emoji: '😊', text: 'Mutlu / Huzurlu' },
+    { emoji: '🥰', text: 'Aşık' },
+    { emoji: '✨', text: 'Enerjik' }
 ];
 
-function wheelAcKapat() { toggleModal("wheelModal"); }
-
-let isSpinning = false;
-function spinWheel() {
-    if (isSpinning) return;
-    isSpinning = true;
-    const disk = document.getElementById("wheelDisk");
-    const surpriseText = document.getElementById("surpriseText");
-    surpriseText.innerText = "Çark dönüyor... 🎯";
-    const randomDegree = Math.floor(Math.random() * 720) + 1440;
-    disk.style.transform = `rotate(${randomDegree}deg)`;
-    setTimeout(() => {
-        const randomCard = surpriseCards[Math.floor(Math.random() * surpriseCards.length)];
-        surpriseText.innerText = randomCard;
-        isSpinning = false;
-    }, 3000);
-}
-
-// Sayaç
-const baslangicTarihi = new Date(2026, 7, 15);
-function sayaciGuncelle() {
-    const simdi = new Date();
-    const fark = simdi - baslangicTarihi;
-    document.getElementById("gun").innerText = Math.floor(fark / (1000 * 60 * 60 * 24));
-    document.getElementById("saat").innerText = Math.floor((fark / (1000 * 60 * 60)) % 24);
-    document.getElementById("dakika").innerText = Math.floor((fark / 1000 / 60) % 60);
-    document.getElementById("saniye").innerText = Math.floor((fark / 1000) % 60);
-}
-setInterval(sayaciGuncelle, 1000);
-sayaciGuncelle();
-
-// Kalpler
-function kalpOlustur() {
-    const heart = document.createElement("div");
-    heart.classList.add("heart");
-    heart.innerText = "❤️";
-    heart.style.left = Math.random() * 100 + "vw";
-    heart.style.animationDuration = Math.random() * 3 + 2 + "s";
-    document.getElementById("bgAnimation").appendChild(heart);
-    setTimeout(() => { heart.remove(); }, 5000);
-}
-setInterval(kalpOlustur, 600);
-
-function kalpPatlat() {
-    for (let i = 0; i < 10; i++) { setTimeout(kalpOlustur, i * 40); }
-    document.getElementById("menuPanel").classList.toggle("acik");
-}
-
-// 🎵 Müzik Kontrolleri
-const muzik = document.getElementById("bgMusic");
-const playBtn = document.getElementById("playBtn");
-const muteBtn = document.getElementById("muteBtn");
-const volumeSlider = document.getElementById("volumeSlider");
-const progressBar = document.getElementById("songProgressBar");
-const currentTimeEl = document.getElementById("currentTime");
-const totalTimeEl = document.getElementById("totalTime");
-
-if (muzik) { 
-    muzik.volume = 0.2; 
-    muzik.addEventListener('loadedmetadata', () => {
-        totalTimeEl.innerText = formatSaniye(muzik.duration);
-    });
-    muzik.addEventListener('timeupdate', () => {
-        if (!muzik.duration) return;
-        currentTimeEl.innerText = formatSaniye(muzik.currentTime);
-        progressBar.value = (muzik.currentTime / muzik.duration) * 100;
-    });
-}
-
-function formatSaniye( saniye ) {
-    let m = Math.floor(saniye / 60);
-    let s = Math.floor(saniye % 60);
-    return `${m}:${s < 10 ? '0' : ''}${s}`;
-}
-
-function sarkiIlerle(val) {
-    if (!muzik.duration) return;
-    muzik.currentTime = (val / 100) * muzik.duration;
-}
-
-function muzikOynatDuraklat() {
-    if (!muzik) return;
-    if (muzik.paused) {
-        muzik.play().then(() => { playBtn.innerText = "⏸️"; }).catch(err => console.log(err));
-    } else {
-        muzik.pause();
-        playBtn.innerText = "▶️";
-    }
-}
-
-function sesAyarla(deger) {
-    muzik.volume = deger;
-    muteBtn.innerText = deger == 0 ? "🔇" : "🔊";
-}
-
-function sesSustur() {
-    if (muzik.muted) {
-        muzik.muted = false;
-        muteBtn.innerText = "🔊";
-        volumeSlider.value = muzik.volume;
-    } else {
-        muzik.muted = true;
-        muteBtn.innerText = "🔇";
-        volumeSlider.value = 0;
-    }
-}
-
-// Ruh Hali Logları
-let moodListesi = [];
-db.collection("ruh_hali").orderBy("tarih", "desc").onSnapshot((snapshot) => {
-    moodListesi = [];
-    snapshot.forEach((doc) => { moodListesi.push({ id: doc.id, ...doc.data() }); });
-    moodCiz();
+document.getElementById('moodSlider').addEventListener('input', (e) => {
+    const index = parseInt(e.target.value) - 1;
+    document.getElementById('moodEmoji').textContent = moods[index].emoji;
+    document.getElementById('moodText').textContent = moods[index].text;
 });
 
-function moodAcKapat() {
-    toggleModal("moodModal");
-    if (document.getElementById("moodModal").classList.contains("acik")) { moodCiz(); }
-}
-
-function moodCiz() {
-    const listDiv = document.getElementById("moodList");
-    if (!listDiv) return;
-    listDiv.innerHTML = "";
-    if (moodListesi.length === 0) {
-        listDiv.innerHTML = `<div style="font-size:10px; opacity:0.7; padding:4px;">Kayıt yok 🎭</div>`;
+document.getElementById('saveProfileBtn').addEventListener('click', () => {
+    if (!selectedProfile) {
+        warningTooltip.style.display = 'block';
         return;
     }
-    moodListesi.forEach((m) => {
-        const item = document.createElement("div");
-        item.classList.add("song-item");
-        let zamanStr = m.tarih ? new Date(m.tarih.seconds * 1000).toLocaleString('tr-TR', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : 'Az önce';
-        let yuzdeStr = m.yuzde !== undefined ? ` (%${m.yuzde})` : '';
-        item.innerHTML = `
-            <div style="display:flex; flex-direction:column; text-align:left;">
-                <span style="font-weight:700; font-size:11px; color:#ffdd59;">👤 ${m.kisi || 'Sevgili'}</span>
-                <span style="font-size:10px; margin-top:2px;">${m.durum}${yuzdeStr}</span>
-                <span style="font-size:8px; opacity:0.6; margin-top:1px;">🕒 ${zamanStr}</span>
+    goScreen('mainAppScreen');
+    initRelationshipCounter();
+    renderCalendar();
+    renderSpecialDays();
+});
+
+// Alt Navigasyon Sekme Geçişleri
+document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.bottom-nav .nav-item').forEach(b => b.classList.remove('active'));
+        const targetBtn = e.currentTarget;
+        targetBtn.classList.add('active');
+        
+        const targetTabId = targetBtn.getAttribute('data-tab');
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.getElementById(targetTabId).classList.add('active');
+    });
+});
+
+// İlişki Sayaç (Başlangıç: 15 Ağustos 2026)
+function initRelationshipCounter() {
+    const startDate = new Date('2026-08-15T00:00:00');
+    function updateCounter() {
+        const now = new Date();
+        const diff = now - startDate;
+        if (diff < 0) {
+            document.getElementById('relationshipCounter').textContent = "15 Ağustos 2026 bekleniyor ❤️";
+            return;
+        }
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / 1000 / 60) % 60);
+        document.getElementById('relationshipCounter').textContent = `${days} Gün ${hours} Saat ${minutes} Dakikadır Birlikteyiz ❤️`;
+    }
+    updateCounter();
+    setInterval(updateCounter, 60000);
+}
+
+// Aşk Çarkıfeleği
+let currentRotation = 0;
+document.getElementById('spinWheelBtn').addEventListener('click', () => {
+    const wheel = document.getElementById('loveWheel');
+    currentRotation += Math.floor(Math.random() * 360) + 1440;
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
+});
+
+document.getElementById('loveBtn').addEventListener('click', () => {
+    alert("Seni çok ama çok seviyorum Yavru Sincabım! ❤️🐿️");
+});
+
+// Müzik Oynatıcı & Gelişmiş Widget Kontrolleri
+const audioPlayer = document.getElementById('audioPlayer');
+const musicModal = document.getElementById('musicModal');
+const quickPlayPauseBtn = document.getElementById('quickPlayPauseBtn');
+const modalPlayPauseBtn = document.getElementById('modalPlayPauseBtn');
+const quickMuteBtn = document.getElementById('quickMuteBtn');
+const miniSeekBar = document.getElementById('miniSeekBar');
+const fullSeekBar = document.getElementById('fullSeekBar');
+
+document.getElementById('openMusicModal').addEventListener('click', () => musicModal.classList.add('active'));
+document.getElementById('closeMusicModal').addEventListener('click', () => musicModal.classList.remove('active'));
+
+function togglePlay() {
+    if (audioPlayer.paused) {
+        audioPlayer.play();
+        quickPlayPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+        modalPlayPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+    } else {
+        audioPlayer.pause();
+        quickPlayPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+        modalPlayPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+    }
+}
+
+quickPlayPauseBtn.addEventListener('click', togglePlay);
+modalPlayPauseBtn.addEventListener('click', togglePlay);
+
+quickMuteBtn.addEventListener('click', () => {
+    audioPlayer.muted = !audioPlayer.muted;
+    quickMuteBtn.innerHTML = audioPlayer.muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+});
+
+audioPlayer.addEventListener('timeupdate', () => {
+    if (audioPlayer.duration) {
+        const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+        miniSeekBar.value = percent;
+        fullSeekBar.value = percent;
+
+        let mins = Math.floor(audioPlayer.currentTime / 60);
+        let secs = Math.floor(audioPlayer.currentTime % 60);
+        document.getElementById('currentTime').textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+});
+
+miniSeekBar.addEventListener('input', (e) => {
+    if (audioPlayer.duration) {
+        audioPlayer.currentTime = (e.target.value / 100) * audioPlayer.duration;
+    }
+});
+
+fullSeekBar.addEventListener('input', (e) => {
+    if (audioPlayer.duration) {
+        audioPlayer.currentTime = (e.target.value / 100) * audioPlayer.duration;
+    }
+});
+
+// Şarkı Sözleri Göster/Gizle Butonu
+document.getElementById('toggleLyricsBtn').addEventListener('click', () => {
+    const box = document.getElementById('lyricsContainer');
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+});
+
+// Galeri Lightbox Tam Ekran
+function openLightbox(imgSrc) {
+    document.getElementById('lightboxImg').src = imgSrc;
+    document.getElementById('lightboxModal').classList.add('active');
+}
+function closeLightbox() {
+    document.getElementById('lightboxModal').classList.remove('active');
+}
+
+// Güvenli PIN Değiştirme (Eski şifre doğrulamalı + Göz ikonu)
+const pinModal = document.getElementById('pinModal');
+document.getElementById('openChangePinModal').addEventListener('click', () => pinModal.classList.add('active'));
+document.getElementById('closePinModal').addEventListener('click', () => pinModal.classList.remove('active'));
+
+const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+const newPinInput1 = document.getElementById('newPinInput1');
+const newPinInput2 = document.getElementById('newPinInput2');
+
+togglePasswordBtn.addEventListener('click', () => {
+    const type = newPinInput1.type === 'password' ? 'text' : 'password';
+    newPinInput1.type = type;
+    newPinInput2.type = type;
+    togglePasswordBtn.className = type === 'password' ? 'fa-solid fa-eye toggle-password' : 'fa-solid fa-eye-slash toggle-password';
+});
+
+document.getElementById('saveNewPinBtn').addEventListener('click', () => {
+    const oldPin = document.getElementById('oldPinInput').value;
+    const p1 = newPinInput1.value;
+    const p2 = newPinInput2.value;
+    const err = document.getElementById('pinChangeError');
+
+    if (oldPin !== currentPin) {
+        err.textContent = "Eski şifre hatalı!";
+        return;
+    }
+    if (p1.length !== 4 || p1 !== p2) {
+        err.textContent = "Yeni şifreler 4 haneli ve birbiriyle aynı olmalı!";
+        return;
+    }
+
+    currentPin = p1;
+    localStorage.setItem('sincapPin', p1);
+    alert("PIN şifreniz başarıyla güncellendi!");
+    pinModal.classList.remove('active');
+    document.getElementById('oldPinInput').value = "";
+    newPinInput1.value = "";
+    newPinInput2.value = "";
+    err.textContent = "";
+});
+
+// Takvim & Özel Günler Yönetimi (Ay değiştirme + Gün tıklayıp not ekleme + Artan sıralama)
+let currentCalendarDate = new Date(2026, 7, 1); // Ağustos 2026
+
+let specialDays = [
+    { title: "Tanışma Yıldönümümüz", date: "2026-08-15", desc: "Her şeyin başladığı o tatlı gün" },
+    { title: "İlk Sinema Buluşması", date: "2026-09-10", desc: "Heyecanlı anlar" },
+    { title: "Özge'nin Doğum Günü", date: "2026-11-25", desc: "Yavru sincabımın doğduğu gün ❤️" }
+];
+
+let selectedDateStr = null;
+
+function renderCalendar() {
+    const year = currentCalendarDate.getFullYear();
+    const month = currentCalendarDate.getMonth();
+    
+    const monthsNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+    document.getElementById('currentMonthYear').textContent = `${monthsNames[month]} ${year}`;
+
+    const daysGrid = document.getElementById('calendarDaysGrid');
+    daysGrid.innerHTML = '';
+
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const adjustedFirstDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1; // Pazartesi başlangıç
+    const totalDays = new Date(year, month + 1, 0).getDate();
+
+    // Boşluklar
+    for (let i = 0; i < adjustedFirstDay; i++) {
+        const emptySpan = document.createElement('span');
+        daysGrid.appendChild(emptySpan);
+    }
+
+    // Günler
+    for (let day = 1; day <= totalDays; day++) {
+        const span = document.createElement('span');
+        span.textContent = day;
+
+        const mStr = String(month + 1).padStart(2, '0');
+        const dStr = String(day).padStart(2, '0');
+        const dateKey = `${year}-${mStr}-${dStr}`;
+
+        // Etkinlik kontrolü
+        if (specialDays.some(item => item.date === dateKey)) {
+            span.classList.add('has-event');
+        }
+
+        span.addEventListener('click', () => {
+            selectedDateStr = dateKey;
+            document.getElementById('selectedDateTitle').textContent = `${day} ${monthsNames[month]} ${year} - Özel Gün Ekle`;
+            document.getElementById('dayNoteModal').classList.add('active');
+        });
+
+        daysGrid.appendChild(span);
+    }
+}
+
+document.getElementById('prevMonthBtn').addEventListener('click', () => {
+    currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+    renderCalendar();
+});
+
+document.getElementById('nextMonthBtn').addEventListener('click', () => {
+    currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+    renderCalendar();
+});
+
+function renderSpecialDays() {
+    // En yakın tarihten en uzağa artan sırada sırala
+    specialDays.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const listContainer = document.getElementById('specialDaysList');
+    listContainer.innerHTML = '';
+    specialDays.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'special-day-item';
+        div.innerHTML = `
+            <div class="special-day-info">
+                <h4>${item.title}</h4>
+                <p>${item.desc || item.date}</p>
             </div>
-            <button class="delete-song-btn" onclick="moodSil('${m.id}')">🗑️</button>
+            <span class="special-day-badge">${item.date}</span>
         `;
-        listDiv.appendChild(item);
+        listContainer.appendChild(div);
     });
 }
 
-function moodSil(docId) { db.collection("ruh_hali").doc(docId).delete(); }
+function closeDayNoteModal() {
+    document.getElementById('dayNoteModal').classList.remove('active');
+    document.getElementById('noteTitleInput').value = '';
+    document.getElementById('noteDescInput').value = '';
+}
 
-// Şarkı Listesi
-let sarkiListesi = [];
-let secilenSarkiAdi = "";
-db.collection("sarkilar").orderBy("tarih", "desc").onSnapshot((snapshot) => {
-    sarkiListesi = [];
-    snapshot.forEach((doc) => { sarkiListesi.push({ id: doc.id, ...doc.data() }); });
-    sarkiListesiniCiz();
+document.getElementById('saveDayNoteBtn').addEventListener('click', () => {
+    const title = document.getElementById('noteTitleInput').value;
+    const desc = document.getElementById('noteDescInput').value;
+
+    if (title && selectedDateStr) {
+        specialDays.push({ title, date: selectedDateStr, desc });
+        renderCalendar();
+        renderSpecialDays();
+        closeDayNoteModal();
+    } else {
+        alert("Lütfen bir başlık girin!");
+    }
 });
-
-function sarkiListesiAcKapat() {
-    toggleModal("musicModal");
-    if (document.getElementById("musicModal").classList.contains("acik")) { sarkiListesiniCiz(); }
-}
-
-function sarkiListesiniCiz() {
-    const listDiv = document.getElementById("songList");
-    if (!listDiv) return;
-    listDiv.innerHTML = "";
-    if (sarkiListesi.length === 0) {
-        listDiv.innerHTML = `<div style="font-size:10px; opacity:0.7; padding:4px;">Şarkı yok 🎵</div>`;
-        return;
-    }
-    sarkiListesi.forEach((sarki) => {
-        const item = document.createElement("div");
-        item.classList.add("song-item");
-        item.innerHTML = `
-            <span class="song-title-click" onclick="platformSecimAc('${sarki.title}')">🎵 ${sarki.title}</span>
-            <button class="delete-song-btn" onclick="sarkiSil('${sarki.id}')">🗑️</button>
-        `;
-        listDiv.appendChild(item);
-    });
-}
-
-function platformSecimAc(title) {
-    secilenSarkiAdi = title;
-    document.getElementById("selectedSongName").innerText = title;
-    toggleModal("platformSelectModal");
-}
-
-function platformModalAcKapat() { toggleModal("platformSelectModal"); }
-
-function openPlatform(platform) {
-    const encoded = encodeURIComponent(secilenSarkiAdi);
-    let url = "";
-    if (platform === "spotify") url = `https://open.spotify.com/search/${encoded}`;
-    else if (platform === "ytmusic") url = `https://music.youtube.com/search?q=${encoded}`;
-    else if (platform === "youtube") url = `https://www.youtube.com/results?search_query=${encoded}`;
-    window.open(url, "_blank");
-    platformModalAcKapat();
-}
-
-function sarkiEkleModalAcKapat() { toggleModal("addSongModal"); }
-
-function sarkiEkle() {
-    const nameInput = document.getElementById("newSongName");
-    if (nameInput.value.trim() === "") return;
-    db.collection("sarkilar").add({
-        title: nameInput.value,
-        tarih: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-        nameInput.value = "";
-        sarkiEkleModalAcKapat();
-        bildirimGonder(`Yeni şarkı eklendi: ${nameInput.value} 🎵`);
-    });
-}
-
-function sarkiSil(docId) { db.collection("sarkilar").doc(docId).delete(); }
-
-// Yapılacaklar
-let todoListesi = [];
-db.collection("todolist").orderBy("tarih", "desc").onSnapshot((snapshot) => {
-    todoListesi = [];
-    snapshot.forEach((doc) => { todoListesi.push({ id: doc.id, ...doc.data() }); });
-    todoCiz();
-});
-
-function todoAcKapat() {
-    toggleModal("todoModal");
-    if (document.getElementById("todoModal").classList.contains("acik")) { todoCiz(); }
-}
-
-function todoCiz() {
-    const listDiv = document.getElementById("todoList");
-    if (!listDiv) return;
-    listDiv.innerHTML = "";
-    if (todoListesi.length === 0) {
-        listDiv.innerHTML = `<div style="font-size:10px; opacity:0.7; padding:4px;">Plan yok 📋</div>`;
-        return;
-    }
-    todoListesi.forEach((todo) => {
-        const item = document.createElement("div");
-        item.classList.add("song-item");
-        item.innerHTML = `
-            <span class="song-title-click ${todo.tamamlandi ? 'todo-done' : ''}" onclick="todoDurumDegistir('${todo.id}', ${!todo.tamamlandi})">
-                ${todo.tamamlandi ? '✅' : '📌'} ${todo.metin}
-            </span>
-            <button class="delete-song-btn" onclick="todoSil('${todo.id}')">🗑️</button>
-        `;
-        listDiv.appendChild(item);
-    });
-}
-
-function todoEkleModalAcKapat() { toggleModal("addTodoModal"); }
-
-function todoEkle() {
-    const input = document.getElementById("newTodoText");
-    if (input.value.trim() === "") return;
-    db.collection("todolist").add({
-        metin: input.value,
-        tamamlandi: false,
-        tarih: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-        input.value = "";
-        todoEkleModalAcKapat();
-        bildirimGonder(`Yeni plan eklendi: ${input.value} 📋`);
-    });
-}
-
-function todoDurumDegistir(docId, yeniDurum) {
-    db.collection("todolist").doc(docId).update({ tamamlandi: yeniDurum });
-}
-
-function todoSil(docId) { db.collection("todolist").doc(docId).delete(); }
-
-// Özel Notlar
-let notlarListesi = [];
-db.collection("notlar").orderBy("tarih", "desc").onSnapshot((snapshot) => {
-    notlarListesi = [];
-    snapshot.forEach((doc) => { notlarListesi.push({ id: doc.id, ...doc.data() }); });
-    notlariCiz();
-});
-
-function notlarAcKapat() {
-    toggleModal("notesModal");
-    if (document.getElementById("notesModal").classList.contains("acik")) { notlariCiz(); }
-}
-
-function notlariCiz() {
-    const listDiv = document.getElementById("notesList");
-    if (!listDiv) return;
-    listDiv.innerHTML = "";
-    if (notlarListesi.length === 0) {
-        listDiv.innerHTML = `<div style="font-size:10px; opacity:0.7; padding:4px;">Not yok 💌</div>`;
-        return;
-    }
-    notlarListesi.forEach((not) => {
-        const item = document.createElement("div");
-        item.classList.add("song-item");
-        item.innerHTML = `
-            <span class="song-title-click">${not.metin}</span>
-            <button class="delete-song-btn" onclick="notSil('${not.id}')">🗑️</button>
-        `;
-        listDiv.appendChild(item);
-    });
-}
-
-function notEkleModalAcKapat() { toggleModal("addNoteModal"); }
-
-function notEkle() {
-    const noteInput = document.getElementById("newNoteText");
-    if (noteInput.value.trim() === "") return;
-    db.collection("notlar").add({
-        metin: noteInput.value,
-        tarih: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-        noteInput.value = "";
-        notEkleModalAcKapat();
-        bildirimGonder(`Yeni özel not eklendi 💌`);
-    });
-}
-
-function notSil(docId) { db.collection("notlar").doc(docId).delete(); }
-
-// Galeri & Günün Anısı Vurgulama
-let fotograflarListesi = [];
-let aktifGununAnisiId = "";
-
-db.collection("fotograflar").orderBy("tarih", "desc").onSnapshot((snapshot) => {
-    fotograflarListesi = [];
-    snapshot.forEach((doc) => { fotograflarListesi.push({ id: doc.id, ...doc.data() }); });
-    galeriyiCiz();
-    updateDailyWidget();
-});
-
-function updateDailyWidget() {
-    const imgEl = document.getElementById("dailyWidgetImg");
-    if (!imgEl) return;
-    if (fotograflarListesi.length > 0) {
-        const randomIndex = Math.floor(Math.random() * fotograflarListesi.length);
-        const secilenFoto = fotograflarListesi[randomIndex];
-        imgEl.src = secilenFoto.url;
-        aktifGununAnisiId = secilenFoto.id;
-    }
-}
-
-function gununAnisinaGit() {
-    galeriAcKapat();
-    setTimeout(() => {
-        if (!aktifGununAnisiId) return;
-        const hedefCard = document.getElementById(`foto-card-${aktifGununAnisiId}`);
-        if (hedefCard) {
-            hedefCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            hedefCard.classList.add("flash-highlight");
-            setTimeout(() => { hedefCard.classList.remove("flash-highlight"); }, 3000);
-        }
-    }, 350);
-}
-
-function galeriAcKapat() {
-    toggleModal("galleryModal");
-    if (document.getElementById("galleryModal").classList.contains("acik")) { galeriyiCiz(); }
-}
-
-function galeriyiCiz() {
-    const grid = document.getElementById("galleryGrid");
-    if (!grid) return;
-    grid.innerHTML = "";
-    if (fotograflarListesi.length === 0) {
-        grid.innerHTML = `<div style="grid-column: 1 / -1; font-size:10px; opacity:0.7; padding:10px;">Fotoğraf yok 📸</div>`;
-        return;
-    }
-    fotograflarListesi.forEach((foto) => {
-        const card = document.createElement("div");
-        card.classList.add("gallery-card");
-        card.id = `foto-card-${foto.id}`;
-        card.innerHTML = `
-            <img src="${foto.url}" onclick="resimBuyut('${foto.url}')">
-            <button class="delete-photo-btn" onclick="fotografSil('${foto.id}')">🗑️</button>
-        `;
-        grid.appendChild(card);
-    });
-}
-
-function fotografYukle(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const statusText = document.getElementById("uploadStatus");
-    statusText.style.display = "block";
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", CLOUDINARY_PRESET);
-
-    fetch(CLOUDINARY_URL, { method: "POST", body: formData })
-    .then(res => res.json())
-    .then(data => {
-        if (data.secure_url) {
-            db.collection("fotograflar").add({
-                url: data.secure_url,
-                tarih: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                statusText.style.display = "none";
-                event.target.value = "";
-                bildirimGonder(`Yeni bir fotoğraf yüklendi! 📸`);
-            });
-        }
-    })
-    .catch(() => { statusText.style.display = "none"; });
-}
-
-function fotografSil(docId) {
-    if (!confirm("Silmek istediğine emin misin?")) return;
-    db.collection("fotograflar").doc(docId).delete();
-}
-
-function resimBuyut(src) {
-    document.getElementById("lightboxImg").src = src;
-    document.getElementById("lightbox").classList.add("acik");
-}
-
-function lightboxKapat() {
-    document.getElementById("lightbox").classList.remove("acik");
-}
-
-// Canlı Bildirim Fonksiyonu
-function bildirimGonder(mesaj) {
-    const toast = document.getElementById("liveToast");
-    const text = document.getElementById("toastText");
-    text.innerText = mesaj;
-    toast.classList.add("goster");
-    setTimeout(() => {
-        toast.classList.remove("goster");
-    }, 4000);
-}
