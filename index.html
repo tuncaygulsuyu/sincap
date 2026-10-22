@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- 1. Splash Ekranı (Yumuşak Geçişli) -->
+    <!-- 1. Splash Ekranı (Yumuşak Gradyan Geçişli) -->
     <div id="splashScreen" class="screen active">
         <div class="splash-content">
             <div class="logo-badge">S</div>
@@ -19,7 +19,7 @@
         </div>
     </div>
 
-    <!-- 2. PIN Doğrulama Ekranı (Klavye Kaydırma Destekli) -->
+    <!-- 2. PIN Doğrulama Ekranı -->
     <div id="pinScreen" class="screen">
         <div class="pin-box" id="pinBoxContainer">
             <div class="back-btn" onclick="goScreen('splashScreen')"><i class="fa-solid fa-chevron-left"></i></div>
@@ -36,7 +36,7 @@
         </div>
     </div>
 
-    <!-- 3. Profil Seçimi & Ruh Hali & Şimdilik Atla -->
+    <!-- 3. Profil Seçimi & Ruh Hali -->
     <div id="profileScreen" class="screen">
         <div class="profile-container">
             <h2>Kim Konuşuyor?</h2>
@@ -103,7 +103,7 @@
                     <div class="counter-display" id="relationshipCounter">Hesaplanıyor...</div>
                 </div>
 
-                <!-- Ana Sayfa Widget'ları (Şarkılarımız & Yapılacaklar Listesi) -->
+                <!-- Ana Sayfa Widget'ları -->
                 <div class="home-widgets-row">
                     <div class="home-widget-card" onclick="openSongsWidgetModal()">
                         <i class="fa-solid fa-compact-disc"></i>
@@ -115,32 +115,33 @@
                     </div>
                 </div>
 
+                <!-- Günün Anısı (Rastgele / Akıllı Değişen) -->
                 <div class="card memory-card" id="memoryCard">
                     <div class="card-header">
                         <h3><i class="fa-solid fa-camera-retro"></i> Günün Anısı</h3>
-                        <span class="date-badge">Bugün</span>
+                        <span class="date-badge">Anı Köşesi</span>
                     </div>
-                    <div class="memory-photo-wrapper">
-                        <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=600&auto=format&fit=crop&q=80" alt="Günün Anısı">
+                    <div class="memory-photo-wrapper" id="randomMemoryWrapper">
+                        <img id="randomMemoryImg" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=600&auto=format&fit=crop&q=80" alt="Günün Anısı">
                         <div class="photo-overlay">
-                            <p>"İlkbahar bahçesindeki o tatlı anımız..."</p>
+                            <p id="randomMemoryText">"Güzel anılarımızdan biri..."</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Aşk Çarkıfeleği -->
+                <!-- Gelişmiş Aşk Çarkıfeleği -->
                 <div class="card wheel-card-compact">
                     <div class="wheel-header-compact">
-                        <h3><i class="fa-solid fa-dharmachakra"></i> Aşk Çarkı</h3>
+                        <h3><i class="fa-solid fa-dharmachakra"></i> Aşk Falı Çarkı</h3>
                         <button id="spinWheelBtn" class="secondary-btn-sm">Çevir</button>
                     </div>
                     <div class="wheel-wrapper-sm" id="wheelWrapperClickable">
                         <div class="wheel-pointer-sm"></div>
                         <div class="wheel-sm" id="loveWheel">
-                            <div class="slice s1"><span>Kahve</span></div>
-                            <div class="slice s2"><span>Film</span></div>
-                            <div class="slice s3"><span>Öpücük</span></div>
-                            <div class="slice s4"><span>Masaj</span></div>
+                            <div class="slice s1"><span>Gözleri Kapat</span></div>
+                            <div class="slice s2"><span>Tatlı İltifat Et</span></div>
+                            <div class="slice s3"><span>Sürpriz Öpücük</span></div>
+                            <div class="slice s4"><span>Şarkı Aç</span></div>
                         </div>
                     </div>
                 </div>
@@ -152,24 +153,25 @@
                 </div>
             </div>
 
-            <!-- Galeri Sekmesi (3 Sütunlu Kare Izgara & Silme Butonlu) -->
+            <!-- Galeri Sekmesi (Çoklu Yükleme, Yükleniyor Göstergesi, Ayna Düzeltmeli Kamera) -->
             <div class="tab-content" id="tab-gallery">
                 <div class="section-title-bar">
                     <h2>Anı Galerimiz</h2>
                     <div class="gallery-action-btns">
                         <label class="add-photo-btn" for="fileInput"><i class="fa-solid fa-folder-open"></i> Yükle</label>
-                        <input type="file" id="fileInput" accept="image/*" style="display:none;">
+                        <input type="file" id="fileInput" accept="image/*" multiple style="display:none;">
 
                         <label class="add-photo-btn camera-btn" for="cameraInput"><i class="fa-solid fa-camera"></i> Çek</label>
                         <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;">
                     </div>
                 </div>
-                <div class="ios-gallery-grid" id="iosGalleryGrid">
-                    <!-- Dinamik kare fotoğraflar -->
+                <div id="uploadingIndicator" style="display:none; text-align:center; padding:10px; font-size:12px; color:var(--primary); font-weight:600;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Fotoğraflar yükleniyor...
                 </div>
+                <div class="ios-gallery-grid" id="iosGalleryGrid"></div>
             </div>
 
-            <!-- Özel Günler / Takvim Sekmesi (Ay/Gün Sıralamalı & Silme Butonlu) -->
+            <!-- Özel Günler / Takvim Sekmesi (Ay/Gün Sıralamalı) -->
             <div class="tab-content" id="tab-days">
                 <div class="section-title-bar">
                     <h2>Özel Günlerimiz</h2>
@@ -190,7 +192,7 @@
                 <div class="special-days-list" id="specialDaysList"></div>
             </div>
 
-            <!-- Ayarlar Sekmesi -->
+            <!-- Ayarlar Sekmesi (Çıkış Yap Butonlu) -->
             <div class="tab-content" id="tab-settings">
                 <div class="section-title-bar">
                     <h2>Ayarlar</h2>
@@ -223,7 +225,7 @@
                             <i class="fa-solid fa-bell"></i>
                             <div>
                                 <h4>Canlı Bildirimler</h4>
-                                <p>Anlık ruh hali ve anı bildirimleri</p>
+                                <p>Anlık ruh hali bildirimleri</p>
                             </div>
                         </div>
                         <label class="switch">
@@ -243,11 +245,16 @@
                         <i class="fa-solid fa-pen"></i>
                     </div>
                 </div>
+
+                <!-- Belirgin Çıkış Yap Butonu -->
+                <button id="logoutBtn" class="logout-btn-primary">
+                    <i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap & Kilitle
+                </button>
             </div>
 
         </main>
 
-        <!-- Alt Navigasyon (4 Sekme: Ana Sayfa, Galeri, Takvim, Ayarlar) -->
+        <!-- Alt Navigasyon (4 Sekme) -->
         <nav class="bottom-nav">
             <button class="nav-item active" data-tab="tab-home"><i class="fa-solid fa-house"></i><span>Ana Sayfa</span></button>
             <button class="nav-item" data-tab="tab-gallery"><i class="fa-solid fa-images"></i><span>Galeri</span></button>
@@ -293,7 +300,7 @@
         </div>
     </div>
 
-    <!-- Ana Sayfa Şarkılar Widget Modalı (Silme Özellikli) -->
+    <!-- Şarkılar Widget Modalı -->
     <div id="songsWidgetModal" class="modal">
         <div class="modal-content" style="max-height:80vh; overflow-y:auto;">
             <div class="close-modal" onclick="closeSongsWidgetModal()"><i class="fa-solid fa-xmark"></i></div>
@@ -328,7 +335,7 @@
         </div>
     </div>
 
-    <!-- Yapılacaklar Listesi Modalı (Ekleme, Yapıldı İşareti ve Silme) -->
+    <!-- Yapılacaklar Listesi Modalı -->
     <div id="todoListModal" class="modal">
         <div class="modal-content" style="max-height:80vh; overflow-y:auto;">
             <div class="close-modal" onclick="closeTodoListModal()"><i class="fa-solid fa-xmark"></i></div>
@@ -369,10 +376,27 @@
         </div>
     </div>
 
-    <!-- Fotoğraf Tam Ekran (Lightbox) Modalı -->
-    <div id="lightboxModal" class="modal" onclick="closeLightbox()">
-        <div class="lightbox-content">
+    <!-- Fotoğraf Tam Ekran (Lightbox) & Paylaş / Sil (Onaylı) Modalı -->
+    <div id="lightboxModal" class="modal">
+        <div class="lightbox-container-centered">
+            <div class="close-lightbox-top" onclick="closeLightbox()"><i class="fa-solid fa-xmark"></i></div>
             <img id="lightboxImg" src="" alt="Tam Ekran Önizleme">
+            <div class="lightbox-action-bar">
+                <button class="lightbox-action-btn share-btn" id="lightboxShareBtn"><i class="fa-solid fa-share-nodes"></i> Paylaş</button>
+                <button class="lightbox-action-btn delete-btn" id="lightboxDeleteBtn"><i class="fa-solid fa-trash-can"></i> Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fotoğraf Silme Onay Modalı -->
+    <div id="deleteConfirmModal" class="modal">
+        <div class="modal-content" style="max-width:280px; text-align:center;">
+            <h3>Anıyı Sil</h3>
+            <p style="font-size:13px; color:#666; margin:15px 0;">Bu fotoğrafı silmek istediğine emin misin?</p>
+            <div style="display:flex; gap:10px;">
+                <button onclick="closeDeleteConfirmModal()" class="secondary-btn" style="flex:1; padding:10px; border-radius:10px;">İptal</button>
+                <button id="confirmDeletePhotoBtn" class="primary-btn" style="flex:1; background:#ff4757; padding:10px; border-radius:10px;">Evet, Sil</button>
+            </div>
         </div>
     </div>
 

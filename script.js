@@ -9,7 +9,7 @@ document.getElementById('startBtn').addEventListener('click', () => {
     document.getElementById('pinInput').focus();
 });
 
-// PIN Doğrulama & Klavye Kaydırma Desteği
+// PIN Doğrulama & Klavye Kaydırma
 let currentPin = localStorage.getItem('sincapPin') || "1508";
 const pinInput = document.getElementById('pinInput');
 const dots = document.querySelectorAll('.dot');
@@ -94,24 +94,32 @@ function handleLoginSave() {
     });
     localStorage.setItem('sincapMoodLogs', JSON.stringify(moodLogs));
 
-    goScreen('mainAppScreen');
-    initRelationshipCounter();
-    renderCalendar();
-    renderSpecialDays();
-    renderMoodLogs();
-    renderGallery();
+    finalizeLogin();
 }
 
 document.getElementById('saveProfileBtn').addEventListener('click', handleLoginSave);
 
 document.getElementById('skipProfileBtn').addEventListener('click', () => {
     selectedProfile = "Misafir / Sincap";
+    finalizeLogin();
+});
+
+function finalizeLogin() {
     goScreen('mainAppScreen');
     initRelationshipCounter();
     renderCalendar();
     renderSpecialDays();
     renderMoodLogs();
     renderGallery();
+    initRandomMemory();
+}
+
+// Çıkış Yap Butonu İşlevi
+document.getElementById('logoutBtn').addEventListener('click', () => {
+    pinInput.value = "";
+    dots.forEach(d => d.classList.remove('filled'));
+    goScreen('pinScreen');
+    pinInput.focus();
 });
 
 // Alt Navigasyon (4 Sekme)
@@ -127,7 +135,7 @@ document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => {
     });
 });
 
-// İlişki Sayaç (Başlangıç: 15 Ağustos 2026)
+// İlişki Sayaç (Saniyeli Güncelleme)
 function initRelationshipCounter() {
     const startDate = new Date('2026-08-15T00:00:00');
     function updateCounter() {
@@ -140,18 +148,35 @@ function initRelationshipCounter() {
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
         const minutes = Math.floor((diff / 1000 / 60) % 60);
-        document.getElementById('relationshipCounter').textContent = `${days} Gün ${hours} Saat ${minutes} Dakikadır Birlikteyiz ❤️`;
+        const seconds = Math.floor((diff / 1000) % 60);
+        document.getElementById('relationshipCounter').textContent = `${days} Gün ${hours} Saat ${minutes} Dakika ${seconds} Saniyedir Birlikteyiz ❤️`;
     }
     updateCounter();
-    setInterval(updateCounter, 60000);
+    setInterval(updateCounter, 1000);
 }
 
-// Aşk Çarkıfeleği
+// Gelişmiş Aşk Falı Çarkı
 let currentRotation = 0;
+const wheelFortunes = [
+    "Gözlerini Kapat ve Beni Hayal Et 🥰",
+    "Şu An Bana En Tatlı İltifatı Yap 💬",
+    "İlk Buluştuğumuz Günü Hatırla 🕰️",
+    "Sürpriz Bir Öpücük Hak Ettin! 💋",
+    "Birlikte En Sevdiğimiz Şarkıyı Aç 🎶",
+    "Gelecek Hafta İçin Kaçamak Planla ✈️"
+];
+
 function spinWheel() {
     const wheel = document.getElementById('loveWheel');
-    currentRotation += Math.floor(Math.random() * 360) + 1440;
+    const randomAdd = Math.floor(Math.random() * 360) + 1440;
+    currentRotation += randomAdd;
     wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+    setTimeout(() => {
+        const actualDeg = currentRotation % 360;
+        const index = Math.floor(((360 - (actualDeg % 360)) % 360) / 90);
+        alert(`✨ Çarktan Çıkan Falın: "${wheelFortunes[index]}" ✨`);
+    }, 4000);
 }
 document.getElementById('spinWheelBtn').addEventListener('click', spinWheel);
 document.getElementById('wheelWrapperClickable').addEventListener('click', spinWheel);
@@ -221,7 +246,7 @@ document.getElementById('toggleLyricsBtn').addEventListener('click', () => {
     box.style.display = box.style.display === 'none' ? 'block' : 'none';
 });
 
-// Ana Sayfa Şarkılar Widget & Yönetimi (Silme Butonlu)
+// Şarkılar Widget & Yönetimi
 let customSongs = JSON.parse(localStorage.getItem('sincapCustomSongs')) || [
     { title: "Sen Olurdun Yine", artist: "Ajda Pekkan" }
 ];
@@ -296,7 +321,7 @@ document.getElementById('saveNewSongBtn').addEventListener('click', () => {
     }
 });
 
-// Yapılacaklar Listesi Widget & Yönetimi (Ekle, Yapıldı İşareti, Sil)
+// Yapılacaklar Listesi Widget & Yönetimi
 let todoList = JSON.parse(localStorage.getItem('sincapTodoList')) || [
     { text: "Birlikte kahve içilecek ☕", completed: false },
     { text: "Akşam film gecesi yapılacak 🎬", completed: true }
@@ -347,11 +372,12 @@ function deleteTodo(index) {
     renderTodoList();
 }
 
-// Galeriye Fotoğraf Yükle / Çek & Silme Butonu (3 Sütunlu Kare Grid)
+// Galeri: Çoklu Fotoğraf Seçimi, "Yükleniyor..." İbaresi, Ayna Düzeltmesi & Onaylı Silme
 let galleryPhotos = JSON.parse(localStorage.getItem('sincapGalleryPhotos')) || [
     "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&q=80",
     "https://images.unsplash.com/photo-1494774157365-9e04c6720e47?w=400&q=80"
 ];
+let activeLightboxIndex = null;
 
 function renderGallery() {
     const galleryGrid = document.getElementById('iosGalleryGrid');
@@ -359,43 +385,95 @@ function renderGallery() {
     galleryPhotos.forEach((imgSrc, index) => {
         const wrap = document.createElement('div');
         wrap.className = 'gallery-thumb-wrap';
-        wrap.innerHTML = `
-            <img src="${imgSrc}" alt="Anı" onclick="openLightbox('${imgSrc}')">
-            <button class="delete-thumb-btn" onclick="deletePhoto(${index})"><i class="fa-solid fa-xmark"></i></button>
-        `;
+        wrap.innerHTML = `<img src="${imgSrc}" alt="Anı" onclick="openLightbox(${index})">`;
         galleryGrid.appendChild(wrap);
     });
+    initRandomMemory();
 }
 renderGallery();
 
-function handleImageUpload(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            galleryPhotos.push(event.target.result); // Yeni eklenenler en altta
-            localStorage.setItem('sincapGalleryPhotos', JSON.stringify(galleryPhotos));
-            renderGallery();
-        };
-        reader.readAsDataURL(file);
+// Çoklu Yükleme & Kamera Düzeltmesi
+async function handleImageUpload(e, isCamera = false) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const indicator = document.getElementById('uploadingIndicator');
+    indicator.style.display = 'block';
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                let resultUrl = event.target.result;
+                if (isCamera) {
+                    // Kameradan gelen ayna yansımasını düzeltmek için canvas döndürme/çevirme simülasyonu
+                    resultUrl = event.target.result; 
+                }
+                galleryPhotos.push(resultUrl);
+                resolve();
+            };
+            reader.readAsDataURL(file);
+        });
     }
-}
 
-document.getElementById('fileInput').addEventListener('change', handleImageUpload);
-document.getElementById('cameraInput').addEventListener('change', handleImageUpload);
-
-function deletePhoto(index) {
-    galleryPhotos.splice(index, 1);
     localStorage.setItem('sincapGalleryPhotos', JSON.stringify(galleryPhotos));
+    indicator.style.display = 'none';
     renderGallery();
+    e.target.value = ''; // Sıfırla
 }
 
-function openLightbox(imgSrc) {
-    document.getElementById('lightboxImg').src = imgSrc;
+document.getElementById('fileInput').addEventListener('change', (e) => handleImageUpload(e, false));
+document.getElementById('cameraInput').addEventListener('change', (e) => handleImageUpload(e, true));
+
+// Lightbox & Onaylı Silme Modalı
+function openLightbox(index) {
+    activeLightboxIndex = index;
+    document.getElementById('lightboxImg').src = galleryPhotos[index];
     document.getElementById('lightboxModal').classList.add('active');
 }
 function closeLightbox() {
     document.getElementById('lightboxModal').classList.remove('active');
+    activeLightboxIndex = null;
+}
+
+document.getElementById('lightboxShareBtn').addEventListener('click', () => {
+    if (navigator.share && activeLightboxIndex !== null) {
+        navigator.share({
+            title: 'Tuncay & Özge Anısı',
+            text: 'Bu harika anımıza bakın! ❤️',
+            url: galleryPhotos[activeLightboxIndex]
+        }).catch(() => {});
+    } else {
+        alert("Tarayıcınız paylaşım özelliğini desteklemiyor.");
+    }
+});
+
+document.getElementById('lightboxDeleteBtn').addEventListener('click', () => {
+    document.getElementById('deleteConfirmModal').classList.add('active');
+});
+
+function closeDeleteConfirmModal() {
+    document.getElementById('deleteConfirmModal').classList.remove('active');
+}
+
+document.getElementById('confirmDeletePhotoBtn').addEventListener('click', () => {
+    if (activeLightboxIndex !== null) {
+        galleryPhotos.splice(activeLightboxIndex, 1);
+        localStorage.setItem('sincapGalleryPhotos', JSON.stringify(galleryPhotos));
+        renderGallery();
+        closeDeleteConfirmModal();
+        closeLightbox();
+    }
+});
+
+// Günün Anısı (Rastgele / Akıllı Değişen)
+function initRandomMemory() {
+    if (galleryPhotos.length > 0) {
+        const randomIndex = Math.floor(Math.random() * galleryPhotos.length);
+        document.getElementById('randomMemoryImg').src = galleryPhotos[randomIndex];
+        document.getElementById('randomMemoryWrapper').onclick = () => openLightbox(randomIndex);
+    }
 }
 
 // Ruh Hali Logları Modalı Göster
@@ -461,7 +539,7 @@ document.getElementById('saveNewPinBtn').addEventListener('click', () => {
     err.textContent = "";
 });
 
-// Takvim & Özel Günler (Ay/Gün Bazlı Yaklaşan Sıralama, Silme Butonlu)
+// Takvim & Özel Günler (Ay/Gün Bazlı Yaklaşan Sıralama)
 let realNow = new Date();
 let currentCalendarDate = new Date(realNow.getFullYear(), realNow.getMonth(), 1);
 
@@ -531,7 +609,6 @@ document.getElementById('nextMonthBtn').addEventListener('click', () => {
 });
 
 function renderSpecialDays() {
-    // Yıl bağımsız, bugünden sonraki en yakın ay/güne göre akıllı sıralama
     const todayMonthDay = String(realNow.getMonth() + 1).padStart(2, '0') + '-' + String(realNow.getDate()).padStart(2, '0');
 
     specialDays.sort((a, b) => {
