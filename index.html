@@ -3,28 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#ee7752">
+    <meta name="theme-color" content="#ff758c">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Sincap & Sevgilisi ❤️</title>
+    <!-- 🤎 Özel Kahverengi S Logosu (Favicon) -->
+    <link rel="icon" type="image/png" href="s_logo.png">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- 🔥 FIREBASE CANLI VERİTABANI KÜTÜPHANELERİ -->
+    <!-- 🔥 FIREBASE KÜTÜPHANELERİ -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-    <!-- 🔒 2 Aşamalı Güvenlik & Görev Kilit Ekranı -->
-    <div class="lock-screen" id="lockScreen">
-        <!-- Aşama 1: PIN Girişi -->
+    <!-- ✨ 1. YENİ SPLASH / KARŞILAMA EKRANI -->
+    <div class="splash-screen" id="splashScreen">
+        <div class="splash-content">
+            <div class="splash-logo-box">
+                <img src="s_logo.png" alt="S Logo" class="splash-s-logo">
+            </div>
+            <h1>Sincap & Özge</h1>
+            <p class="splash-slogan">"Bu Masala Giriş Yap"</p>
+            <button class="love-btn splash-enter-btn" onclick="splashGecisYap()">Giriş Yap ✨</button>
+        </div>
+    </div>
+
+    <!-- 🔒 2. PIN GİRİŞ EKRANI -->
+    <div class="lock-screen ios-hidden" id="lockScreen">
         <div class="lock-card" id="pinStage">
             <div class="lock-icon">🔒</div>
             <h2>Sadece İkimize Özel ❤️</h2>
             <p>Devam etmek için 4 haneli pin kodumuzu gir:</p>
 
             <div class="pin-container" id="pinContainer">
-                <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box" autocomplete="one-time-code" autofocus>
+                <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box" autocomplete="one-time-code">
                 <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box" autocomplete="one-time-code">
                 <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box" autocomplete="one-time-code">
                 <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box" autocomplete="one-time-code">
@@ -33,20 +46,20 @@
             <p id="passError" class="pass-error" style="display:none;">Hatalı şifre yavru sincabım! 🐿️</p>
         </div>
 
-        <!-- Aşama 2: Eğlenceli Görev / Ruh Hali -->
-        <div class="lock-card" id="taskStage" style="display:none;">
+        <!-- 🎭 3. RUH HALİ & KİM OLUŞ GÖREVİ -->
+        <div class="lock-card ios-hidden" id="taskStage">
             <div class="lock-icon" id="taskIcon">🎭</div>
-            <h2 id="taskTitle">Günün Görevi</h2>
-            <p id="taskDesc">Devam etmek için görevi tamamla:</p>
+            <h2 id="taskTitle">Ruh Hali Görevi</h2>
+            <p id="taskDesc">Devam etmek için ruh halini seç:</p>
 
-            <!-- Görev A: Ruh Hali Slider + Yüzde Göstergesi -->
             <div id="taskSliderGame" class="task-box">
-                <p style="font-size:11px; margin-bottom:6px;">Sen kimsin ve şu an ruh halin nasıl?</p>
+                <p style="font-size:11px; margin-bottom:6px; font-weight:500;">Sen kimsin?</p>
                 
-                <div style="display:flex; gap:8px; justify-content:center; margin-bottom:8px;">
-                    <button id="btnUser1" class="user-select-btn active" onclick="selectUser('Tuncay')">👦 Tuncay</button>
-                    <button id="btnUser2" class="user-select-btn" onclick="selectUser('Yavru Sincap')">🐿️ Yavru Sincap</button>
+                <div style="display:flex; gap:10px; justify-content:center; margin-bottom:10px;">
+                    <button id="btnUser1" class="user-select-pill" onclick="selectUser('Tuncay')">👦 Tuncay</button>
+                    <button id="btnUser2" class="user-select-pill" onclick="selectUser('Özge')">🐿️ Özge</button>
                 </div>
+                <div id="userWarningBubble" class="warning-bubble" style="display:none;">Kim olduğunu seçmelisin! ⚠️</div>
 
                 <div id="moodStatusText" style="font-size:13px; font-weight:700; color:#ffdd59; margin-bottom:2px;">🥰 Çok Mutluyum!</div>
                 <div id="moodPercentBadge" style="font-size:9px; background:rgba(255,255,255,0.15); display:inline-block; padding:2px 6px; border-radius:8px; margin-bottom:8px; font-weight:600; color:#ffdd59;">%50</div>
@@ -57,50 +70,54 @@
                     <span>🥺 Üzgün</span>
                     <span>🥰 Mutlu</span>
                 </div>
-                <button class="love-btn" style="margin-top:10px;" onclick="saveMoodAndEnter()">Kaydet & Giriş Yap 🗝️</button>
+                <button class="love-btn" style="margin-top:12px;" onclick="saveMoodAndEnter()">Kaydet & Giriş Yap 🗝️</button>
                 <button class="skip-btn-glass" onclick="kilitCoz()">Bu seferlik atla ➡️</button>
-            </div>
-
-            <!-- Görev B: Sincap Yakalama Oyunu -->
-            <div id="taskCatchGame" class="task-box" style="display:none;">
-                <p style="font-size:11px; opacity:0.9;">Ekranda beliren 3 sincabı yakala! (<span id="catchCount">0</span>/3)</p>
-                <div class="catch-area" id="catchArea"></div>
-                <button class="skip-btn-glass" style="margin-top:8px;" onclick="kilitCoz()">Bu seferlik atla ➡️</button>
             </div>
         </div>
     </div>
 
-    <!-- Arka planda uçuşan kalpler -->
+    <!-- 🔔 ÜST BİLDİRİM BALONCUĞU -->
+    <div class="live-toast" id="liveToast">
+        <span id="toastText">Yeni bir bildirim var! 💌</span>
+    </div>
+
+    <!-- Arka plan kalpler -->
     <div class="bg-animation" id="bgAnimation"></div>
 
     <div class="main-wrapper">
-        <!-- Üst Müzik Widget'ı -->
-        <div class="top-music-widget">
+        <!-- 🎵 ÜST GELİŞMİŞ MÜZİK WIDGET'I (Seek Bar + Şarkı Sözü Tıklamalı) -->
+        <div class="top-music-widget" onclick="sarkiSozleriAcKapat()">
             <audio id="bgMusic" src="sarkilarimiz/Ajda_Pekkan_Sen_Olurdun_Yine.mp3" loop></audio>
             <div class="song-info">
                 <span class="music-icon">🎵</span>
                 <div class="song-text">
                     <span class="song-title" id="songTitle">Sen Olurdun Yine</span>
-                    <span class="song-artist" id="songArtist">Ajda Pekkan</span>
+                    <span class="song-artist" id="songArtist">Ajda Pekkan (Sözler için dokun 📜)</span>
                 </div>
             </div>
-            <div class="widget-controls">
+            <div class="widget-controls" onclick="event.stopPropagation()">
                 <button id="playBtn" class="widget-btn-main" onclick="muzikOynatDuraklat()">▶️</button>
-                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.2" oninput="sesAyarla(this.value)" title="Ses Seviyesi">
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.2" oninput="sesAyarla(this.value)" title="Ses">
                 <button id="muteBtn" class="widget-btn" onclick="sesSustur()">🔊</button>
+            </div>
+            <!-- Seek / İlerleme Çubuğu -->
+            <div class="music-progress-container" onclick="event.stopPropagation()">
+                <span id="currentTime" class="time-label">0:00</span>
+                <input type="range" id="songProgressBar" min="0" max="100" value="0" oninput="sarkiIlerle(this.value)">
+                <span id="totalTime" class="time-label">0:00</span>
             </div>
         </div>
 
         <!-- 📸 WIDGET: Günün Anısı Köşesi -->
-        <div class="daily-photo-widget" id="dailyPhotoWidget" onclick="galeriAcKapat()">
-            <div class="widget-badge">📸 Günün Anısı</div>
+        <div class="daily-photo-widget" id="dailyPhotoWidget" onclick="gununAnisinaGit()">
+            <div class="widget-badge">📸 Günün Anısı (Gitmek için tıkla)</div>
             <img id="dailyWidgetImg" src="giris_sincaplar_gemini.jpg" alt="Günün Anısı">
         </div>
 
         <!-- Ana Kart -->
         <div class="card">
             <div class="profile-icon">
-                <img src="giris_sincaplar_gemini.jpg" alt="Sincaplar" class="sincap-img">
+                <img src="s_logo.png" alt="Logo" class="sincap-img">
             </div>
             <h1>Bizim Hikayemiz</h1>
             <p class="subtitle">Birlikte geçen her an çok özel...</p>
@@ -112,7 +129,8 @@
                 <div class="time-unit"><span id="saniye">0</span><small>Saniye</small></div>
             </div>
 
-            <button class="love-btn" onclick="kalpPatlat()">Seni Seviyorum ❤️</button>
+            <!-- 💖 HAREKETLİ DİKKAT ÇEKİCİ BUTON -->
+            <button class="love-btn pulse-love-btn" onclick="kalpPatlat()">Seni Seviyorum ❤️</button>
 
             <!-- Menü Paneli -->
             <div class="menu-panel" id="menuPanel">
@@ -122,14 +140,31 @@
                 <button class="menu-item" onclick="todoAcKapat()">📋 Yapılacaklar Listesi</button>
                 <button class="menu-item" onclick="wheelAcKapat()">🎡 Aşk Çarkıfeleği</button>
                 <button class="menu-item" onclick="notlarAcKapat()">💌 Özel Notlar</button>
-                <button class="menu-item" onclick="moodAcKapat()">🎭 Ruh Halimiz Log</button>
-                <button class="menu-item menu-item-small" onclick="sifreDegistirModalAcKapat()">⚙️ PIN Şifresini Değiştir</button>
+                
+                <!-- ⚙️ YAN YANA SAĞLI SOLLU KÜÇÜK BUTONLAR -->
+                <div class="menu-row-double">
+                    <button class="menu-item menu-item-small" onclick="moodAcKapat()">🎭 Ruh Hali Log</button>
+                    <button class="menu-item menu-item-small" onclick="sifreDegistirModalAcKapat()">⚙️ PIN Değiştir</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Modallar -->
-    <div class="modal" id="ozelGunModal">
+    <!-- 📜 ŞARKI SÖZLERİ MODALI -->
+    <div class="modal ios-modal" id="lyricsModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="sarkiSozleriAcKapat()">&times;</span>
+            <h2>📜 Şarkı Sözleri</h2>
+            <div class="lyrics-box" id="lyricsContent">
+                <p><b>Sen Olurdun Yine</b></p>
+                <p>Gözlerinde kaybolduğum o gün,<br>Dünyanın en güzel rengiydi.<br>Birlikte attı kalbimiz bütün,<br>Her şarkının sonunda sen oldun...</p>
+                <p style="margin-top:10px; font-size:10px; opacity:0.8;">İkimize yazılan bu şarkı hiç bitmesin ❤️</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⏳ ÖZEL GÜNLER MODALI -->
+    <div class="modal ios-modal" id="ozelGunModal">
         <div class="modal-content">
             <span class="close-btn" onclick="ozelGunlerAcKapat()">&times;</span>
             <h2>⏳ Özel Günlerimiz</h2>
@@ -138,7 +173,7 @@
         </div>
     </div>
 
-    <div class="modal" id="addOzelGunModal">
+    <div class="modal ios-modal" id="addOzelGunModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="ozelGunEkleModalAcKapat()">&times;</span>
             <h2>⏳ Özel Gün Ekle</h2>
@@ -150,23 +185,26 @@
         </div>
     </div>
 
-    <div class="modal" id="wheelModal">
+    <!-- 🎡 AŞK ÇARKIFELEĞİ MODALI (Direkt Çarka Tıklayarak Hızlı Dönüş) -->
+    <div class="modal ios-modal" id="wheelModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="wheelAcKapat()">&times;</span>
             <h2>🎡 Aşk Çarkıfeleği</h2>
-            <p style="font-size:11px; opacity:0.8; margin-bottom:8px;">Çarkı çevir, kaderindeki sürpriz görevi gör!</p>
-            <div class="wheel-container" id="wheelContainer">
+            <p style="font-size:11px; opacity:0.8; margin-bottom:8px;">Çarka dokun ve kaderindeki sürprizi gör! 🎯</p>
+            
+            <div class="wheel-container" id="wheelContainer" onclick="spinWheel()">
                 <div class="wheel-pointer">▼</div>
-                <div class="wheel-disk" id="wheelDisk"><span class="wheel-label">ÇEVİR 🎲</span></div>
+                <div class="wheel-disk" id="wheelDisk"><span class="wheel-label">DOKUN 🎲</span></div>
             </div>
+
             <div class="surprise-card-box" id="surpriseCardBox" style="margin-top:10px;">
-                <span id="surpriseText" style="font-size:13px; font-weight:600; color:#ffdd59;">Hadi çarkı çevir ve şansını dene! 🎁</span>
+                <span id="surpriseText" style="font-size:13px; font-weight:600; color:#ffdd59;">Hadi çarka dokun ve şansını dene! 🎁</span>
             </div>
-            <button class="love-btn" style="margin-top:10px;" id="spinBtn" onclick="spinWheel()">Çarkı Çevir! 🎡</button>
         </div>
     </div>
 
-    <div class="modal" id="moodModal">
+    <!-- 🎭 RUH HALİ LOG MODALI -->
+    <div class="modal ios-modal" id="moodModal">
         <div class="modal-content">
             <span class="close-btn" onclick="moodAcKapat()">&times;</span>
             <h2>🎭 Ruh Hali Geçmişimiz</h2>
@@ -174,7 +212,8 @@
         </div>
     </div>
 
-    <div class="modal" id="musicModal">
+    <!-- 🎵 ŞARKI LİSTESİ MODALI -->
+    <div class="modal ios-modal" id="musicModal">
         <div class="modal-content">
             <span class="close-btn" onclick="sarkiListesiAcKapat()">&times;</span>
             <h2>🎵 Ortak Şarkı Listemiz</h2>
@@ -183,11 +222,12 @@
         </div>
     </div>
 
-    <div class="modal" id="platformSelectModal">
+    <!-- 🎧 PLATFORM SEÇİM MODALI -->
+    <div class="modal ios-modal" id="platformSelectModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="platformModalAcKapat()">&times;</span>
             <h2 id="selectedSongName">Şarkı Dinle</h2>
-            <p style="font-size: 11px; opacity:0.8; margin-bottom:10px;">Hangi uygulamada dinlemek istersin?</p>
+            <p style="font-size: 11px; opacity:0.8; margin-bottom:10px;">Hangi uygulamada açmak istersin?</p>
             <div class="add-song-box">
                 <button style="background: #1DB954;" onclick="openPlatform('spotify')">🟢 Spotify'da Aç</button>
                 <button style="background: #FF0000;" onclick="openPlatform('ytmusic')">🔴 YouTube Music'te Aç</button>
@@ -196,7 +236,8 @@
         </div>
     </div>
 
-    <div class="modal" id="todoModal">
+    <!-- 📋 YAPILACAKLAR MODALI -->
+    <div class="modal ios-modal" id="todoModal">
         <div class="modal-content">
             <span class="close-btn" onclick="todoAcKapat()">&times;</span>
             <h2>📋 Yapılacaklar Listemiz</h2>
@@ -205,7 +246,7 @@
         </div>
     </div>
 
-    <div class="modal" id="addTodoModal">
+    <div class="modal ios-modal" id="addTodoModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="todoEkleModalAcKapat()">&times;</span>
             <h2>📋 Plan / Hedef Ekle</h2>
@@ -216,7 +257,8 @@
         </div>
     </div>
 
-    <div class="modal" id="notesModal">
+    <!-- 💌 NOTLAR MODALI -->
+    <div class="modal ios-modal" id="notesModal">
         <div class="modal-content">
             <span class="close-btn" onclick="notlarAcKapat()">&times;</span>
             <h2>💌 Özel Notlarımız</h2>
@@ -225,7 +267,7 @@
         </div>
     </div>
 
-    <div class="modal" id="addSongModal">
+    <div class="modal ios-modal" id="addSongModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="sarkiEkleModalAcKapat()">&times;</span>
             <h2>🎵 Şarkı Ekle</h2>
@@ -236,18 +278,19 @@
         </div>
     </div>
 
-    <div class="modal" id="addNoteModal">
+    <div class="modal ios-modal" id="addNoteModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="notEkleModalAcKapat()">&times;</span>
             <h2>💌 Özel Not Ekle</h2>
             <div class="add-song-box">
-                <textarea id="newNoteText" placeholder="Notunu yaz yavru sincabım..." rows="3"></textarea>
+                <textarea id="newNoteText" placeholder="Notunu yaz sevgilim..." rows="3"></textarea>
                 <button onclick="notEkle()">Notu Kaydet</button>
             </div>
         </div>
     </div>
 
-    <div class="modal" id="changePassModal">
+    <!-- ⚙️ ŞİFRE DEĞİŞTİRME MODALI -->
+    <div class="modal ios-modal" id="changePassModal">
         <div class="modal-content" style="height:auto;">
             <span class="close-btn" onclick="sifreDegistirModalAcKapat()">&times;</span>
             <h2>⚙️ PIN Şifresini Değiştir</h2>
@@ -264,7 +307,8 @@
         </div>
     </div>
 
-    <div class="modal" id="galleryModal">
+    <!-- 📸 GALERİ MODALI -->
+    <div class="modal ios-modal" id="galleryModal">
         <div class="modal-content">
             <span class="close-btn" onclick="galeriAcKapat()">&times;</span>
             <h2>📸 Anı Galerimiz</h2>
@@ -277,6 +321,7 @@
         </div>
     </div>
 
+    <!-- 🔍 BÜYÜK RESİM LIGHTBOX -->
     <div class="lightbox" id="lightbox" onclick="lightboxKapat()">
         <img id="lightboxImg" src="" alt="Büyük Görsel">
     </div>

@@ -16,7 +16,16 @@ const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/kokuno0e/image/upload";
 const CLOUDINARY_PRESET = "sincap_cloud";
 
 let OZEL_SIFRE = localStorage.getItem("sincapOzelSifre") || "1508"; 
+let aktifKullanici = localStorage.getItem("sincapAktifKullanici") || "";
 
+// Splash -> PIN Ekranı Geçişi
+function splashGecisYap() {
+    document.getElementById("splashScreen").classList.add("gizle");
+    document.getElementById("lockScreen").classList.remove("ios-hidden");
+    setTimeout(() => { pinInputs[0].focus(); }, 100);
+}
+
+// PIN Kontrolü ve Otomatik Klavye Odaklanma
 const pinInputs = document.querySelectorAll('.pin-box');
 const pinStage = document.getElementById("pinStage");
 const taskStage = document.getElementById("taskStage");
@@ -48,9 +57,8 @@ function sifreKontrol() {
 
     if (girilenSifre === OZEL_SIFRE) {
         errorMsg.style.display = "none";
-        pinStage.style.display = "none";
-        taskStage.style.display = "block";
-        randomTaskInit();
+        pinStage.classList.add("ios-hidden");
+        taskStage.classList.remove("ios-hidden");
     } else {
         errorMsg.style.display = "block";
         pinInputs.forEach(input => input.value = "");
@@ -58,6 +66,7 @@ function sifreKontrol() {
     }
 }
 
+// Şifre Değiştirme
 function yeniSifreleriGosterGizle(eyeBtn) {
     const newPass = document.getElementById("newPassInput");
     const confirmPass = document.getElementById("confirmPassInput");
@@ -90,62 +99,23 @@ function sifreGuncelle() {
     sifreDegistirModalAcKapat();
 }
 
-let caughtSquirrels = 0;
+// 🎭 Ruh Hali & Zorunlu Profil Seçimi (Başta Seçili Yok)
+let selectedUser = "";
 let currentMood = "🥰 Çok Mutluyum!";
 let currentMoodPercent = 50;
-let selectedUser = "Tuncay";
 
 function selectUser(user) {
     selectedUser = user;
+    localStorage.setItem("sincapAktifKullanici", user);
     document.getElementById("btnUser1").classList.toggle("active", user === 'Tuncay');
-    document.getElementById("btnUser2").classList.toggle("active", user === 'Yavru Sincap');
-}
-
-function randomTaskInit() {
-    const isRareCatch = Math.random() < 0.2;
-    document.getElementById("taskSliderGame").style.display = "none";
-    document.getElementById("taskCatchGame").style.display = "none";
-
-    if (isRareCatch) {
-        document.getElementById("taskIcon").innerText = "🐿️";
-        document.getElementById("taskTitle").innerText = "Nadir Sincap Yakalama Görevi";
-        document.getElementById("taskCatchGame").style.display = "block";
-        spawnSquirrels();
-    } else {
-        document.getElementById("taskIcon").innerText = "🎭";
-        document.getElementById("taskTitle").innerText = "Ruh Hali Görevi";
-        document.getElementById("taskSliderGame").style.display = "block";
-        checkMoodSlider(50);
-    }
-}
-
-function spawnSquirrels() {
-    const area = document.getElementById("catchArea");
-    area.innerHTML = "";
-    caughtSquirrels = 0;
-    document.getElementById("catchCount").innerText = 0;
-
-    for (let i = 0; i < 3; i++) {
-        const sq = document.createElement("span");
-        sq.classList.add("clickable-squirrel");
-        sq.innerText = "🐿️";
-        sq.style.top = Math.floor(Math.random() * 65) + "px";
-        sq.style.left = Math.floor(Math.random() * 80) + "%";
-        sq.onclick = function() {
-            sq.remove();
-            caughtSquirrels++;
-            document.getElementById("catchCount").innerText = caughtSquirrels;
-            if (caughtSquirrels >= 3) { setTimeout(kilitCoz, 200); }
-        };
-        area.appendChild(sq);
-    }
+    document.getElementById("btnUser2").classList.toggle("active", user === 'Özge');
+    document.getElementById("userWarningBubble").style.display = "none";
 }
 
 function checkMoodSlider(val) {
     currentMoodPercent = val;
     const textEl = document.getElementById("moodStatusText");
     const percentEl = document.getElementById("moodPercentBadge");
-    
     percentEl.innerText = `%${val}`;
 
     if (val <= 30) {
@@ -162,12 +132,26 @@ function checkMoodSlider(val) {
 }
 
 function saveMoodAndEnter() {
+    if (!selectedUser) {
+        const card = document.getElementById("taskStage");
+        card.classList.add("screen-shake");
+        setTimeout(() => { card.classList.remove("screen-shake"); }, 300);
+        document.getElementById("userWarningBubble").style.display = "block";
+        return;
+    }
+
     db.collection("ruh_hali").add({
         kisi: selectedUser,
         durum: currentMood,
         yuzde: currentMoodPercent,
         tarih: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => { kilitCoz(); });
+    }).then(() => {
+        // Üzgün veya Sinirli ise Bildirim Gönder
+        if (currentMoodPercent <= 70) {
+            bildirimGonder(`${selectedUser} şu an ${currentMood} hissediyor! 🥺`);
+        }
+        kilitCoz();
+    });
 }
 
 function kilitCoz() {
@@ -185,7 +169,10 @@ function toggleModal(modalId) {
     }
 }
 
-// ⏳ Özel Günler
+// 📜 Şarkı Sözleri Modalı
+function sarkiSozleriAcKapat() { toggleModal("lyricsModal"); }
+
+// ⏳ Özel Günler (Doğum Günü ve Yıllık Döngü Düzeltmesi)
 let ozelGunlerListesi = [];
 db.collection("ozel_gunler").orderBy("tarih", "asc").onSnapshot((snapshot) => {
     ozelGunlerListesi = [];
@@ -208,15 +195,20 @@ function ozelGunCiz() {
     }
     const simdi = new Date();
     ozelGunlerListesi.forEach((gun) => {
+        let hedefTarih = new Date(gun.tarih);
+        // Yıllık döngü hesaplaması (Doğum günleri geçmişte kalmasın, bu yılki/gelecek yılki tarihi baz alsın)
+        let buYilHedef = new Date(simdi.getFullYear(), hedefTarih.getMonth(), hedefTarih.getDate());
+        if (buYilHedef < simdi) {
+            buYilHedef.setFullYear(simdi.getFullYear() + 1);
+        }
+        let farkGun = Math.ceil((buYilHedef - simdi) / (1000 * 60 * 60 * 24));
+
         const item = document.createElement("div");
         item.classList.add("song-item");
-        let hedefTarih = new Date(gun.tarih);
-        let farkGun = Math.ceil((hedefTarih - simdi) / (1000 * 60 * 60 * 24));
-        let kalanStr = farkGun >= 0 ? `${farkGun} gün kaldı 🎉` : `Kutlandı ❤️`;
         item.innerHTML = `
             <div style="display:flex; flex-direction:column; text-align:left;">
                 <span style="font-weight:700; font-size:11px; color:#ffdd59;">✨ ${gun.baslik}</span>
-                <span style="font-size:10px; margin-top:2px;">📅 ${gun.tarih} (${kalanStr})</span>
+                <span style="font-size:10px; margin-top:2px;">📅 ${gun.tarih} (${farkGun} gün kaldı 🎉)</span>
             </div>
             <button class="delete-song-btn" onclick="ozelGunSil('${gun.id}')">🗑️</button>
         `;
@@ -238,6 +230,7 @@ function ozelGunEkle() {
         baslikInput.value = "";
         tarihInput.value = "";
         ozelGunEkleModalAcKapat();
+        bildirimGonder(`Yeni özel gün eklendi: ${baslikInput.value} ⏳`);
     });
 }
 
@@ -246,16 +239,16 @@ function ozelGunSil(docId) {
     db.collection("ozel_gunler").doc(docId).delete();
 }
 
-// 🎡 Çarkıfelek (3 Saniye Hızlı Sonuçlanma)
+// 🎡 Çarkıfelek (Direkt Dokunarak Eşit Hızlı Dönüş)
 const surpriseCards = [
-    "🤗 Bugün Tuncay sana kocaman sarılma borçlu!",
-    "🍰 Yavru sincap sana en sevdiğin tatlıyı ısmarlayacak!",
+    "🤗 Bugün birbirinize kocaman sarılma borcunuz var!",
+    "🍰 En sevdiğiniz tatlıyı ısmarlama zamanı!",
     "💆‍♂️ 10 dakikalık masaj hakkı kazandın!",
-    "🎬 Bu akşamki filmi sen seçiyorsun!",
+    "🎬 Bu akşamki filmi/diziyi seçme hakkı sende!",
     "🍕 En sevdiğiniz yemeği söyleme sırası sende!",
     "💋 5 saniyelik uzun öpücük hakkı!",
-    "☕ Sabah kahvesini diğeri hazırlayacak!",
-    "🎵 Gün boyunca sadece senin seçtiğin şarkılar çalacak!",
+    "☕ Kahveleri hazırlama sırası değişti!",
+    "🎵 Gün boyunca sadece ortak şarkılarımız çalacak!",
     "💌 Telefonuna en tatlı iltifat mesajı yazılacak!"
 ];
 
@@ -266,16 +259,13 @@ function spinWheel() {
     if (isSpinning) return;
     isSpinning = true;
     const disk = document.getElementById("wheelDisk");
-    const spinBtn = document.getElementById("spinBtn");
     const surpriseText = document.getElementById("surpriseText");
-    spinBtn.disabled = true;
     surpriseText.innerText = "Çark dönüyor... 🎯";
-    const randomDegree = Math.floor(Math.random() * 720) + 1080;
+    const randomDegree = Math.floor(Math.random() * 720) + 1440;
     disk.style.transform = `rotate(${randomDegree}deg)`;
     setTimeout(() => {
         const randomCard = surpriseCards[Math.floor(Math.random() * surpriseCards.length)];
         surpriseText.innerText = randomCard;
-        spinBtn.disabled = false;
         isSpinning = false;
     }, 3000);
 }
@@ -310,13 +300,37 @@ function kalpPatlat() {
     document.getElementById("menuPanel").classList.toggle("acik");
 }
 
-// Müzik
+// 🎵 Gelişmiş Müzik Kontrolleri (Seek Bar + Süreler)
 const muzik = document.getElementById("bgMusic");
 const playBtn = document.getElementById("playBtn");
 const muteBtn = document.getElementById("muteBtn");
 const volumeSlider = document.getElementById("volumeSlider");
+const progressBar = document.getElementById("songProgressBar");
+const currentTimeEl = document.getElementById("currentTime");
+const totalTimeEl = document.getElementById("totalTime");
 
-if (muzik) { muzik.volume = 0.2; }
+if (muzik) { 
+    muzik.volume = 0.2; 
+    muzik.addEventListener('loadedmetadata', () => {
+        totalTimeEl.innerText = formatSaniye(muzik.duration);
+    });
+    muzik.addEventListener('timeupdate', () => {
+        if (!muzik.duration) return;
+        currentTimeEl.innerText = formatSaniye(muzik.currentTime);
+        progressBar.value = (muzik.currentTime / muzik.duration) * 100;
+    });
+}
+
+function formatSaniye( saniye ) {
+    let m = Math.floor(saniye / 60);
+    let s = Math.floor(saniye % 60);
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
+function sarkiIlerle(val) {
+    if (!muzik.duration) return;
+    muzik.currentTime = (val / 100) * muzik.duration;
+}
 
 function muzikOynatDuraklat() {
     if (!muzik) return;
@@ -373,7 +387,7 @@ function moodCiz() {
         let yuzdeStr = m.yuzde !== undefined ? ` (%${m.yuzde})` : '';
         item.innerHTML = `
             <div style="display:flex; flex-direction:column; text-align:left;">
-                <span style="font-weight:700; font-size:11px; color:#ffdd59;">👤 ${m.kisi || 'Sincap'}</span>
+                <span style="font-weight:700; font-size:11px; color:#ffdd59;">👤 ${m.kisi || 'Sevgili'}</span>
                 <span style="font-size:10px; margin-top:2px;">${m.durum}${yuzdeStr}</span>
                 <span style="font-size:8px; opacity:0.6; margin-top:1px;">🕒 ${zamanStr}</span>
             </div>
@@ -447,6 +461,7 @@ function sarkiEkle() {
     }).then(() => {
         nameInput.value = "";
         sarkiEkleModalAcKapat();
+        bildirimGonder(`Yeni şarkı eklendi: ${nameInput.value} 🎵`);
     });
 }
 
@@ -498,6 +513,7 @@ function todoEkle() {
     }).then(() => {
         input.value = "";
         todoEkleModalAcKapat();
+        bildirimGonder(`Yeni plan eklendi: ${input.value} 📋`);
     });
 }
 
@@ -550,13 +566,16 @@ function notEkle() {
     }).then(() => {
         noteInput.value = "";
         notEkleModalAcKapat();
+        bildirimGonder(`Yeni özel not eklendi 💌`);
     });
 }
 
 function notSil(docId) { db.collection("notlar").doc(docId).delete(); }
 
-// Galeri
+// 📸 Galeri & Günün Anısı Vurgulama (Flash Efekti)
 let fotograflarListesi = [];
+let aktifGununAnisiId = "";
+
 db.collection("fotograflar").orderBy("tarih", "desc").onSnapshot((snapshot) => {
     fotograflarListesi = [];
     snapshot.forEach((doc) => { fotograflarListesi.push({ id: doc.id, ...doc.data() }); });
@@ -568,9 +587,24 @@ function updateDailyWidget() {
     const imgEl = document.getElementById("dailyWidgetImg");
     if (!imgEl) return;
     if (fotograflarListesi.length > 0) {
-        const randomImg = fotograflarListesi[Math.floor(Math.random() * fotograflarListesi.length)].url;
-        imgEl.src = randomImg;
+        const randomIndex = Math.floor(Math.random() * fotograflarListesi.length);
+        const secilenFoto = fotograflarListesi[randomIndex];
+        imgEl.src = secilenFoto.url;
+        aktifGununAnisiId = secilenFoto.id;
     }
+}
+
+function gununAnisinaGit() {
+    galeriAcKapat();
+    setTimeout(() => {
+        if (!aktifGununAnisiId) return;
+        const hedefCard = document.getElementById(`foto-card-${aktifGununAnisiId}`);
+        if (hedefCard) {
+            hedefCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            hedefCard.classList.add("flash-highlight");
+            setTimeout(() => { hedefCard.classList.remove("flash-highlight"); }, 3000);
+        }
+    }, 350);
 }
 
 function galeriAcKapat() {
@@ -589,6 +623,7 @@ function galeriyiCiz() {
     fotograflarListesi.forEach((foto) => {
         const card = document.createElement("div");
         card.classList.add("gallery-card");
+        card.id = `foto-card-${foto.id}`;
         card.innerHTML = `
             <img src="${foto.url}" onclick="resimBuyut('${foto.url}')">
             <button class="delete-photo-btn" onclick="fotografSil('${foto.id}')">🗑️</button>
@@ -616,6 +651,7 @@ function fotografYukle(event) {
             }).then(() => {
                 statusText.style.display = "none";
                 event.target.value = "";
+                bildirimGonder(`Yeni bir fotoğraf yüklendi! 📸`);
             });
         }
     })
@@ -634,4 +670,15 @@ function resimBuyut(src) {
 
 function lightboxKapat() {
     document.getElementById("lightbox").classList.remove("acik");
+}
+
+// 🔔 Karşılıklı Canlı Bildirim Fonksiyonu
+function bildirimGonder(mesaj) {
+    const toast = document.getElementById("liveToast");
+    const text = document.getElementById("toastText");
+    text.innerText = mesaj;
+    toast.classList.add("goster");
+    setTimeout(() => {
+        toast.classList.remove("goster");
+    }, 4000);
 }
