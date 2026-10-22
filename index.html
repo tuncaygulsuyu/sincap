@@ -2,24 +2,24 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Tuncay & Özge - Romantik Dünyamız</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Splash / Karşılama Ekranı -->
+    <!-- 1. Splash Ekranı -->
     <div id="splashScreen" class="screen active">
         <div class="splash-content">
-            <div class="logo-badge animate-pulse">S</div>
+            <div class="logo-badge">S</div>
             <h1>Tuncay & Özge</h1>
             <p class="subtitle">Bu Masala Giriş Yap</p>
             <button id="startBtn" class="primary-btn">Giriş Yap <i class="fa-solid fa-arrow-right"></i></button>
         </div>
     </div>
 
-    <!-- PIN Doğrulama Ekranı -->
+    <!-- 2. PIN Doğrulama Ekranı -->
     <div id="pinScreen" class="screen">
         <div class="pin-box">
             <div class="back-btn" onclick="goScreen('splashScreen')"><i class="fa-solid fa-chevron-left"></i></div>
@@ -36,7 +36,7 @@
         </div>
     </div>
 
-    <!-- Profil Seçimi & Ruh Hali Ekranı -->
+    <!-- 3. Profil Seçimi & Ruh Hali Ekranı -->
     <div id="profileScreen" class="screen">
         <div class="profile-container">
             <h2>Kim Konuşuyor?</h2>
@@ -67,9 +67,9 @@
         </div>
     </div>
 
-    <!-- Ana Uygulama Ekranı -->
+    <!-- 4. Ana Uygulama Ekranı -->
     <div id="mainAppScreen" class="screen">
-        <!-- Üst Bar & Gelişmiş Müzik Widget -->
+        <!-- Üst Bar & Müzik Widget -->
         <header class="app-header">
             <div class="music-widget-full">
                 <div class="music-top-row">
@@ -94,7 +94,7 @@
         <!-- İçerik Akışı -->
         <main class="app-content">
             
-            <!-- 1. ANA SAYFA -->
+            <!-- Ana Sayfa Sekmesi -->
             <div class="tab-content active" id="tab-home">
                 <div class="card relationship-card">
                     <h3><i class="fa-solid fa-heart-pulse"></i> Birlikte Geçen Zamanımız</h3>
@@ -114,7 +114,7 @@
                     </div>
                 </div>
 
-                <!-- Düzeltilmiş Küçültülmüş Aşk Çarkıfeleği -->
+                <!-- Küçültülmüş Aşk Çarkıfeleği -->
                 <div class="card wheel-card-compact">
                     <div class="wheel-header-compact">
                         <h3><i class="fa-solid fa-dharmachakra"></i> Aşk Çarkı</h3>
@@ -138,7 +138,7 @@
                 </div>
             </div>
 
-            <!-- 2. GALERİ (iOS Grid, Yeniler En Altta, Tıklayınca Tam Ekran) -->
+            <!-- Galeri Sekmesi -->
             <div class="tab-content" id="tab-gallery">
                 <div class="section-title-bar">
                     <h2>Anı Galerimiz</h2>
@@ -154,7 +154,7 @@
                 </div>
             </div>
 
-            <!-- 3. ÖZEL GÜNLER / TAKVİM -->
+            <!-- Özel Günler / Takvim Sekmesi -->
             <div class="tab-content" id="tab-days">
                 <div class="section-title-bar">
                     <h2>Özel Günlerimiz</h2>
@@ -175,7 +175,7 @@
                 <div class="special-days-list" id="specialDaysList"></div>
             </div>
 
-            <!-- 4. AYARLAR -->
+            <!-- Ayarlar Sekmesi -->
             <div class="tab-content" id="tab-settings">
                 <div class="section-title-bar">
                     <h2>Ayarlar</h2>
@@ -230,7 +230,7 @@
         </nav>
     </div>
 
-    <!-- Müzik Detay & Şarkı Sözleri Modalı -->
+    <!-- Müzik Modalı -->
     <div id="musicModal" class="modal">
         <div class="modal-content glass">
             <div class="close-modal" id="closeMusicModal"><i class="fa-solid fa-xmark"></i></div>
@@ -274,13 +274,11 @@
             <h3>PIN Şifresini Değiştir</h3>
             <div class="pin-change-form">
                 <input type="password" id="oldPinInput" placeholder="Mevcut PIN (1508)" maxlength="4" pattern="[0-9]*" inputmode="numeric">
-                
                 <div class="password-field-wrapper">
                     <input type="password" id="newPinInput1" placeholder="Yeni 4 Haneli PIN" maxlength="4" pattern="[0-9]*" inputmode="numeric">
                     <i class="fa-solid fa-eye toggle-password" id="togglePasswordBtn"></i>
                 </div>
                 <input type="password" id="newPinInput2" placeholder="Yeni PIN (Tekrar)" maxlength="4" pattern="[0-9]*" inputmode="numeric">
-                
                 <p id="pinChangeError" class="error-msg"></p>
                 <button id="saveNewPinBtn" class="primary-btn" style="margin-top: 10px;">Şifreyi Kaydet</button>
             </div>

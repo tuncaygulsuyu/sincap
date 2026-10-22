@@ -15,15 +15,12 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-body {
+html, body {
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
     background: var(--bg-gradient);
     color: var(--text-color);
-    width: 100vw;
-    height: 100vh;
-    height: 100dvh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     overflow: hidden;
     position: fixed;
 }
@@ -43,18 +40,6 @@ body {
 
 .screen.active {
     display: flex;
-}
-
-/* Masaüstünde telefon çerçevesi, mobilde tam ekran */
-@media(min-width: 480px) {
-    .screen {
-        max-width: 414px;
-        max-height: 896px;
-        border-radius: 40px;
-        border: 12px solid #2f3542;
-        box-shadow: var(--shadow);
-        position: relative;
-    }
 }
 
 /* Splash Ekranı */
@@ -393,7 +378,7 @@ body {
     font-size: 12px;
 }
 
-/* KESİN ÇÖZÜMLÜ KÜÇÜLTÜLMÜŞ AŞK ÇARKIFELEĞİ */
+/* Küçültülmüş Aşk Çarkıfeleği (Taşma Önleyici Kesin Tasarım) */
 .wheel-card-compact {
     padding: 12px 15px;
 }
@@ -447,7 +432,6 @@ body {
     background: #fff;
 }
 
-/* Flexbox taşmasını önleyen kesin dilim konumlandırması */
 .wheel-sm .slice {
     position: absolute;
     top: 0;
