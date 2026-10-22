@@ -71,7 +71,6 @@
 
     <!-- 4. Ana Uygulama Ekranı -->
     <div id="mainAppScreen" class="screen">
-        <!-- Üst Bar & Müzik Widget (Sabit) -->
         <header class="app-header">
             <div class="music-widget-full">
                 <div class="music-top-row">
@@ -93,9 +92,7 @@
             </div>
         </header>
 
-        <!-- İçerik Akışı (4 Sekme) -->
         <main class="app-content">
-            
             <!-- Ana Sayfa Sekmesi -->
             <div class="tab-content active" id="tab-home">
                 <div class="card relationship-card" id="relationshipCardWrap">
@@ -244,7 +241,7 @@
         </nav>
     </div>
 
-    <!-- Modaller (Arka plana tıklayarak kapatma özellikli) -->
+    <!-- Modaller -->
     <div id="musicModal" class="modal" onclick="checkOutsideClick(event, 'musicModal')">
         <div class="modal-content">
             <div class="close-modal" id="closeMusicModal"><i class="fa-solid fa-xmark"></i></div>
@@ -280,12 +277,13 @@
         </div>
     </div>
 
+    <!-- Şarkılarımız Modalı -->
     <div id="songsWidgetModal" class="modal" onclick="checkOutsideClick(event, 'songsWidgetModal')">
-        <div class="modal-content" style="max-height:80vh; overflow-y:auto;">
+        <div class="modal-content" style="max-height:85vh; display:flex; flex-direction:column;">
             <div class="close-modal" onclick="closeSongsWidgetModal()"><i class="fa-solid fa-xmark"></i></div>
-            <h3>Şarkılarımız</h3>
-            <button class="primary-btn" id="openAddSongModal" style="padding:8px 15px; font-size:13px; margin:10px 0;"><i class="fa-solid fa-plus"></i> Yeni Şarkı Ekle</button>
-            <div class="songs-list" id="songsWidgetListContainer" style="margin-top:10px; text-align:left;"></div>
+            <h3 style="flex-shrink:0;">Şarkılarımız</h3>
+            <button class="primary-btn" id="openAddSongModal" style="padding:10px 15px; font-size:13px; margin:10px 0; flex-shrink:0;"><i class="fa-solid fa-plus"></i> Yeni Şarkı Ekle</button>
+            <div class="songs-list" id="songsWidgetListContainer" style="margin-top:5px; text-align:left; overflow-y:auto; flex:1; max-height:280px; padding-right:4px;"></div>
         </div>
     </div>
 
@@ -324,6 +322,7 @@
         </div>
     </div>
 
+    <!-- Özelleştirilmiş Çark Modali -->
     <div id="customWheelAppModal" class="modal" onclick="checkOutsideClick(event, 'customWheelAppModal')">
         <div class="modal-content" style="max-height:85vh; overflow-y:auto;">
             <div class="close-modal" onclick="closeCustomWheelAppModal()"><i class="fa-solid fa-xmark"></i></div>
@@ -335,9 +334,8 @@
                 <button onclick="addWheelOption()" class="primary-btn" style="width:auto; padding:8px 12px; font-size:12px;">Ekle</button>
             </div>
 
-            <div id="wheelOptionsListContainer" style="display:flex; flex-direction:column; gap:6px; max-height:110px; overflow-y:auto; text-align:left; margin-bottom:15px;"></div>
+            <div id="wheelOptionsListContainer" style="display:flex; flex-direction:column; gap:6px; max-height:100px; overflow-y:auto; text-align:left; margin-bottom:15px;"></div>
 
-            <!-- Gelişmiş Kusursuz Çark -->
             <div style="position:relative; width:150px; height:150px; margin:15px auto;">
                 <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:10px solid transparent; border-right:10px solid transparent; border-top:16px solid var(--text-color); z-index:10;"></div>
                 <div id="proInteractiveWheel" style="width:100%; height:100%; border-radius:50%; border:4px solid var(--card-bg); box-shadow:0 5px 15px rgba(0,0,0,0.15); position:relative; transition: transform 4s cubic-bezier(0.15,0,0.15,1);"></div>
@@ -395,13 +393,13 @@
         </div>
     </div>
 
-    <!-- Ortalanmış & Pratik Tarih Seçimli Özel Gün Ekle Modalı -->
+    <!-- Yeni Özel Gün Ekle Modalı -->
     <div id="addSpecialDayModal" class="modal" onclick="checkOutsideClick(event, 'addSpecialDayModal')">
         <div class="modal-content">
             <div class="close-modal" onclick="closeAddSpecialDayModal()"><i class="fa-solid fa-xmark"></i></div>
             <h3>Yeni Özel Gün Ekle</h3>
             
-            <input type="text" id="specialDayTitleInput" placeholder="Etkinlik Adı (örn: Özge'nin Doğum Günü)">
+            <input type="text" id="specialDayTitleInput" placeholder="Etkinlik Adı (örn: Özge Doğum Günü)">
             <input type="text" id="specialDayDescInput" placeholder="Açıklama / Not">
             
             <div class="date-picker-group">
