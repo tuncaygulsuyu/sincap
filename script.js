@@ -3,13 +3,27 @@ function goScreen(screenId) {
     document.getElementById(screenId).classList.add('active');
 }
 
-// Splash Giriş
+const darkModeToggle = document.getElementById('darkModeToggle');
+const savedTheme = localStorage.getItem('sincapTheme') || 'light';
+if (savedTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    darkModeToggle.checked = true;
+}
+darkModeToggle.addEventListener('change', (e) => {
+    if (e.target.checked) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('sincapTheme', 'dark');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('sincapTheme', 'light');
+    }
+});
+
 document.getElementById('startBtn').addEventListener('click', () => {
     goScreen('pinScreen');
     document.getElementById('pinInput').focus();
 });
 
-// PIN Doğrulama & Klavye Kaydırma
 let currentPin = localStorage.getItem('sincapPin') || "1508";
 const pinInput = document.getElementById('pinInput');
 const dots = document.querySelectorAll('.dot');
@@ -46,7 +60,6 @@ pinInput.addEventListener('input', (e) => {
     }
 });
 
-// Profil Seçimi & Ruh Hali & Log Tutma
 let selectedProfile = null;
 const profileCards = document.querySelectorAll('.profile-card');
 const warningTooltip = document.getElementById('profileWarning');
@@ -98,7 +111,6 @@ function handleLoginSave() {
 }
 
 document.getElementById('saveProfileBtn').addEventListener('click', handleLoginSave);
-
 document.getElementById('skipProfileBtn').addEventListener('click', () => {
     selectedProfile = "Misafir / Sincap";
     finalizeLogin();
@@ -112,17 +124,17 @@ function finalizeLogin() {
     renderMoodLogs();
     renderGallery();
     initRandomMemory();
+    startAutoFadeInMusic();
 }
 
-// Çıkış Yap Butonu İşlevi
 document.getElementById('logoutBtn').addEventListener('click', () => {
+    audioPlayer.pause();
     pinInput.value = "";
     dots.forEach(d => d.classList.remove('filled'));
     goScreen('pinScreen');
     pinInput.focus();
 });
 
-// Alt Navigasyon (4 Sekme)
 document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => {
     btn.addEventListener('click', (e) => {
         document.querySelectorAll('.bottom-nav .nav-item').forEach(b => b.classList.remove('active'));
@@ -135,7 +147,6 @@ document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => {
     });
 });
 
-// İlişki Sayaç (Saniyeli Güncelleme)
 function initRelationshipCounter() {
     const startDate = new Date('2026-08-15T00:00:00');
     function updateCounter() {
@@ -155,37 +166,10 @@ function initRelationshipCounter() {
     setInterval(updateCounter, 1000);
 }
 
-// Gelişmiş Aşk Falı Çarkı
-let currentRotation = 0;
-const wheelFortunes = [
-    "Gözlerini Kapat ve Beni Hayal Et 🥰",
-    "Şu An Bana En Tatlı İltifatı Yap 💬",
-    "İlk Buluştuğumuz Günü Hatırla 🕰️",
-    "Sürpriz Bir Öpücük Hak Ettin! 💋",
-    "Birlikte En Sevdiğimiz Şarkıyı Aç 🎶",
-    "Gelecek Hafta İçin Kaçamak Planla ✈️"
-];
-
-function spinWheel() {
-    const wheel = document.getElementById('loveWheel');
-    const randomAdd = Math.floor(Math.random() * 360) + 1440;
-    currentRotation += randomAdd;
-    wheel.style.transform = `rotate(${currentRotation}deg)`;
-
-    setTimeout(() => {
-        const actualDeg = currentRotation % 360;
-        const index = Math.floor(((360 - (actualDeg % 360)) % 360) / 90);
-        alert(`✨ Çarktan Çıkan Falın: "${wheelFortunes[index]}" ✨`);
-    }, 4000);
-}
-document.getElementById('spinWheelBtn').addEventListener('click', spinWheel);
-document.getElementById('wheelWrapperClickable').addEventListener('click', spinWheel);
-
 document.getElementById('loveBtn').addEventListener('click', () => {
     alert("Seni çok ama çok seviyorum Yavru Sincabım! ❤️🐿️");
 });
 
-// Müzik Oynatıcı Kontrolleri
 const audioPlayer = document.getElementById('audioPlayer');
 const musicModal = document.getElementById('musicModal');
 const quickPlayPauseBtn = document.getElementById('quickPlayPauseBtn');
@@ -194,12 +178,34 @@ const quickMuteBtn = document.getElementById('quickMuteBtn');
 const miniSeekBar = document.getElementById('miniSeekBar');
 const fullSeekBar = document.getElementById('fullSeekBar');
 
+function startAutoFadeInMusic() {
+    audioPlayer.volume = 0.0;
+    audioPlayer.play().then(() => {
+        quickPlayPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+        modalPlayPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+        
+        let step = 0;
+        const volumes = [0.1, 0.2, 0.3, 0.4, 0.5];
+        const fadeInterval = setInterval(() => {
+            if (step < volumes.length && !audioPlayer.paused) {
+                audioPlayer.volume = volumes[step];
+                step++;
+            } else {
+                clearInterval(fadeInterval);
+            }
+        }, 3000);
+    }).catch(() => {
+        console.log("Tarayıcı otomatik oynatmayı kısıtladı.");
+    });
+}
+
 document.getElementById('openMusicModal').addEventListener('click', () => musicModal.classList.add('active'));
 document.getElementById('closeMusicModal').addEventListener('click', () => musicModal.classList.remove('active'));
 
 function togglePlay() {
     if (audioPlayer.paused) {
         audioPlayer.play();
+        audioPlayer.volume = 0.5;
         quickPlayPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
         modalPlayPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
     } else {
@@ -246,7 +252,6 @@ document.getElementById('toggleLyricsBtn').addEventListener('click', () => {
     box.style.display = box.style.display === 'none' ? 'block' : 'none';
 });
 
-// Şarkılar Widget & Yönetimi
 let customSongs = JSON.parse(localStorage.getItem('sincapCustomSongs')) || [
     { title: "Sen Olurdun Yine", artist: "Ajda Pekkan" }
 ];
@@ -321,7 +326,6 @@ document.getElementById('saveNewSongBtn').addEventListener('click', () => {
     }
 });
 
-// Yapılacaklar Listesi Widget & Yönetimi
 let todoList = JSON.parse(localStorage.getItem('sincapTodoList')) || [
     { text: "Birlikte kahve içilecek ☕", completed: false },
     { text: "Akşam film gecesi yapılacak 🎬", completed: true }
@@ -372,7 +376,83 @@ function deleteTodo(index) {
     renderTodoList();
 }
 
-// Galeri: Çoklu Fotoğraf Seçimi, "Yükleniyor..." İbaresi, Ayna Düzeltmesi & Onaylı Silme
+let customWheelOptions = JSON.parse(localStorage.getItem('sincapCustomWheel')) || [
+    "Film İzle 🎬", "Kahve İç ☕", "Yürüyüş Yap 🌳", "Sürpriz Öpücük 💋"
+];
+let wheelRotationAngle = 0;
+
+function openCustomWheelAppModal() {
+    document.getElementById('customWheelAppModal').classList.add('active');
+    renderWheelOptionsList();
+    drawMiniWheel();
+}
+function closeCustomWheelAppModal() {
+    document.getElementById('customWheelAppModal').classList.remove('active');
+}
+
+function renderWheelOptionsList() {
+    const container = document.getElementById('wheelOptionsListContainer');
+    container.innerHTML = '';
+    customWheelOptions.forEach((opt, index) => {
+        const div = document.createElement('div');
+        div.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:var(--bg-gradient); padding:6px 10px; border-radius:6px; font-size:12px; border:1px solid var(--border-color);";
+        div.innerHTML = `<span>${opt}</span> <button class="delete-item-btn" onclick="deleteWheelOption(${index})" style="font-size:12px;"><i class="fa-solid fa-trash-can"></i></button>`;
+        container.appendChild(div);
+    });
+}
+
+function addWheelOption() {
+    const inp = document.getElementById('newWheelOptionInput');
+    const val = inp.value.trim();
+    if (val) {
+        customWheelOptions.push(val);
+        localStorage.setItem('sincapCustomWheel', JSON.stringify(customWheelOptions));
+        inp.value = '';
+        renderWheelOptionsList();
+        drawMiniWheel();
+    }
+}
+
+function deleteWheelOption(index) {
+    if (customWheelOptions.length <= 2) {
+        alert("Çarkta en az 2 seçenek kalmalıdır!");
+        return;
+    }
+    customWheelOptions.splice(index, 1);
+    localStorage.setItem('sincapCustomWheel', JSON.stringify(customWheelOptions));
+    renderWheelOptionsList();
+    drawMiniWheel();
+}
+
+function drawMiniWheel() {
+    const wheel = document.getElementById('dynamicInteractiveWheel');
+    wheel.innerHTML = '';
+    const sliceAngle = 360 / customWheelOptions.length;
+    const colors = ['#ff6b81', '#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#9b59b6'];
+
+    customWheelOptions.forEach((opt, i) => {
+        const slice = document.createElement('div');
+        slice.style.cssText = `position:absolute; top:0; left:0; width:50%; height:50%; transform-origin:100% 100%; transform: rotate(${i * sliceAngle}deg) skewY(-30deg); background: ${colors[i % colors.length]}; display:flex; align-items:center; justify-content:center; font-size:7px; font-weight:700; color:#fff; text-align:center; padding-left:8px;`;
+        slice.innerHTML = `<span>${opt}</span>`;
+        wheel.appendChild(slice);
+    });
+}
+
+function spinDynamicWheel() {
+    if (customWheelOptions.length === 0) return;
+    const wheel = document.getElementById('dynamicInteractiveWheel');
+    const randomAdd = Math.floor(Math.random() * 360) + 1440;
+    wheelRotationAngle += randomAdd;
+    wheel.style.transform = `rotate(${wheelRotationAngle}deg)`;
+
+    setTimeout(() => {
+        const actualDeg = wheelRotationAngle % 360;
+        const sliceAngle = 360 / customWheelOptions.length;
+        const index = Math.floor(((360 - (actualDeg % 360)) % 360) / sliceAngle) % customWheelOptions.length;
+        document.getElementById('wheelResultDisplay').textContent = `✨ Sonuç: ${customWheelOptions[index]} ✨`;
+    }, 4000);
+}
+
 let galleryPhotos = JSON.parse(localStorage.getItem('sincapGalleryPhotos')) || [
     "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&q=80",
     "https://images.unsplash.com/photo-1494774157365-9e04c6720e47?w=400&q=80"
@@ -392,7 +472,6 @@ function renderGallery() {
 }
 renderGallery();
 
-// Çoklu Yükleme & Kamera Düzeltmesi
 async function handleImageUpload(e, isCamera = false) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -407,8 +486,7 @@ async function handleImageUpload(e, isCamera = false) {
             reader.onload = function(event) {
                 let resultUrl = event.target.result;
                 if (isCamera) {
-                    // Kameradan gelen ayna yansımasını düzeltmek için canvas döndürme/çevirme simülasyonu
-                    resultUrl = event.target.result; 
+                    resultUrl = event.target.result;
                 }
                 galleryPhotos.push(resultUrl);
                 resolve();
@@ -420,13 +498,12 @@ async function handleImageUpload(e, isCamera = false) {
     localStorage.setItem('sincapGalleryPhotos', JSON.stringify(galleryPhotos));
     indicator.style.display = 'none';
     renderGallery();
-    e.target.value = ''; // Sıfırla
+    e.target.value = '';
 }
 
 document.getElementById('fileInput').addEventListener('change', (e) => handleImageUpload(e, false));
 document.getElementById('cameraInput').addEventListener('change', (e) => handleImageUpload(e, true));
 
-// Lightbox & Onaylı Silme Modalı
 function openLightbox(index) {
     activeLightboxIndex = index;
     document.getElementById('lightboxImg').src = galleryPhotos[index];
@@ -467,7 +544,6 @@ document.getElementById('confirmDeletePhotoBtn').addEventListener('click', () =>
     }
 });
 
-// Günün Anısı (Rastgele / Akıllı Değişen)
 function initRandomMemory() {
     if (galleryPhotos.length > 0) {
         const randomIndex = Math.floor(Math.random() * galleryPhotos.length);
@@ -476,7 +552,6 @@ function initRandomMemory() {
     }
 }
 
-// Ruh Hali Logları Modalı Göster
 document.getElementById('openMoodLogsModal').addEventListener('click', () => {
     document.getElementById('moodLogsModal').classList.add('active');
 });
@@ -492,13 +567,12 @@ function renderMoodLogs() {
     }
     moodLogs.forEach(log => {
         const div = document.createElement('div');
-        div.style.cssText = "background:#f8f9fa; padding:10px; border-radius:8px; font-size:12px; border:1px solid #eee;";
+        div.style.cssText = "background:var(--bg-gradient); padding:10px; border-radius:8px; font-size:12px; border:1px solid var(--border-color);";
         div.innerHTML = `<strong>${log.profile}</strong>: ${log.mood} <br><span style="font-size:10px; color:#888;"><i class="fa-regular fa-clock"></i> ${log.datetime}</span>`;
         list.appendChild(div);
     });
 }
 
-// Güvenli PIN Değiştirme
 const pinModal = document.getElementById('pinModal');
 document.getElementById('openChangePinModal').addEventListener('click', () => pinModal.classList.add('active'));
 document.getElementById('closePinModal').addEventListener('click', () => pinModal.classList.remove('active'));
@@ -539,16 +613,14 @@ document.getElementById('saveNewPinBtn').addEventListener('click', () => {
     err.textContent = "";
 });
 
-// Takvim & Özel Günler (Ay/Gün Bazlı Yaklaşan Sıralama)
 let realNow = new Date();
 let currentCalendarDate = new Date(realNow.getFullYear(), realNow.getMonth(), 1);
 
 let specialDays = JSON.parse(localStorage.getItem('sincapSpecialDays')) || [
     { title: "Tanışma Yıldönümümüz", date: "2026-08-15", desc: "Her şeyin başladığı o tatlı gün" },
-    { title: "İlk Sinema Buluşması", date: "2026-09-10", desc: "Heyecanlı anlar" },
-    { title: "Özge'nin Doğum Günü", date: "2026-11-25", desc: "Yavru sincabımın doğduğu gün ❤️" }
+    { title: "Özge'nin Doğum Günü", date: "2000-12-07", desc: "Yavru sincabımın doğduğu gün ❤️" },
+    { title: "İlk Sinema Buluşması", date: "2026-09-10", desc: "Heyecanlı anlar" }
 ];
-let selectedDateStr = null;
 
 function renderCalendar() {
     const year = currentCalendarDate.getFullYear();
@@ -588,12 +660,6 @@ function renderCalendar() {
             span.classList.add('has-event');
         }
 
-        span.addEventListener('click', () => {
-            selectedDateStr = dateKey;
-            document.getElementById('selectedDateTitle').textContent = `${day} ${monthsNames[month]} ${year} - Özel Gün Ekle`;
-            document.getElementById('dayNoteModal').classList.add('active');
-        });
-
         daysGrid.appendChild(span);
     }
 }
@@ -614,7 +680,6 @@ function renderSpecialDays() {
     specialDays.sort((a, b) => {
         const mdA = a.date.slice(5);
         const mdB = b.date.slice(5);
-        
         const diffA = mdA < todayMonthDay ? '1-' + mdA : '0-' + mdA;
         const diffB = mdB < todayMonthDay ? '1-' + mdB : '0-' + mdB;
         return diffA.localeCompare(diffB);
@@ -628,10 +693,10 @@ function renderSpecialDays() {
         div.innerHTML = `
             <div class="special-day-info">
                 <h4>${item.title}</h4>
-                <p>${item.desc || item.date}</p>
+                <p>${item.desc || item.date} (${item.date})</p>
             </div>
             <div class="special-day-right">
-                <span class="special-day-badge">${item.date}</span>
+                <span class="special-day-badge">${item.date.slice(5)}</span>
                 <button class="delete-item-btn" onclick="deleteSpecialDay(${index})"><i class="fa-solid fa-trash-can"></i></button>
             </div>
         `;
@@ -646,22 +711,28 @@ function deleteSpecialDay(index) {
     renderSpecialDays();
 }
 
-function closeDayNoteModal() {
-    document.getElementById('dayNoteModal').classList.remove('active');
-    document.getElementById('noteTitleInput').value = '';
-    document.getElementById('noteDescInput').value = '';
+function openAddSpecialDayModal() {
+    document.getElementById('addSpecialDayModal').classList.add('active');
+}
+function closeAddSpecialDayModal() {
+    document.getElementById('addSpecialDayModal').classList.remove('active');
+    document.getElementById('specialDayTitleInput').value = '';
+    document.getElementById('specialDayDateInput').value = '';
+    document.getElementById('specialDayDescInput').value = '';
 }
 
-document.getElementById('saveDayNoteBtn').addEventListener('click', () => {
-    const title = document.getElementById('noteTitleInput').value;
-    const desc = document.getElementById('noteDescInput').value;
-    if (title && selectedDateStr) {
-        specialDays.push({ title, date: selectedDateStr, desc });
+document.getElementById('saveSpecialDayBtn').addEventListener('click', () => {
+    const title = document.getElementById('specialDayTitleInput').value;
+    const date = document.getElementById('specialDayDateInput').value;
+    const desc = document.getElementById('specialDayDescInput').value;
+
+    if (title && date) {
+        specialDays.push({ title, date, desc });
         localStorage.setItem('sincapSpecialDays', JSON.stringify(specialDays));
         renderCalendar();
         renderSpecialDays();
-        closeDayNoteModal();
+        closeAddSpecialDayModal();
     } else {
-        alert("Lütfen bir başlık girin!");
+        alert("Lütfen başlık ve tarih seçin!");
     }
 });

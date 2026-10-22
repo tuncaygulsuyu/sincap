@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- 1. Splash Ekranı (Yumuşak Gradyan Geçişli) -->
+    <!-- 1. Splash Ekranı -->
     <div id="splashScreen" class="screen active">
         <div class="splash-content">
             <div class="logo-badge">S</div>
@@ -71,7 +71,7 @@
 
     <!-- 4. Ana Uygulama Ekranı -->
     <div id="mainAppScreen" class="screen">
-        <!-- Üst Bar & Müzik Widget -->
+        <!-- Üst Bar & Müzik Widget (Sabit) -->
         <header class="app-header">
             <div class="music-widget-full">
                 <div class="music-top-row">
@@ -103,46 +103,31 @@
                     <div class="counter-display" id="relationshipCounter">Hesaplanıyor...</div>
                 </div>
 
-                <!-- Ana Sayfa Widget'ları -->
-                <div class="home-widgets-row">
-                    <div class="home-widget-card" onclick="openSongsWidgetModal()">
-                        <i class="fa-solid fa-compact-disc"></i>
-                        <span>Şarkılarımız</span>
-                    </div>
-                    <div class="home-widget-card" onclick="openTodoListModal()">
-                        <i class="fa-solid fa-list-check"></i>
-                        <span>Yapılacaklar</span>
-                    </div>
-                </div>
-
-                <!-- Günün Anısı (Rastgele / Akıllı Değişen) -->
-                <div class="card memory-card" id="memoryCard">
+                <div class="card memory-card-large" id="memoryCard">
                     <div class="card-header">
                         <h3><i class="fa-solid fa-camera-retro"></i> Günün Anısı</h3>
                         <span class="date-badge">Anı Köşesi</span>
                     </div>
-                    <div class="memory-photo-wrapper" id="randomMemoryWrapper">
+                    <div class="memory-photo-wrapper-large" id="randomMemoryWrapper">
                         <img id="randomMemoryImg" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=600&auto=format&fit=crop&q=80" alt="Günün Anısı">
-                        <div class="photo-overlay">
+                        <div class="photo-overlay-large">
                             <p id="randomMemoryText">"Güzel anılarımızdan biri..."</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Gelişmiş Aşk Çarkıfeleği -->
-                <div class="card wheel-card-compact">
-                    <div class="wheel-header-compact">
-                        <h3><i class="fa-solid fa-dharmachakra"></i> Aşk Falı Çarkı</h3>
-                        <button id="spinWheelBtn" class="secondary-btn-sm">Çevir</button>
+                <div class="apps-grid-row">
+                    <div class="app-shortcut-card" onclick="openSongsWidgetModal()">
+                        <i class="fa-solid fa-compact-disc"></i>
+                        <span>Şarkılarımız</span>
                     </div>
-                    <div class="wheel-wrapper-sm" id="wheelWrapperClickable">
-                        <div class="wheel-pointer-sm"></div>
-                        <div class="wheel-sm" id="loveWheel">
-                            <div class="slice s1"><span>Gözleri Kapat</span></div>
-                            <div class="slice s2"><span>Tatlı İltifat Et</span></div>
-                            <div class="slice s3"><span>Sürpriz Öpücük</span></div>
-                            <div class="slice s4"><span>Şarkı Aç</span></div>
-                        </div>
+                    <div class="app-shortcut-card" onclick="openTodoListModal()">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>Yapılacaklar</span>
+                    </div>
+                    <div class="app-shortcut-card" onclick="openCustomWheelAppModal()">
+                        <i class="fa-solid fa-dharmachakra"></i>
+                        <span>Özel Çark</span>
                     </div>
                 </div>
 
@@ -153,7 +138,7 @@
                 </div>
             </div>
 
-            <!-- Galeri Sekmesi (Çoklu Yükleme, Yükleniyor Göstergesi, Ayna Düzeltmeli Kamera) -->
+            <!-- Galeri Sekmesi -->
             <div class="tab-content" id="tab-gallery">
                 <div class="section-title-bar">
                     <h2>Anı Galerimiz</h2>
@@ -171,10 +156,11 @@
                 <div class="ios-gallery-grid" id="iosGalleryGrid"></div>
             </div>
 
-            <!-- Özel Günler / Takvim Sekmesi (Ay/Gün Sıralamalı) -->
+            <!-- Takvim Sekmesi -->
             <div class="tab-content" id="tab-days">
                 <div class="section-title-bar">
                     <h2>Özel Günlerimiz</h2>
+                    <button class="add-photo-btn" onclick="openAddSpecialDayModal()"><i class="fa-solid fa-plus"></i> Yeni Ekle</button>
                 </div>
                 
                 <div class="card calendar-card">
@@ -192,7 +178,7 @@
                 <div class="special-days-list" id="specialDaysList"></div>
             </div>
 
-            <!-- Ayarlar Sekmesi (Çıkış Yap Butonlu) -->
+            <!-- Ayarlar Sekmesi -->
             <div class="tab-content" id="tab-settings">
                 <div class="section-title-bar">
                     <h2>Ayarlar</h2>
@@ -222,6 +208,20 @@
 
                     <div class="setting-item">
                         <div class="setting-info">
+                            <i class="fa-solid fa-moon"></i>
+                            <div>
+                                <h4>Karanlık Mod</h4>
+                                <p>Gözü yormayan koyu tema</p>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="slider-round"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
                             <i class="fa-solid fa-bell"></i>
                             <div>
                                 <h4>Canlı Bildirimler</h4>
@@ -233,28 +233,14 @@
                             <span class="slider-round"></span>
                         </label>
                     </div>
-
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <i class="fa-solid fa-calendar-heart"></i>
-                            <div>
-                                <h4>İlişki Başlangıç Tarihi</h4>
-                                <p>15 Ağustos 2026</p>
-                            </div>
-                        </div>
-                        <i class="fa-solid fa-pen"></i>
-                    </div>
                 </div>
 
-                <!-- Belirgin Çıkış Yap Butonu -->
                 <button id="logoutBtn" class="logout-btn-primary">
                     <i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap & Kilitle
                 </button>
             </div>
-
         </main>
 
-        <!-- Alt Navigasyon (4 Sekme) -->
         <nav class="bottom-nav">
             <button class="nav-item active" data-tab="tab-home"><i class="fa-solid fa-house"></i><span>Ana Sayfa</span></button>
             <button class="nav-item" data-tab="tab-gallery"><i class="fa-solid fa-images"></i><span>Galeri</span></button>
@@ -263,16 +249,16 @@
         </nav>
     </div>
 
-    <!-- Müzik Oynatıcı Modalı -->
+    <!-- Modaller -->
     <div id="musicModal" class="modal">
-        <div class="modal-content glass">
+        <div class="modal-content">
             <div class="close-modal" id="closeMusicModal"><i class="fa-solid fa-xmark"></i></div>
             <h3>Ortak Şarkı Listemiz</h3>
             <div class="player-controls-box">
-                <audio id="audioPlayer" src="Ajda_Pekkan_Sen_Olurdun_Yine.mp3"></audio>
-                <div class="song-details-lg">
+                <audio id="audioPlayer" src="Ajda_Pekkan_Sen_Olurdun_Yine.mp3" preload="auto"></audio>
+                <div class="song-details-lg" style="margin: 10px 0;">
                     <h4>Sen Olurdun Yine</h4>
-                    <p>Ajda Pekkan</p>
+                    <p style="font-size:11px; color:#888;">Ajda Pekkan</p>
                 </div>
                 <div class="seek-bar-container">
                     <span id="currentTime">0:00</span>
@@ -285,7 +271,7 @@
                     <button><i class="fa-solid fa-forward-step"></i></button>
                 </div>
                 
-                <button id="toggleLyricsBtn" class="secondary-btn" style="margin-bottom: 12px;"><i class="fa-solid fa-align-center"></i> Şarkı Sözlerini Göster</button>
+                <button id="toggleLyricsBtn" class="secondary-btn" style="margin-bottom: 12px; width:100%; padding:10px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-gradient); color:var(--text-color); font-weight:600;"><i class="fa-solid fa-align-center"></i> Şarkı Sözlerini Göster</button>
                 <div id="lyricsContainer" class="lyrics-box" style="display: none;">
                     <p>Gözlerim yollarda, kalbim sende...</p>
                     <p>Bir rüzgar eser, aklımda sen...</p>
@@ -300,7 +286,6 @@
         </div>
     </div>
 
-    <!-- Şarkılar Widget Modalı -->
     <div id="songsWidgetModal" class="modal">
         <div class="modal-content" style="max-height:80vh; overflow-y:auto;">
             <div class="close-modal" onclick="closeSongsWidgetModal()"><i class="fa-solid fa-xmark"></i></div>
@@ -310,12 +295,11 @@
         </div>
     </div>
 
-    <!-- Şarkı Platform Seçim Modalı -->
     <div id="songPlatformModal" class="modal">
         <div class="modal-content">
             <div class="close-modal" onclick="closeSongPlatformModal()"><i class="fa-solid fa-xmark"></i></div>
             <h3 id="platformModalSongTitle">Şarkı Adı</h3>
-            <p id="platformModalArtist" style="font-size:12px; color:#666; margin-bottom:15px;">Sanatçı</p>
+            <p id="platformModalArtist" style="font-size:12px; color:#888; margin-bottom:15px;">Sanatçı</p>
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <a href="#" id="spotifyOpenLink" target="_blank" class="ext-btn spotify" style="padding:12px; border-radius:10px;"><i class="fa-brands fa-spotify"></i> Spotify'da Aç</a>
                 <a href="#" id="ytMusicOpenLink" target="_blank" class="ext-btn youtube" style="padding:12px; border-radius:10px; background:#ff0000;"><i class="fa-brands fa-youtube"></i> YouTube Music'te Aç</a>
@@ -324,41 +308,59 @@
         </div>
     </div>
 
-    <!-- Şarkı Ekleme Modalı -->
     <div id="addSongModal" class="modal">
         <div class="modal-content">
             <div class="close-modal" onclick="closeAddSongModal()"><i class="fa-solid fa-xmark"></i></div>
             <h3>Yeni Şarkı Ekle</h3>
-            <input type="text" id="newSongTitleInput" placeholder="Şarkı Adı" style="width:100%; padding:10px; margin:10px 0; border:1px solid #ddd; border-radius:8px;">
-            <input type="text" id="newSongArtistInput" placeholder="Sanatçı" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ddd; border-radius:8px;">
+            <input type="text" id="newSongTitleInput" placeholder="Şarkı Adı">
+            <input type="text" id="newSongArtistInput" placeholder="Sanatçı">
             <button id="saveNewSongBtn" class="primary-btn">Şarkıyı Ekle</button>
         </div>
     </div>
 
-    <!-- Yapılacaklar Listesi Modalı -->
     <div id="todoListModal" class="modal">
         <div class="modal-content" style="max-height:80vh; overflow-y:auto;">
             <div class="close-modal" onclick="closeTodoListModal()"><i class="fa-solid fa-xmark"></i></div>
             <h3>Yapılacaklar Listesi</h3>
             <div style="display:flex; gap:8px; margin:10px 0;">
-                <input type="text" id="todoInput" placeholder="Yeni yapılacak şey..." style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:13px;">
+                <input type="text" id="todoInput" placeholder="Yeni yapılacak şey..." style="flex:1; padding:10px; border-radius:8px; font-size:13px; margin-bottom:0;">
                 <button id="addTodoBtn" class="primary-btn" style="width:auto; padding:10px 15px; font-size:13px;">Ekle</button>
             </div>
             <div id="todoItemsContainer" style="display:flex; flex-direction:column; gap:8px; text-align:left; margin-top:10px;"></div>
         </div>
     </div>
 
-    <!-- Ruh Hali Logları Modalı -->
+    <div id="customWheelAppModal" class="modal">
+        <div class="modal-content" style="max-height:85vh; overflow-y:auto;">
+            <div class="close-modal" onclick="closeCustomWheelAppModal()"><i class="fa-solid fa-xmark"></i></div>
+            <h3><i class="fa-solid fa-dharmachakra"></i> Kendi Çarkını Yarat</h3>
+            <p style="font-size:11px; color:#888; margin-bottom:12px;">Kararsız kaldığınızda kendi seçeneklerinizi ekleyin ve çarkı çevirin!</p>
+            
+            <div style="display:flex; gap:8px; margin-bottom:12px;">
+                <input type="text" id="newWheelOptionInput" placeholder="Yeni seçenek (örn: Film izleyelim)" style="flex:1; margin-bottom:0; font-size:12px; padding:8px;">
+                <button onclick="addWheelOption()" class="primary-btn" style="width:auto; padding:8px 12px; font-size:12px;">Ekle</button>
+            </div>
+
+            <div id="wheelOptionsListContainer" style="display:flex; flex-direction:column; gap:6px; max-height:140px; overflow-y:auto; text-align:left; margin-bottom:15px;"></div>
+
+            <div style="position:relative; width:120px; height:120px; margin:10px auto;">
+                <div style="position:absolute; top:-8px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:12px solid var(--text-color); z-index:10;"></div>
+                <div id="dynamicInteractiveWheel" style="width:100%; height:100%; border-radius:50%; border:3px solid var(--border-color); position:relative; overflow:hidden; transition: transform 4s cubic-bezier(0.15,0,0.15,1); background:var(--primary-light);"></div>
+            </div>
+            <button onclick="spinDynamicWheel()" class="primary-btn" style="margin-top:12px;">Çarkı Çevir 🎡</button>
+            <div id="wheelResultDisplay" style="font-size:13px; font-weight:700; color:var(--primary); margin-top:10px;"></div>
+        </div>
+    </div>
+
     <div id="moodLogsModal" class="modal">
         <div class="modal-content" style="max-height:80vh; overflow-y:auto;">
             <div class="close-modal" onclick="closeMoodLogsModal()"><i class="fa-solid fa-xmark"></i></div>
             <h3>Ruh Hali Logları</h3>
-            <p style="font-size:11px; color:#666; margin-bottom:12px;">Giriş yapanların tarih ve saatli kayıtları</p>
+            <p style="font-size:11px; color:#888; margin-bottom:12px;">Giriş yapanların tarih ve saatli kayıtları</p>
             <div id="moodLogsListContainer" style="display:flex; flex-direction:column; gap:8px; text-align:left;"></div>
         </div>
     </div>
 
-    <!-- PIN Değiştirme Modalı -->
     <div id="pinModal" class="modal">
         <div class="modal-content">
             <div class="close-modal" id="closePinModal"><i class="fa-solid fa-xmark"></i></div>
@@ -376,7 +378,6 @@
         </div>
     </div>
 
-    <!-- Fotoğraf Tam Ekran (Lightbox) & Paylaş / Sil (Onaylı) Modalı -->
     <div id="lightboxModal" class="modal">
         <div class="lightbox-container-centered">
             <div class="close-lightbox-top" onclick="closeLightbox()"><i class="fa-solid fa-xmark"></i></div>
@@ -388,26 +389,25 @@
         </div>
     </div>
 
-    <!-- Fotoğraf Silme Onay Modalı -->
     <div id="deleteConfirmModal" class="modal">
         <div class="modal-content" style="max-width:280px; text-align:center;">
             <h3>Anıyı Sil</h3>
-            <p style="font-size:13px; color:#666; margin:15px 0;">Bu fotoğrafı silmek istediğine emin misin?</p>
+            <p style="font-size:13px; color:#888; margin:15px 0;">Bu fotoğrafı silmek istediğine emin misin?</p>
             <div style="display:flex; gap:10px;">
-                <button onclick="closeDeleteConfirmModal()" class="secondary-btn" style="flex:1; padding:10px; border-radius:10px;">İptal</button>
+                <button onclick="closeDeleteConfirmModal()" class="secondary-btn" style="flex:1; padding:10px; border-radius:10px; border:1px solid var(--border-color); background:var(--bg-gradient); color:var(--text-color);">İptal</button>
                 <button id="confirmDeletePhotoBtn" class="primary-btn" style="flex:1; background:#ff4757; padding:10px; border-radius:10px;">Evet, Sil</button>
             </div>
         </div>
     </div>
 
-    <!-- Takvim Gün Not Ekleme Modalı -->
-    <div id="dayNoteModal" class="modal">
+    <div id="addSpecialDayModal" class="modal">
         <div class="modal-content">
-            <div class="close-modal" onclick="closeDayNoteModal()"><i class="fa-solid fa-xmark"></i></div>
-            <h3 id="selectedDateTitle">Özel Gün Ekle</h3>
-            <input type="text" id="noteTitleInput" placeholder="Etkinlik Başlığı" style="width:100%; padding:10px; margin:10px 0; border:1px solid #ddd; border-radius:8px;">
-            <input type="text" id="noteDescInput" placeholder="Açıklama" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ddd; border-radius:8px;">
-            <button id="saveDayNoteBtn" class="primary-btn">Kaydet</button>
+            <div class="close-modal" onclick="closeAddSpecialDayModal()"><i class="fa-solid fa-xmark"></i></div>
+            <h3>Yeni Özel Gün Ekle</h3>
+            <input type="text" id="specialDayTitleInput" placeholder="Etkinlik Adı (örn: Özge'nin Doğum Günü)">
+            <input type="date" id="specialDayDateInput" style="margin-bottom:10px;">
+            <input type="text" id="specialDayDescInput" placeholder="Açıklama / Not" style="margin-bottom:15px;">
+            <button id="saveSpecialDayBtn" class="primary-btn">Kaydet</button>
         </div>
     </div>
 
