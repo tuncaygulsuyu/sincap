@@ -9,13 +9,21 @@ document.getElementById('startBtn').addEventListener('click', () => {
     document.getElementById('pinInput').focus();
 });
 
-// PIN Doğrulama
+// PIN Doğrulama & Klavye Kaydırma Desteği
 let currentPin = localStorage.getItem('sincapPin') || "1508";
 const pinInput = document.getElementById('pinInput');
 const dots = document.querySelectorAll('.dot');
 const pinError = document.getElementById('pinError');
+const pinBoxContainer = document.getElementById('pinBoxContainer');
 
 document.getElementById('pinScreen').addEventListener('click', () => pinInput.focus());
+
+pinInput.addEventListener('focus', () => {
+    pinBoxContainer.style.transform = "translateY(-40px)";
+});
+pinInput.addEventListener('blur', () => {
+    pinBoxContainer.style.transform = "translateY(0)";
+});
 
 pinInput.addEventListener('input', (e) => {
     const val = e.target.value;
@@ -73,7 +81,6 @@ function handleLoginSave() {
         warningTooltip.style.display = 'block';
         return;
     }
-    // Ruh Hali Logu Kaydet (Tarih ve Saatli)
     const currentMoodIndex = parseInt(moodSlider.value) - 1;
     const moodObj = moods[currentMoodIndex];
     const now = new Date();
@@ -92,11 +99,11 @@ function handleLoginSave() {
     renderCalendar();
     renderSpecialDays();
     renderMoodLogs();
+    renderGallery();
 }
 
 document.getElementById('saveProfileBtn').addEventListener('click', handleLoginSave);
 
-// Şimdilik Atla Butonu
 document.getElementById('skipProfileBtn').addEventListener('click', () => {
     selectedProfile = "Misafir / Sincap";
     goScreen('mainAppScreen');
@@ -104,9 +111,10 @@ document.getElementById('skipProfileBtn').addEventListener('click', () => {
     renderCalendar();
     renderSpecialDays();
     renderMoodLogs();
+    renderGallery();
 });
 
-// Alt Navigasyon Sekme Geçişleri (5 Sekme)
+// Alt Navigasyon (4 Sekme)
 document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => {
     btn.addEventListener('click', (e) => {
         document.querySelectorAll('.bottom-nav .nav-item').forEach(b => b.classList.remove('active'));
@@ -138,7 +146,7 @@ function initRelationshipCounter() {
     setInterval(updateCounter, 60000);
 }
 
-// Aşk Çarkıfeleği (Hem butona hem çarkın kendisine tıklayınca döner)
+// Aşk Çarkıfeleği
 let currentRotation = 0;
 function spinWheel() {
     const wheel = document.getElementById('loveWheel');
@@ -213,32 +221,44 @@ document.getElementById('toggleLyricsBtn').addEventListener('click', () => {
     box.style.display = box.style.display === 'none' ? 'block' : 'none';
 });
 
-// Şarkılarımız & Platform Seçim Modalı
+// Ana Sayfa Şarkılar Widget & Yönetimi (Silme Butonlu)
 let customSongs = JSON.parse(localStorage.getItem('sincapCustomSongs')) || [
     { title: "Sen Olurdun Yine", artist: "Ajda Pekkan" }
 ];
 
-function renderSongsList() {
-    const container = document.getElementById('songsListContainer');
+function openSongsWidgetModal() {
+    document.getElementById('songsWidgetModal').classList.add('active');
+    renderSongsWidgetList();
+}
+function closeSongsWidgetModal() {
+    document.getElementById('songsWidgetModal').classList.remove('active');
+}
+
+function renderSongsWidgetList() {
+    const container = document.getElementById('songsWidgetListContainer');
     container.innerHTML = '';
-    customSongs.forEach(s => {
+    customSongs.forEach((s, index) => {
         const div = document.createElement('div');
         div.className = 'song-item-card';
-        div.onclick = () => openSongPlatformModal(s.title, s.artist);
         div.innerHTML = `
-            <div class="song-item-info">
+            <div class="song-item-info" onclick="openSongPlatformModal('${s.title}', '${s.artist}')">
                 <i class="fa-solid fa-compact-disc"></i>
                 <div>
                     <h4>${s.title}</h4>
                     <p>${s.artist}</p>
                 </div>
             </div>
-            <i class="fa-solid fa-chevron-right" style="color:#aaa; font-size:12px;"></i>
+            <button class="delete-item-btn" onclick="deleteSong(${index})"><i class="fa-solid fa-trash-can"></i></button>
         `;
         container.appendChild(div);
     });
 }
-renderSongsList();
+
+function deleteSong(index) {
+    customSongs.splice(index, 1);
+    localStorage.setItem('sincapCustomSongs', JSON.stringify(customSongs));
+    renderSongsWidgetList();
+}
 
 function openSongPlatformModal(title, artist) {
     document.getElementById('platformModalSongTitle').textContent = title;
@@ -269,27 +289,93 @@ document.getElementById('saveNewSongBtn').addEventListener('click', () => {
     if (title && artist) {
         customSongs.push({ title, artist });
         localStorage.setItem('sincapCustomSongs', JSON.stringify(customSongs));
-        renderSongsList();
+        renderSongsWidgetList();
         closeAddSongModal();
     } else {
         alert("Lütfen şarkı adı ve sanatçı girin!");
     }
 });
 
-// Galeriye Fotoğraf Yükle veya Kameradan Çek (Yeniler En Altta)
-const galleryGrid = document.getElementById('iosGalleryGrid');
+// Yapılacaklar Listesi Widget & Yönetimi (Ekle, Yapıldı İşareti, Sil)
+let todoList = JSON.parse(localStorage.getItem('sincapTodoList')) || [
+    { text: "Birlikte kahve içilecek ☕", completed: false },
+    { text: "Akşam film gecesi yapılacak 🎬", completed: true }
+];
+
+function openTodoListModal() {
+    document.getElementById('todoListModal').classList.add('active');
+    renderTodoList();
+}
+function closeTodoListModal() {
+    document.getElementById('todoListModal').classList.remove('active');
+}
+
+function renderTodoList() {
+    const container = document.getElementById('todoItemsContainer');
+    container.innerHTML = '';
+    todoList.forEach((todo, index) => {
+        const div = document.createElement('div');
+        div.className = 'todo-item-card';
+        div.innerHTML = `
+            <span class="todo-text ${todo.completed ? 'completed' : ''}" onclick="toggleTodo(${index})">${todo.text}</span>
+            <button class="delete-item-btn" onclick="deleteTodo(${index})"><i class="fa-solid fa-trash-can"></i></button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+document.getElementById('addTodoBtn').addEventListener('click', () => {
+    const input = document.getElementById('todoInput');
+    const text = input.value.trim();
+    if (text) {
+        todoList.push({ text, completed: false });
+        localStorage.setItem('sincapTodoList', JSON.stringify(todoList));
+        input.value = '';
+        renderTodoList();
+    }
+});
+
+function toggleTodo(index) {
+    todoList[index].completed = !todoList[index].completed;
+    localStorage.setItem('sincapTodoList', JSON.stringify(todoList));
+    renderTodoList();
+}
+
+function deleteTodo(index) {
+    todoList.splice(index, 1);
+    localStorage.setItem('sincapTodoList', JSON.stringify(todoList));
+    renderTodoList();
+}
+
+// Galeriye Fotoğraf Yükle / Çek & Silme Butonu (3 Sütunlu Kare Grid)
+let galleryPhotos = JSON.parse(localStorage.getItem('sincapGalleryPhotos')) || [
+    "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&q=80",
+    "https://images.unsplash.com/photo-1494774157365-9e04c6720e47?w=400&q=80"
+];
+
+function renderGallery() {
+    const galleryGrid = document.getElementById('iosGalleryGrid');
+    galleryGrid.innerHTML = '';
+    galleryPhotos.forEach((imgSrc, index) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'gallery-thumb-wrap';
+        wrap.innerHTML = `
+            <img src="${imgSrc}" alt="Anı" onclick="openLightbox('${imgSrc}')">
+            <button class="delete-thumb-btn" onclick="deletePhoto(${index})"><i class="fa-solid fa-xmark"></i></button>
+        `;
+        galleryGrid.appendChild(wrap);
+    });
+}
+renderGallery();
 
 function handleImageUpload(e) {
     const file = e.target.files[0];
     if (file) {
         const reader = new FileReader();
         reader.onload = function(event) {
-            const imgSrc = event.target.result;
-            const thumb = document.createElement('div');
-            thumb.className = 'gallery-thumb';
-            thumb.onclick = () => openLightbox(imgSrc);
-            thumb.innerHTML = `<img src="${imgSrc}" alt="Yüklenen Anı">`;
-            galleryGrid.appendChild(thumb); // En alta eklenir
+            galleryPhotos.push(event.target.result); // Yeni eklenenler en altta
+            localStorage.setItem('sincapGalleryPhotos', JSON.stringify(galleryPhotos));
+            renderGallery();
         };
         reader.readAsDataURL(file);
     }
@@ -297,6 +383,12 @@ function handleImageUpload(e) {
 
 document.getElementById('fileInput').addEventListener('change', handleImageUpload);
 document.getElementById('cameraInput').addEventListener('change', handleImageUpload);
+
+function deletePhoto(index) {
+    galleryPhotos.splice(index, 1);
+    localStorage.setItem('sincapGalleryPhotos', JSON.stringify(galleryPhotos));
+    renderGallery();
+}
 
 function openLightbox(imgSrc) {
     document.getElementById('lightboxImg').src = imgSrc;
@@ -369,11 +461,11 @@ document.getElementById('saveNewPinBtn').addEventListener('click', () => {
     err.textContent = "";
 });
 
-// Takvim & Özel Günler (Standart Türkiye Takvimi ve Gerçek Saat Senkronizasyonu)
+// Takvim & Özel Günler (Ay/Gün Bazlı Yaklaşan Sıralama, Silme Butonlu)
 let realNow = new Date();
 let currentCalendarDate = new Date(realNow.getFullYear(), realNow.getMonth(), 1);
 
-let specialDays = [
+let specialDays = JSON.parse(localStorage.getItem('sincapSpecialDays')) || [
     { title: "Tanışma Yıldönümümüz", date: "2026-08-15", desc: "Her şeyin başladığı o tatlı gün" },
     { title: "İlk Sinema Buluşması", date: "2026-09-10", desc: "Heyecanlı anlar" },
     { title: "Özge'nin Doğum Günü", date: "2026-11-25", desc: "Yavru sincabımın doğduğu gün ❤️" }
@@ -408,14 +500,13 @@ function renderCalendar() {
         const dStr = String(day).padStart(2, '0');
         const dateKey = `${year}-${mStr}-${dStr}`;
 
-        // Gerçek bugünün tarihi ise işaretle
         if (year === todayYear && month === todayMonth && day === todayDate) {
             span.style.background = "var(--primary)";
             span.style.color = "white";
             span.style.fontWeight = "bold";
         }
 
-        if (specialDays.some(item => item.date === dateKey)) {
+        if (specialDays.some(item => item.date.slice(5) === `${mStr}-${dStr}`)) {
             span.classList.add('has-event');
         }
 
@@ -440,10 +531,21 @@ document.getElementById('nextMonthBtn').addEventListener('click', () => {
 });
 
 function renderSpecialDays() {
-    specialDays.sort((a, b) => new Date(a.date) - new Date(b.date));
+    // Yıl bağımsız, bugünden sonraki en yakın ay/güne göre akıllı sıralama
+    const todayMonthDay = String(realNow.getMonth() + 1).padStart(2, '0') + '-' + String(realNow.getDate()).padStart(2, '0');
+
+    specialDays.sort((a, b) => {
+        const mdA = a.date.slice(5);
+        const mdB = b.date.slice(5);
+        
+        const diffA = mdA < todayMonthDay ? '1-' + mdA : '0-' + mdA;
+        const diffB = mdB < todayMonthDay ? '1-' + mdB : '0-' + mdB;
+        return diffA.localeCompare(diffB);
+    });
+
     const listContainer = document.getElementById('specialDaysList');
     listContainer.innerHTML = '';
-    specialDays.forEach(item => {
+    specialDays.forEach((item, index) => {
         const div = document.createElement('div');
         div.className = 'special-day-item';
         div.innerHTML = `
@@ -451,10 +553,20 @@ function renderSpecialDays() {
                 <h4>${item.title}</h4>
                 <p>${item.desc || item.date}</p>
             </div>
-            <span class="special-day-badge">${item.date}</span>
+            <div class="special-day-right">
+                <span class="special-day-badge">${item.date}</span>
+                <button class="delete-item-btn" onclick="deleteSpecialDay(${index})"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
         `;
         listContainer.appendChild(div);
     });
+}
+
+function deleteSpecialDay(index) {
+    specialDays.splice(index, 1);
+    localStorage.setItem('sincapSpecialDays', JSON.stringify(specialDays));
+    renderCalendar();
+    renderSpecialDays();
 }
 
 function closeDayNoteModal() {
@@ -468,6 +580,7 @@ document.getElementById('saveDayNoteBtn').addEventListener('click', () => {
     const desc = document.getElementById('noteDescInput').value;
     if (title && selectedDateStr) {
         specialDays.push({ title, date: selectedDateStr, desc });
+        localStorage.setItem('sincapSpecialDays', JSON.stringify(specialDays));
         renderCalendar();
         renderSpecialDays();
         closeDayNoteModal();
