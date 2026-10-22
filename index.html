@@ -69,13 +69,13 @@
 
     <!-- Ana Uygulama Ekranı -->
     <div id="mainAppScreen" class="screen">
-        <!-- Üst Bar & Gelişmiş Müzik Widget (İleri Sar, Oynat/Durdur, Ses Aç/Kapat) -->
+        <!-- Üst Bar & Gelişmiş Müzik Widget -->
         <header class="app-header">
             <div class="music-widget-full">
                 <div class="music-top-row">
                     <div class="music-left-info" id="openMusicModal">
                         <i class="fa-solid fa-music"></i>
-                        <div>
+                        <div class="song-text-wrap">
                             <span class="song-title">Sen Olurdun Yine</span>
                             <span class="artist-name">Ajda Pekkan</span>
                         </div>
@@ -85,7 +85,6 @@
                         <button id="quickMuteBtn"><i class="fa-solid fa-volume-high"></i></button>
                     </div>
                 </div>
-                <!-- Mini İleri Sarma Çubuğu -->
                 <div class="seek-bar-mini-container">
                     <input type="range" id="miniSeekBar" value="0" max="100" step="0.1">
                 </div>
@@ -115,7 +114,7 @@
                     </div>
                 </div>
 
-                <!-- Küçültülmüş Aşk Çarkıfeleği -->
+                <!-- Düzeltilmiş Küçültülmüş Aşk Çarkıfeleği -->
                 <div class="card wheel-card-compact">
                     <div class="wheel-header-compact">
                         <h3><i class="fa-solid fa-dharmachakra"></i> Aşk Çarkı</h3>
@@ -124,10 +123,10 @@
                     <div class="wheel-wrapper-sm">
                         <div class="wheel-pointer-sm"></div>
                         <div class="wheel-sm" id="loveWheel">
-                            <div class="slice" style="--i:1; background:#ff6b81;"><span>Kahve</span></div>
-                            <div class="slice" style="--i:2; background:#ff4757;"><span>Film</span></div>
-                            <div class="slice" style="--i:3; background:#2ed573;"><span>Öpücük</span></div>
-                            <div class="slice" style="--i:4; background:#1e90ff;"><span>Masaj</span></div>
+                            <div class="slice s1"><span>Kahve</span></div>
+                            <div class="slice s2"><span>Film</span></div>
+                            <div class="slice s3"><span>Öpücük</span></div>
+                            <div class="slice s4"><span>Masaj</span></div>
                         </div>
                     </div>
                 </div>
@@ -146,7 +145,6 @@
                     <button class="add-photo-btn" id="openUploadModal"><i class="fa-solid fa-plus"></i> Fotoğraf Ekle</button>
                 </div>
                 <div class="ios-gallery-grid" id="iosGalleryGrid">
-                    <!-- Dinamik olarak yeniler en altta eklenecek -->
                     <div class="gallery-thumb" onclick="openLightbox('https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&q=80')">
                         <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&q=80" alt="Galeri 1">
                     </div>
@@ -156,7 +154,7 @@
                 </div>
             </div>
 
-            <!-- 3. ÖZEL GÜNLER / TAKVİM (Ay Değiştirme, Gün Seçip Not Ekleme, Artan Sıralama) -->
+            <!-- 3. ÖZEL GÜNLER / TAKVİM -->
             <div class="tab-content" id="tab-days">
                 <div class="section-title-bar">
                     <h2>Özel Günlerimiz</h2>
@@ -177,7 +175,7 @@
                 <div class="special-days-list" id="specialDaysList"></div>
             </div>
 
-            <!-- 4. AYARLAR (Güvenli PIN Değiştirme, Göz Açma/Kapama) -->
+            <!-- 4. AYARLAR -->
             <div class="tab-content" id="tab-settings">
                 <div class="section-title-bar">
                     <h2>Ayarlar</h2>
@@ -254,7 +252,6 @@
                     <button><i class="fa-solid fa-forward-step"></i></button>
                 </div>
                 
-                <!-- Şarkı Sözleri Butonu -->
                 <button id="toggleLyricsBtn" class="secondary-btn" style="margin-bottom: 12px;"><i class="fa-solid fa-align-center"></i> Şarkı Sözlerini Göster</button>
                 <div id="lyricsContainer" class="lyrics-box" style="display: none;">
                     <p>Gözlerim yollarda, kalbim sende...</p>
@@ -270,7 +267,7 @@
         </div>
     </div>
 
-    <!-- PIN Değiştirme Modalı (Eski şifre + 2 yeni şifre + göz açma/kapama) -->
+    <!-- PIN Değiştirme Modalı -->
     <div id="pinModal" class="modal">
         <div class="modal-content">
             <div class="close-modal" id="closePinModal"><i class="fa-solid fa-xmark"></i></div>
@@ -302,7 +299,7 @@
         <div class="modal-content">
             <div class="close-modal" onclick="closeDayNoteModal()"><i class="fa-solid fa-xmark"></i></div>
             <h3 id="selectedDateTitle">Özel Gün Ekle</h3>
-            <input type="text" id="noteTitleInput" placeholder="Etkinlik Başlığı (Örn: Yıldönümümüz)" style="width:100%; padding:10px; margin:10px 0; border:1px solid #ddd; border-radius:8px;">
+            <input type="text" id="noteTitleInput" placeholder="Etkinlik Başlığı" style="width:100%; padding:10px; margin:10px 0; border:1px solid #ddd; border-radius:8px;">
             <input type="text" id="noteDescInput" placeholder="Açıklama" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ddd; border-radius:8px;">
             <button id="saveDayNoteBtn" class="primary-btn">Kaydet</button>
         </div>

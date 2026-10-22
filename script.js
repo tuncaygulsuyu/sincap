@@ -121,7 +121,7 @@ document.getElementById('loveBtn').addEventListener('click', () => {
     alert("Seni çok ama çok seviyorum Yavru Sincabım! ❤️🐿️");
 });
 
-// Müzik Oynatıcı & Gelişmiş Widget Kontrolleri
+// Müzik Oynatıcı Kontrolleri
 const audioPlayer = document.getElementById('audioPlayer');
 const musicModal = document.getElementById('musicModal');
 const quickPlayPauseBtn = document.getElementById('quickPlayPauseBtn');
@@ -177,13 +177,12 @@ fullSeekBar.addEventListener('input', (e) => {
     }
 });
 
-// Şarkı Sözleri Göster/Gizle Butonu
 document.getElementById('toggleLyricsBtn').addEventListener('click', () => {
     const box = document.getElementById('lyricsContainer');
     box.style.display = box.style.display === 'none' ? 'block' : 'none';
 });
 
-// Galeri Lightbox Tam Ekran
+// Galeri Lightbox
 function openLightbox(imgSrc) {
     document.getElementById('lightboxImg').src = imgSrc;
     document.getElementById('lightboxModal').classList.add('active');
@@ -192,7 +191,7 @@ function closeLightbox() {
     document.getElementById('lightboxModal').classList.remove('active');
 }
 
-// Güvenli PIN Değiştirme (Eski şifre doğrulamalı + Göz ikonu)
+// Güvenli PIN Değiştirme
 const pinModal = document.getElementById('pinModal');
 document.getElementById('openChangePinModal').addEventListener('click', () => pinModal.classList.add('active'));
 document.getElementById('closePinModal').addEventListener('click', () => pinModal.classList.remove('active'));
@@ -219,7 +218,7 @@ document.getElementById('saveNewPinBtn').addEventListener('click', () => {
         return;
     }
     if (p1.length !== 4 || p1 !== p2) {
-        err.textContent = "Yeni şifreler 4 haneli ve birbiriyle aynı olmalı!";
+        err.textContent = "Yeni şifreler 4 haneli ve aynı olmalı!";
         return;
     }
 
@@ -233,21 +232,18 @@ document.getElementById('saveNewPinBtn').addEventListener('click', () => {
     err.textContent = "";
 });
 
-// Takvim & Özel Günler Yönetimi (Ay değiştirme + Gün tıklayıp not ekleme + Artan sıralama)
-let currentCalendarDate = new Date(2026, 7, 1); // Ağustos 2026
-
+// Takvim
+let currentCalendarDate = new Date(2026, 7, 1);
 let specialDays = [
     { title: "Tanışma Yıldönümümüz", date: "2026-08-15", desc: "Her şeyin başladığı o tatlı gün" },
     { title: "İlk Sinema Buluşması", date: "2026-09-10", desc: "Heyecanlı anlar" },
     { title: "Özge'nin Doğum Günü", date: "2026-11-25", desc: "Yavru sincabımın doğduğu gün ❤️" }
 ];
-
 let selectedDateStr = null;
 
 function renderCalendar() {
     const year = currentCalendarDate.getFullYear();
     const month = currentCalendarDate.getMonth();
-    
     const monthsNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
     document.getElementById('currentMonthYear').textContent = `${monthsNames[month]} ${year}`;
 
@@ -255,25 +251,20 @@ function renderCalendar() {
     daysGrid.innerHTML = '';
 
     const firstDayIndex = new Date(year, month, 1).getDay();
-    const adjustedFirstDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1; // Pazartesi başlangıç
+    const adjustedFirstDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
     const totalDays = new Date(year, month + 1, 0).getDate();
 
-    // Boşluklar
     for (let i = 0; i < adjustedFirstDay; i++) {
-        const emptySpan = document.createElement('span');
-        daysGrid.appendChild(emptySpan);
+        daysGrid.appendChild(document.createElement('span'));
     }
 
-    // Günler
     for (let day = 1; day <= totalDays; day++) {
         const span = document.createElement('span');
         span.textContent = day;
-
         const mStr = String(month + 1).padStart(2, '0');
         const dStr = String(day).padStart(2, '0');
         const dateKey = `${year}-${mStr}-${dStr}`;
 
-        // Etkinlik kontrolü
         if (specialDays.some(item => item.date === dateKey)) {
             span.classList.add('has-event');
         }
@@ -299,9 +290,7 @@ document.getElementById('nextMonthBtn').addEventListener('click', () => {
 });
 
 function renderSpecialDays() {
-    // En yakın tarihten en uzağa artan sırada sırala
     specialDays.sort((a, b) => new Date(a.date) - new Date(b.date));
-
     const listContainer = document.getElementById('specialDaysList');
     listContainer.innerHTML = '';
     specialDays.forEach(item => {
@@ -327,7 +316,6 @@ function closeDayNoteModal() {
 document.getElementById('saveDayNoteBtn').addEventListener('click', () => {
     const title = document.getElementById('noteTitleInput').value;
     const desc = document.getElementById('noteDescInput').value;
-
     if (title && selectedDateStr) {
         specialDays.push({ title, date: selectedDateStr, desc });
         renderCalendar();
