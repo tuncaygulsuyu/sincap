@@ -38,10 +38,11 @@ pinInput.addEventListener('input', (e) => {
     }
 });
 
-// Profil Seçimi & Ruh Hali
+// Profil Seçimi & Ruh Hali & Log Tutma
 let selectedProfile = null;
 const profileCards = document.querySelectorAll('.profile-card');
 const warningTooltip = document.getElementById('profileWarning');
+let moodLogs = JSON.parse(localStorage.getItem('sincapMoodLogs')) || [];
 
 profileCards.forEach(card => {
     card.addEventListener('click', () => {
@@ -60,24 +61,52 @@ const moods = [
     { emoji: '✨', text: 'Enerjik' }
 ];
 
-document.getElementById('moodSlider').addEventListener('input', (e) => {
+const moodSlider = document.getElementById('moodSlider');
+moodSlider.addEventListener('input', (e) => {
     const index = parseInt(e.target.value) - 1;
     document.getElementById('moodEmoji').textContent = moods[index].emoji;
     document.getElementById('moodText').textContent = moods[index].text;
 });
 
-document.getElementById('saveProfileBtn').addEventListener('click', () => {
+function handleLoginSave() {
     if (!selectedProfile) {
         warningTooltip.style.display = 'block';
         return;
     }
+    // Ruh Hali Logu Kaydet (Tarih ve Saatli)
+    const currentMoodIndex = parseInt(moodSlider.value) - 1;
+    const moodObj = moods[currentMoodIndex];
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+    const timeStr = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+
+    moodLogs.unshift({
+        profile: selectedProfile,
+        mood: `${moodObj.emoji} ${moodObj.text}`,
+        datetime: `${dateStr} - ${timeStr}`
+    });
+    localStorage.setItem('sincapMoodLogs', JSON.stringify(moodLogs));
+
     goScreen('mainAppScreen');
     initRelationshipCounter();
     renderCalendar();
     renderSpecialDays();
+    renderMoodLogs();
+}
+
+document.getElementById('saveProfileBtn').addEventListener('click', handleLoginSave);
+
+// Şimdilik Atla Butonu
+document.getElementById('skipProfileBtn').addEventListener('click', () => {
+    selectedProfile = "Misafir / Sincap";
+    goScreen('mainAppScreen');
+    initRelationshipCounter();
+    renderCalendar();
+    renderSpecialDays();
+    renderMoodLogs();
 });
 
-// Alt Navigasyon Sekme Geçişleri
+// Alt Navigasyon Sekme Geçişleri (5 Sekme)
 document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => {
     btn.addEventListener('click', (e) => {
         document.querySelectorAll('.bottom-nav .nav-item').forEach(b => b.classList.remove('active'));
@@ -109,13 +138,15 @@ function initRelationshipCounter() {
     setInterval(updateCounter, 60000);
 }
 
-// Aşk Çarkıfeleği
+// Aşk Çarkıfeleği (Hem butona hem çarkın kendisine tıklayınca döner)
 let currentRotation = 0;
-document.getElementById('spinWheelBtn').addEventListener('click', () => {
+function spinWheel() {
     const wheel = document.getElementById('loveWheel');
     currentRotation += Math.floor(Math.random() * 360) + 1440;
     wheel.style.transform = `rotate(${currentRotation}deg)`;
-});
+}
+document.getElementById('spinWheelBtn').addEventListener('click', spinWheel);
+document.getElementById('wheelWrapperClickable').addEventListener('click', spinWheel);
 
 document.getElementById('loveBtn').addEventListener('click', () => {
     alert("Seni çok ama çok seviyorum Yavru Sincabım! ❤️🐿️");
@@ -182,13 +213,119 @@ document.getElementById('toggleLyricsBtn').addEventListener('click', () => {
     box.style.display = box.style.display === 'none' ? 'block' : 'none';
 });
 
-// Galeri Lightbox
+// Şarkılarımız & Platform Seçim Modalı
+let customSongs = JSON.parse(localStorage.getItem('sincapCustomSongs')) || [
+    { title: "Sen Olurdun Yine", artist: "Ajda Pekkan" }
+];
+
+function renderSongsList() {
+    const container = document.getElementById('songsListContainer');
+    container.innerHTML = '';
+    customSongs.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'song-item-card';
+        div.onclick = () => openSongPlatformModal(s.title, s.artist);
+        div.innerHTML = `
+            <div class="song-item-info">
+                <i class="fa-solid fa-compact-disc"></i>
+                <div>
+                    <h4>${s.title}</h4>
+                    <p>${s.artist}</p>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color:#aaa; font-size:12px;"></i>
+        `;
+        container.appendChild(div);
+    });
+}
+renderSongsList();
+
+function openSongPlatformModal(title, artist) {
+    document.getElementById('platformModalSongTitle').textContent = title;
+    document.getElementById('platformModalArtist').textContent = artist;
+    
+    const query = encodeURIComponent(`${artist} ${title}`);
+    document.getElementById('spotifyOpenLink').href = `https://open.spotify.com/search/${query}`;
+    document.getElementById('ytMusicOpenLink').href = `https://music.youtube.com/search?q=${query}`;
+    document.getElementById('ytOpenLink').href = `https://www.youtube.com/results?search_query=${query}`;
+
+    document.getElementById('songPlatformModal').classList.add('active');
+}
+function closeSongPlatformModal() {
+    document.getElementById('songPlatformModal').classList.remove('active');
+}
+
+document.getElementById('openAddSongModal').addEventListener('click', () => {
+    document.getElementById('addSongModal').classList.add('active');
+});
+function closeAddSongModal() {
+    document.getElementById('addSongModal').classList.remove('active');
+    document.getElementById('newSongTitleInput').value = '';
+    document.getElementById('newSongArtistInput').value = '';
+}
+document.getElementById('saveNewSongBtn').addEventListener('click', () => {
+    const title = document.getElementById('newSongTitleInput').value;
+    const artist = document.getElementById('newSongArtistInput').value;
+    if (title && artist) {
+        customSongs.push({ title, artist });
+        localStorage.setItem('sincapCustomSongs', JSON.stringify(customSongs));
+        renderSongsList();
+        closeAddSongModal();
+    } else {
+        alert("Lütfen şarkı adı ve sanatçı girin!");
+    }
+});
+
+// Galeriye Fotoğraf Yükle veya Kameradan Çek (Yeniler En Altta)
+const galleryGrid = document.getElementById('iosGalleryGrid');
+
+function handleImageUpload(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const imgSrc = event.target.result;
+            const thumb = document.createElement('div');
+            thumb.className = 'gallery-thumb';
+            thumb.onclick = () => openLightbox(imgSrc);
+            thumb.innerHTML = `<img src="${imgSrc}" alt="Yüklenen Anı">`;
+            galleryGrid.appendChild(thumb); // En alta eklenir
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+document.getElementById('fileInput').addEventListener('change', handleImageUpload);
+document.getElementById('cameraInput').addEventListener('change', handleImageUpload);
+
 function openLightbox(imgSrc) {
     document.getElementById('lightboxImg').src = imgSrc;
     document.getElementById('lightboxModal').classList.add('active');
 }
 function closeLightbox() {
     document.getElementById('lightboxModal').classList.remove('active');
+}
+
+// Ruh Hali Logları Modalı Göster
+document.getElementById('openMoodLogsModal').addEventListener('click', () => {
+    document.getElementById('moodLogsModal').classList.add('active');
+});
+function closeMoodLogsModal() {
+    document.getElementById('moodLogsModal').classList.remove('active');
+}
+function renderMoodLogs() {
+    const list = document.getElementById('moodLogsListContainer');
+    list.innerHTML = '';
+    if (moodLogs.length === 0) {
+        list.innerHTML = '<p style="font-size:12px; color:#888; text-align:center;">Henüz log kaydı bulunmuyor.</p>';
+        return;
+    }
+    moodLogs.forEach(log => {
+        const div = document.createElement('div');
+        div.style.cssText = "background:#f8f9fa; padding:10px; border-radius:8px; font-size:12px; border:1px solid #eee;";
+        div.innerHTML = `<strong>${log.profile}</strong>: ${log.mood} <br><span style="font-size:10px; color:#888;"><i class="fa-regular fa-clock"></i> ${log.datetime}</span>`;
+        list.appendChild(div);
+    });
 }
 
 // Güvenli PIN Değiştirme
@@ -232,8 +369,10 @@ document.getElementById('saveNewPinBtn').addEventListener('click', () => {
     err.textContent = "";
 });
 
-// Takvim
-let currentCalendarDate = new Date(2026, 7, 1);
+// Takvim & Özel Günler (Standart Türkiye Takvimi ve Gerçek Saat Senkronizasyonu)
+let realNow = new Date();
+let currentCalendarDate = new Date(realNow.getFullYear(), realNow.getMonth(), 1);
+
 let specialDays = [
     { title: "Tanışma Yıldönümümüz", date: "2026-08-15", desc: "Her şeyin başladığı o tatlı gün" },
     { title: "İlk Sinema Buluşması", date: "2026-09-10", desc: "Heyecanlı anlar" },
@@ -258,12 +397,23 @@ function renderCalendar() {
         daysGrid.appendChild(document.createElement('span'));
     }
 
+    const todayYear = realNow.getFullYear();
+    const todayMonth = realNow.getMonth();
+    const todayDate = realNow.getDate();
+
     for (let day = 1; day <= totalDays; day++) {
         const span = document.createElement('span');
         span.textContent = day;
         const mStr = String(month + 1).padStart(2, '0');
         const dStr = String(day).padStart(2, '0');
         const dateKey = `${year}-${mStr}-${dStr}`;
+
+        // Gerçek bugünün tarihi ise işaretle
+        if (year === todayYear && month === todayMonth && day === todayDate) {
+            span.style.background = "var(--primary)";
+            span.style.color = "white";
+            span.style.fontWeight = "bold";
+        }
 
         if (specialDays.some(item => item.date === dateKey)) {
             span.classList.add('has-event');

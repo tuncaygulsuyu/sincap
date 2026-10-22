@@ -36,7 +36,7 @@
         </div>
     </div>
 
-    <!-- 3. Profil Seçimi & Ruh Hali Ekranı -->
+    <!-- 3. Profil Seçimi & Ruh Hali & Şimdilik Atla -->
     <div id="profileScreen" class="screen">
         <div class="profile-container">
             <h2>Kim Konuşuyor?</h2>
@@ -64,6 +64,9 @@
 
             <button id="saveProfileBtn" class="primary-btn">Kaydet & Giriş Yap</button>
             <div id="profileWarning" class="warning-tooltip">Kim olduğunu seçmelisin!</div>
+            
+            <!-- Şimdilik Atla Butonu -->
+            <button id="skipProfileBtn" class="skip-btn">Şimdilik Atla</button>
         </div>
     </div>
 
@@ -91,7 +94,7 @@
             </div>
         </header>
 
-        <!-- İçerik Akışı -->
+        <!-- İçerik Akışı (Sekmeler) -->
         <main class="app-content">
             
             <!-- Ana Sayfa Sekmesi -->
@@ -114,13 +117,13 @@
                     </div>
                 </div>
 
-                <!-- Küçültülmüş Aşk Çarkıfeleği -->
+                <!-- Aşk Çarkıfeleği (Hem butona hem çarkın kendisine tıklayınca döner) -->
                 <div class="card wheel-card-compact">
                     <div class="wheel-header-compact">
                         <h3><i class="fa-solid fa-dharmachakra"></i> Aşk Çarkı</h3>
                         <button id="spinWheelBtn" class="secondary-btn-sm">Çevir</button>
                     </div>
-                    <div class="wheel-wrapper-sm">
+                    <div class="wheel-wrapper-sm" id="wheelWrapperClickable">
                         <div class="wheel-pointer-sm"></div>
                         <div class="wheel-sm" id="loveWheel">
                             <div class="slice s1"><span>Kahve</span></div>
@@ -138,11 +141,17 @@
                 </div>
             </div>
 
-            <!-- Galeri Sekmesi -->
+            <!-- Galeri Sekmesi (Galeriden Seç + Kamerayla Çek, Yeniler En Altta) -->
             <div class="tab-content" id="tab-gallery">
                 <div class="section-title-bar">
                     <h2>Anı Galerimiz</h2>
-                    <button class="add-photo-btn" id="openUploadModal"><i class="fa-solid fa-plus"></i> Fotoğraf Ekle</button>
+                    <div class="gallery-action-btns">
+                        <label class="add-photo-btn" for="fileInput"><i class="fa-solid fa-folder-open"></i> Yükle</label>
+                        <input type="file" id="fileInput" accept="image/*" style="display:none;">
+
+                        <label class="add-photo-btn camera-btn" for="cameraInput"><i class="fa-solid fa-camera"></i> Çek</label>
+                        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;">
+                    </div>
                 </div>
                 <div class="ios-gallery-grid" id="iosGalleryGrid">
                     <div class="gallery-thumb" onclick="openLightbox('https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&q=80')">
@@ -154,7 +163,28 @@
                 </div>
             </div>
 
-            <!-- Özel Günler / Takvim Sekmesi -->
+            <!-- Şarkılarımız Sekmesi (Spotify, YouTube Music, YouTube Seçenekli) -->
+            <div class="tab-content" id="tab-songs">
+                <div class="section-title-bar">
+                    <h2>Şarkılarımız</h2>
+                    <button class="add-photo-btn" id="openAddSongModal"><i class="fa-solid fa-plus"></i> Şarkı Ekle</button>
+                </div>
+                <div class="songs-list" id="songsListContainer">
+                    <!-- Örnek Şarkı -->
+                    <div class="song-item-card" onclick="openSongPlatformModal('Sen Olurdun Yine', 'Ajda Pekkan')">
+                        <div class="song-item-info">
+                            <i class="fa-solid fa-compact-disc fa-spin"></i>
+                            <div>
+                                <h4>Sen Olurdun Yine</h4>
+                                <p>Ajda Pekkan</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right" style="color:#aaa; font-size:12px;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Özel Günler / Takvim Sekmesi (Gerçek Türkiye Saati & Takvimi) -->
             <div class="tab-content" id="tab-days">
                 <div class="section-title-bar">
                     <h2>Özel Günlerimiz</h2>
@@ -175,7 +205,7 @@
                 <div class="special-days-list" id="specialDaysList"></div>
             </div>
 
-            <!-- Ayarlar Sekmesi -->
+            <!-- Ayarlar Sekmesi (Ruh Hali Logları Dahil) -->
             <div class="tab-content" id="tab-settings">
                 <div class="section-title-bar">
                     <h2>Ayarlar</h2>
@@ -187,6 +217,17 @@
                             <div>
                                 <h4>PIN Şifresini Değiştir</h4>
                                 <p>Güvenli şifre güncelleme</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+
+                    <div class="setting-item" id="openMoodLogsModal">
+                        <div class="setting-info">
+                            <i class="fa-solid fa-face-smile"></i>
+                            <div>
+                                <h4>Ruh Hali Giriş Logları</h4>
+                                <p>Kim ne zaman hangi ruh halini seçti</p>
                             </div>
                         </div>
                         <i class="fa-solid fa-chevron-right"></i>
@@ -221,11 +262,12 @@
 
         </main>
 
-        <!-- Alt Navigasyon -->
+        <!-- Alt Navigasyon (5 Sekme) -->
         <nav class="bottom-nav">
             <button class="nav-item active" data-tab="tab-home"><i class="fa-solid fa-house"></i><span>Ana Sayfa</span></button>
             <button class="nav-item" data-tab="tab-gallery"><i class="fa-solid fa-images"></i><span>Galeri</span></button>
-            <button class="nav-item" data-tab="tab-days"><i class="fa-solid fa-calendar-days"></i><span>Özel Günler</span></button>
+            <button class="nav-item" data-tab="tab-songs"><i class="fa-solid fa-music"></i><span>Şarkılar</span></button>
+            <button class="nav-item" data-tab="tab-days"><i class="fa-solid fa-calendar-days"></i><span>Takvim</span></button>
             <button class="nav-item" data-tab="tab-settings"><i class="fa-solid fa-gear"></i><span>Ayarlar</span></button>
         </nav>
     </div>
@@ -261,8 +303,45 @@
 
                 <div class="external-links">
                     <a href="https://open.spotify.com" target="_blank" class="ext-btn spotify"><i class="fa-brands fa-spotify"></i> Spotify</a>
-                    <a href="https://music.youtube.com" target="_blank" class="ext-btn youtube"><i class="fa-brands fa-youtube"></i> YouTube</a>
+                    <a href="https://music.youtube.com" target="_blank" class="ext-btn youtube"><i class="fa-brands fa-youtube"></i> YouTube Music</a>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Şarkı Platform Seçim Modalı -->
+    <div id="songPlatformModal" class="modal">
+        <div class="modal-content">
+            <div class="close-modal" onclick="closeSongPlatformModal()"><i class="fa-solid fa-xmark"></i></div>
+            <h3 id="platformModalSongTitle">Şarkı Adı</h3>
+            <p id="platformModalArtist" style="font-size:12px; color:#666; margin-bottom:15px;">Sanatçı</p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <a href="#" id="spotifyOpenLink" target="_blank" class="ext-btn spotify" style="padding:12px; border-radius:10px;"><i class="fa-brands fa-spotify"></i> Spotify'da Aç</a>
+                <a href="#" id="ytMusicOpenLink" target="_blank" class="ext-btn youtube" style="padding:12px; border-radius:10px; background:#ff0000;"><i class="fa-brands fa-youtube"></i> YouTube Music'te Aç</a>
+                <a href="#" id="ytOpenLink" target="_blank" class="ext-btn youtube" style="padding:12px; border-radius:10px; background:#cc0000;"><i class="fa-solid fa-video"></i> YouTube'da Ara</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Şarkı Ekleme Modalı -->
+    <div id="addSongModal" class="modal">
+        <div class="modal-content">
+            <div class="close-modal" onclick="closeAddSongModal()"><i class="fa-solid fa-xmark"></i></div>
+            <h3>Yeni Şarkı Ekle</h3>
+            <input type="text" id="newSongTitleInput" placeholder="Şarkı Adı" style="width:100%; padding:10px; margin:10px 0; border:1px solid #ddd; border-radius:8px;">
+            <input type="text" id="newSongArtistInput" placeholder="Sanatçı" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ddd; border-radius:8px;">
+            <button id="saveNewSongBtn" class="primary-btn">Şarkıyı Ekle</button>
+        </div>
+    </div>
+
+    <!-- Ruh Hali Logları Modalı -->
+    <div id="moodLogsModal" class="modal">
+        <div class="modal-content" style="max-height:80vh; overflow-y:auto;">
+            <div class="close-modal" onclick="closeMoodLogsModal()"><i class="fa-solid fa-xmark"></i></div>
+            <h3>Ruh Hali Logları</h3>
+            <p style="font-size:11px; color:#666; margin-bottom:12px;">Giriş yapanların tarih ve saatli kayıtları</p>
+            <div id="moodLogsListContainer" style="display:flex; flex-direction:column; gap:8px; text-align:left;">
+                <!-- Dinamik loglar -->
             </div>
         </div>
     </div>
