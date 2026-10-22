@@ -146,7 +146,6 @@ function saveMoodAndEnter() {
         yuzde: currentMoodPercent,
         tarih: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
-        // Üzgün veya Sinirli ise Bildirim Gönder
         if (currentMoodPercent <= 70) {
             bildirimGonder(`${selectedUser} şu an ${currentMood} hissediyor! 🥺`);
         }
@@ -172,7 +171,7 @@ function toggleModal(modalId) {
 // 📜 Şarkı Sözleri Modalı
 function sarkiSozleriAcKapat() { toggleModal("lyricsModal"); }
 
-// ⏳ Özel Günler (Doğum Günü ve Yıllık Döngü Düzeltmesi)
+// ⏳ Özel Günler
 let ozelGunlerListesi = [];
 db.collection("ozel_gunler").orderBy("tarih", "asc").onSnapshot((snapshot) => {
     ozelGunlerListesi = [];
@@ -196,7 +195,6 @@ function ozelGunCiz() {
     const simdi = new Date();
     ozelGunlerListesi.forEach((gun) => {
         let hedefTarih = new Date(gun.tarih);
-        // Yıllık döngü hesaplaması (Doğum günleri geçmişte kalmasın, bu yılki/gelecek yılki tarihi baz alsın)
         let buYilHedef = new Date(simdi.getFullYear(), hedefTarih.getMonth(), hedefTarih.getDate());
         if (buYilHedef < simdi) {
             buYilHedef.setFullYear(simdi.getFullYear() + 1);
@@ -239,7 +237,7 @@ function ozelGunSil(docId) {
     db.collection("ozel_gunler").doc(docId).delete();
 }
 
-// 🎡 Çarkıfelek (Direkt Dokunarak Eşit Hızlı Dönüş)
+// 🎡 Çarkıfelek
 const surpriseCards = [
     "🤗 Bugün birbirinize kocaman sarılma borcunuz var!",
     "🍰 En sevdiğiniz tatlıyı ısmarlama zamanı!",
@@ -300,7 +298,7 @@ function kalpPatlat() {
     document.getElementById("menuPanel").classList.toggle("acik");
 }
 
-// 🎵 Gelişmiş Müzik Kontrolleri (Seek Bar + Süreler)
+// 🎵 Müzik Kontrolleri
 const muzik = document.getElementById("bgMusic");
 const playBtn = document.getElementById("playBtn");
 const muteBtn = document.getElementById("muteBtn");
@@ -572,7 +570,7 @@ function notEkle() {
 
 function notSil(docId) { db.collection("notlar").doc(docId).delete(); }
 
-// 📸 Galeri & Günün Anısı Vurgulama (Flash Efekti)
+// Galeri & Günün Anısı Vurgulama
 let fotograflarListesi = [];
 let aktifGununAnisiId = "";
 
@@ -672,7 +670,7 @@ function lightboxKapat() {
     document.getElementById("lightbox").classList.remove("acik");
 }
 
-// 🔔 Karşılıklı Canlı Bildirim Fonksiyonu
+// Canlı Bildirim Fonksiyonu
 function bildirimGonder(mesaj) {
     const toast = document.getElementById("liveToast");
     const text = document.getElementById("toastText");
