@@ -3,6 +3,13 @@ function goScreen(screenId) {
     document.getElementById(screenId).classList.add('active');
 }
 
+// Modal arka planına tıklayınca kapatma fonksiyonu
+function checkOutsideClick(event, modalId) {
+    if (event.target.id === modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+}
+
 const darkModeToggle = document.getElementById('darkModeToggle');
 const savedTheme = localStorage.getItem('sincapTheme') || 'light';
 if (savedTheme === 'dark') {
@@ -472,6 +479,7 @@ function renderGallery() {
 }
 renderGallery();
 
+// Düzeltilmiş Galeri Yükleme Akışı
 async function handleImageUpload(e, isCamera = false) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -484,11 +492,7 @@ async function handleImageUpload(e, isCamera = false) {
         await new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = function(event) {
-                let resultUrl = event.target.result;
-                if (isCamera) {
-                    resultUrl = event.target.result;
-                }
-                galleryPhotos.push(resultUrl);
+                galleryPhotos.push(event.target.result);
                 resolve();
             };
             reader.readAsDataURL(file);
@@ -648,7 +652,6 @@ function renderCalendar() {
         span.textContent = day;
         const mStr = String(month + 1).padStart(2, '0');
         const dStr = String(day).padStart(2, '0');
-        const dateKey = `${year}-${mStr}-${dStr}`;
 
         if (year === todayYear && month === todayMonth && day === todayDate) {
             span.style.background = "var(--primary)";
@@ -696,7 +699,7 @@ function renderSpecialDays() {
                 <p>${item.desc || item.date} (${item.date})</p>
             </div>
             <div class="special-day-right">
-                <span class="special-day-badge">${item.date.slice(5)}</span>
+                <span class="special-day-badge">${item.date}</span>
                 <button class="delete-item-btn" onclick="deleteSpecialDay(${index})"><i class="fa-solid fa-trash-can"></i></button>
             </div>
         `;
@@ -711,28 +714,84 @@ function deleteSpecialDay(index) {
     renderSpecialDays();
 }
 
+// Gelişmiş Pratik Tarih Seçici (Önce Yıl/Ay, Sonra Gün)
+function populateDateSelectors() {
+    const yearSelect = document.getElementById('selectYear');
+    const monthSelect = document.getElementById('selectMonth');
+    const daySelect = document.getElementById('selectDay');
+
+    yearSelect.innerHTML = '';
+    monthSelect.innerHTML = '';
+
+    const currentYear = realNow.getFullYear();
+    for (let y = currentYear; y >= 2000; y--) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y;
+        if (y === currentYear) opt.selected = true;
+        yearSelect.appendChild(opt);
+    }
+
+    const monthsNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+    monthsNames.forEach((m, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx + 1;
+        opt.textContent = m;
+        if (idx === realNow.getMonth()) opt.selected = true;
+        monthSelect.appendChild(opt);
+    });
+
+    updateDaysDropdown();
+
+    yearSelect.onchange = updateDaysDropdown;
+    monthSelect.onchange = updateDaysDropdown;
+}
+
+function updateDaysDropdown() {
+    const yearSelect = document.getElementById('selectYear');
+    const monthSelect = document.getElementById('selectMonth');
+    const daySelect = document.getElementById('selectDay');
+
+    const y = parseInt(yearSelect.value);
+    const m = parseInt(monthSelect.value);
+    const totalDays = new Date(y, m, 0).getDate();
+
+    const selectedDayVal = daySelect.value;
+    daySelect.innerHTML = '';
+    for (let d = 1; d <= totalDays; d++) {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = d;
+        if (d == selectedDayVal) opt.selected = true;
+        daySelect.appendChild(opt);
+    }
+}
+
 function openAddSpecialDayModal() {
     document.getElementById('addSpecialDayModal').classList.add('active');
+    populateDateSelectors();
 }
 function closeAddSpecialDayModal() {
     document.getElementById('addSpecialDayModal').classList.remove('active');
     document.getElementById('specialDayTitleInput').value = '';
-    document.getElementById('specialDayDateInput').value = '';
     document.getElementById('specialDayDescInput').value = '';
 }
 
 document.getElementById('saveSpecialDayBtn').addEventListener('click', () => {
     const title = document.getElementById('specialDayTitleInput').value;
-    const date = document.getElementById('specialDayDateInput').value;
+    const y = document.getElementById('selectYear').value;
+    const m = String(document.getElementById('selectMonth').value).padStart(2, '0');
+    const d = String(document.getElementById('selectDay').value).padStart(2, '0');
     const desc = document.getElementById('specialDayDescInput').value;
 
-    if (title && date) {
-        specialDays.push({ title, date, desc });
+    if (title) {
+        const dateStr = `${y}-${m}-${d}`;
+        specialDays.push({ title, date: dateStr, desc });
         localStorage.setItem('sincapSpecialDays', JSON.stringify(specialDays));
         renderCalendar();
         renderSpecialDays();
         closeAddSpecialDayModal();
     } else {
-        alert("Lütfen başlık ve tarih seçin!");
+        alert("Lütfen etkinlik adı girin!");
     }
 });

@@ -249,8 +249,8 @@
         </nav>
     </div>
 
-    <!-- Modaller -->
-    <div id="musicModal" class="modal">
+    <!-- Modaller (Arka plana tıklayınca kapanma özelliği eklendi) -->
+    <div id="musicModal" class="modal" onclick="checkOutsideClick(event, 'musicModal')">
         <div class="modal-content">
             <div class="close-modal" id="closeMusicModal"><i class="fa-solid fa-xmark"></i></div>
             <h3>Ortak Şarkı Listemiz</h3>
@@ -286,7 +286,7 @@
         </div>
     </div>
 
-    <div id="songsWidgetModal" class="modal">
+    <div id="songsWidgetModal" class="modal" onclick="checkOutsideClick(event, 'songsWidgetModal')">
         <div class="modal-content" style="max-height:80vh; overflow-y:auto;">
             <div class="close-modal" onclick="closeSongsWidgetModal()"><i class="fa-solid fa-xmark"></i></div>
             <h3>Şarkılarımız</h3>
@@ -295,7 +295,7 @@
         </div>
     </div>
 
-    <div id="songPlatformModal" class="modal">
+    <div id="songPlatformModal" class="modal" onclick="checkOutsideClick(event, 'songPlatformModal')">
         <div class="modal-content">
             <div class="close-modal" onclick="closeSongPlatformModal()"><i class="fa-solid fa-xmark"></i></div>
             <h3 id="platformModalSongTitle">Şarkı Adı</h3>
@@ -308,7 +308,7 @@
         </div>
     </div>
 
-    <div id="addSongModal" class="modal">
+    <div id="addSongModal" class="modal" onclick="checkOutsideClick(event, 'addSongModal')">
         <div class="modal-content">
             <div class="close-modal" onclick="closeAddSongModal()"><i class="fa-solid fa-xmark"></i></div>
             <h3>Yeni Şarkı Ekle</h3>
@@ -318,7 +318,7 @@
         </div>
     </div>
 
-    <div id="todoListModal" class="modal">
+    <div id="todoListModal" class="modal" onclick="checkOutsideClick(event, 'todoListModal')">
         <div class="modal-content" style="max-height:80vh; overflow-y:auto;">
             <div class="close-modal" onclick="closeTodoListModal()"><i class="fa-solid fa-xmark"></i></div>
             <h3>Yapılacaklar Listesi</h3>
@@ -330,7 +330,7 @@
         </div>
     </div>
 
-    <div id="customWheelAppModal" class="modal">
+    <div id="customWheelAppModal" class="modal" onclick="checkOutsideClick(event, 'customWheelAppModal')">
         <div class="modal-content" style="max-height:85vh; overflow-y:auto;">
             <div class="close-modal" onclick="closeCustomWheelAppModal()"><i class="fa-solid fa-xmark"></i></div>
             <h3><i class="fa-solid fa-dharmachakra"></i> Kendi Çarkını Yarat</h3>
@@ -352,7 +352,7 @@
         </div>
     </div>
 
-    <div id="moodLogsModal" class="modal">
+    <div id="moodLogsModal" class="modal" onclick="checkOutsideClick(event, 'moodLogsModal')">
         <div class="modal-content" style="max-height:80vh; overflow-y:auto;">
             <div class="close-modal" onclick="closeMoodLogsModal()"><i class="fa-solid fa-xmark"></i></div>
             <h3>Ruh Hali Logları</h3>
@@ -361,7 +361,7 @@
         </div>
     </div>
 
-    <div id="pinModal" class="modal">
+    <div id="pinModal" class="modal" onclick="checkOutsideClick(event, 'pinModal')">
         <div class="modal-content">
             <div class="close-modal" id="closePinModal"><i class="fa-solid fa-xmark"></i></div>
             <h3>PIN Şifresini Değiştir</h3>
@@ -378,7 +378,7 @@
         </div>
     </div>
 
-    <div id="lightboxModal" class="modal">
+    <div id="lightboxModal" class="modal" onclick="checkOutsideClick(event, 'lightboxModal')">
         <div class="lightbox-container-centered">
             <div class="close-lightbox-top" onclick="closeLightbox()"><i class="fa-solid fa-xmark"></i></div>
             <img id="lightboxImg" src="" alt="Tam Ekran Önizleme">
@@ -389,7 +389,7 @@
         </div>
     </div>
 
-    <div id="deleteConfirmModal" class="modal">
+    <div id="deleteConfirmModal" class="modal" onclick="checkOutsideClick(event, 'deleteConfirmModal')">
         <div class="modal-content" style="max-width:280px; text-align:center;">
             <h3>Anıyı Sil</h3>
             <p style="font-size:13px; color:#888; margin:15px 0;">Bu fotoğrafı silmek istediğine emin misin?</p>
@@ -400,13 +400,23 @@
         </div>
     </div>
 
-    <div id="addSpecialDayModal" class="modal">
+    <!-- Yeni Özel Gün Ekle (Önce Ay/Yıl, Sonra Gün Seçmeli Düzgün Modal) -->
+    <div id="addSpecialDayModal" class="modal" onclick="checkOutsideClick(event, 'addSpecialDayModal')">
         <div class="modal-content">
             <div class="close-modal" onclick="closeAddSpecialDayModal()"><i class="fa-solid fa-xmark"></i></div>
             <h3>Yeni Özel Gün Ekle</h3>
-            <input type="text" id="specialDayTitleInput" placeholder="Etkinlik Adı (örn: Özge'nin Doğum Günü)">
-            <input type="date" id="specialDayDateInput" style="margin-bottom:10px;">
-            <input type="text" id="specialDayDescInput" placeholder="Açıklama / Not" style="margin-bottom:15px;">
+            <input type="text" id="specialDayTitleInput" placeholder="Etkinlik Adı (örn: Özge Doğum Günü)">
+            <input type="text" id="specialDayDescInput" placeholder="Açıklama / Not">
+            
+            <div class="date-picker-group">
+                <label style="font-size:11px; color:#888; display:block; text-align:left; margin-bottom:4px;">Yıl, Ay ve Gün Seçin:</label>
+                <div style="display:flex; gap:6px; margin-bottom:12px;">
+                    <select id="selectYear" style="flex:1; padding:10px; border-radius:8px; border:2px solid var(--border-color); background:var(--card-bg); color:var(--text-color); font-size:13px;"></select>
+                    <select id="selectMonth" style="flex:1.2; padding:10px; border-radius:8px; border:2px solid var(--border-color); background:var(--card-bg); color:var(--text-color); font-size:13px;"></select>
+                    <select id="selectDay" style="flex:0.8; padding:10px; border-radius:8px; border:2px solid var(--border-color); background:var(--card-bg); color:var(--text-color); font-size:13px;"></select>
+                </div>
+            </div>
+
             <button id="saveSpecialDayBtn" class="primary-btn">Kaydet</button>
         </div>
     </div>
