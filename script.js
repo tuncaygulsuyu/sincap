@@ -1,800 +1,664 @@
-// Firebase hazır olduğunda bulut senkronizasyonunu başlat ve verileri anında yersele işle
-window.addEventListener('firebase-ready', () => {
-    const db = window.db;
-    const { doc, onSnapshot } = window.firebaseModules;
-    const sharedDataRef = doc(db, "sincap_data", "main_state");
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
-    // Sayfa açılır açılmaz buluttaki güncel veriyi çek ve localStorage'a bas
-    onSnapshot(sharedDataRef, (docSnap) => {
-        if (docSnap.exists()) {
-            const cloudData = docSnap.data();
-            console.log("Buluttan canlı veri alındı:", cloudData);
-            
-            for (const key in cloudData) {
-                if (Object.prototype.hasOwnProperty.call(cloudData, key)) {
-                    const val = cloudData[key];
-                    localStorage.setItem(key, typeof val === 'object' ? JSON.stringify(val) : val);
-                }
-            }
-
-            // Veriler güncellendiği an arayüzü yenilemek için sayfayı bir kereye mahsus güncelleyebiliriz
-            // Veya ilgili render fonksiyonlarını tetikleyelim:
-            if (typeof renderGallery === "function") renderGallery();
-            if (typeof renderTodayMemory === "function") renderTodayMemory();
-            if (typeof renderCalendar === "function") renderCalendar();
-            if (typeof renderEvents === "function") renderEvents();
-            if (typeof renderSongsList === "function") renderSongsList();
-            if (typeof renderTodos === "function") renderTodos();
-            if (typeof renderWheelTags === "function") renderWheelTags();
-            if (typeof drawWheel === "function") drawWheel();
-        }
-    });
-});
-
-// localStorage.setItem komutunu otomatik yakalayıp Firebase'e gönderen sihirli köprü
-const originalSetItem = localStorage.setItem;
-localStorage.setItem = function(key, value) {
-    originalSetItem.apply(this, arguments); // Normal telefonuna/tarayıcına kaydetmeye devam etsin
-
-    // Eğer Firebase hazırsa, veriyi anında buluta da gönder
-    if (window.db && window.firebaseModules) {
-        try {
-            const { doc, setDoc } = window.firebaseModules;
-            const sharedDataRef = doc(window.db, "sincap_data", "main_state");
-            
-            // Tarayıcındaki TÜM localStorage verilerini tek seferde toplayıp buluta atar
-            const allAppData = {};
-            for (let i = 0; i < localStorage.length; i++) {
-                const k = localStorage.key(i);
-                try {
-                    allAppData[k] = JSON.parse(localStorage.getItem(k));
-                } catch (e) {
-                    allAppData[k] = localStorage.getItem(k);
-                }
-            }
-
-            setDoc(sharedDataRef, allAppData, { merge: true }).catch(err => {
-                console.error("Buluta otomatik senkron hatası:", err);
-            });
-        } catch (e) {
-            console.error("JSON parse hatası", e);
-        }
-    }
+// Firebase Bağlantı Bilgileri
+const firebaseConfig = {
+  apiKey: "AIzaSyCi3RVc9AvcI-1ZH9uRWBtFsmW2GuSdMvI",
+  authDomain: "sincap-v2.firebaseapp.com",
+  projectId: "sincap-v2",
+  storageBucket: "sincap-v2.firebasestorage.app",
+  messagingSenderId: "985716748362",
+  appId: "1:985716748362:web:980a879cab98c40afdf6b3",
+  measurementId: "G-PF628J6GDF"
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-    let CORRECT_PIN = localStorage.getItem("app_pin") || "1508";
-    let autoMusicEnabled = localStorage.getItem("app_auto_music") !== "false";
-    const RELATIONSHIP_START = new Date("2026-08-15T00:00:00");
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    let logs = JSON.parse(localStorage.getItem("app_logs")) || [];
-    let galleryPhotos = JSON.parse(localStorage.getItem("app_gallery")) || [
-        { id: 1, url: "https://images.unsplash.com/photo-1518173946687-a4c8392bbd9f?w=400", date: "2026-08-15" },
-        { id: 2, url: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=400", date: "2026-09-01" }
-    ];
-    let songsList = JSON.parse(localStorage.getItem("app_songs")) || [
-        { id: 1, title: "Sen Olurdun Yine", artist: "Ajda Pekkan", date: "2026-08-15" }
-    ];
-    let todosList = JSON.parse(localStorage.getItem("app_todos")) || [
-        { id: 1, text: "Birlikte kahve içilecek ☕", done: false }
-    ];
-    let eventsList = JSON.parse(localStorage.getItem("app_events")) || [
-        { id: 1, title: "Tanışma Yıldönümümüz", desc: "Her şeyin başladığı o tatlı gün", date: "2026-08-15" }
-    ];
-    let wheelOptions = JSON.parse(localStorage.getItem("app_wheel")) || ["Film İzle", "Kahve İç", "Yemek Söyle", "Yürüyüş Yap"];
+const RELATIONSHIP_START = new Date("2026-08-15T00:00:00");
+let currentPin = localStorage.getItem("sincap_pin") || "1508";
+let enteredPinBuffer = "";
+let selectedUser = null;
+let currentMoodIndex = 2;
 
-    let currentProfile = null;
-    let currentMood = "Mutlu / Huzurlu 😊";
-    let isMusicPlaying = false;
-    let musicAudio = new Audio("Ajda_Pekkan_Sen_Olurdun_Yine.mp3");
-    musicAudio.loop = true;
+const moods = [
+    { emoji: "😠", text: "Sinirli" },
+    { emoji: "😢", text: "Üzgün" },
+    { emoji: "😊", text: "Mutlu / Huzurlu" },
+    { emoji: "😍", text: "Aşık" },
+    { emoji: "⚡", text: "Enerjik Bomba Gibi" }
+];
 
-    const screens = document.querySelectorAll(".screen");
-    function switchScreen(screenId) {
-        screens.forEach(s => s.classList.remove("active"));
-        document.getElementById(screenId).classList.add("active");
-    }
+let appState = {
+    todos: JSON.parse(localStorage.getItem("sincap_todos")) || [
+        { text: "Birlikte kahve içmek ☕", done: false },
+        { text: "Yıldönümünü kutlamak ✨", done: true }
+    ],
+    songs: JSON.parse(localStorage.getItem("sincap_songs")) || [
+        { title: "Sen Olurdun Yine", artist: "Ajda Pekkan" },
+        { title: "Beni Unutma", artist: "Sezen Aksu" }
+    ],
+    events: JSON.parse(localStorage.getItem("sincap_events")) || {
+        "2026-08-15": [{ title: "Masalımızın Başlangıcı", desc: "İlk adımımız ❤️" }]
+    },
+    photos: JSON.parse(localStorage.getItem("sincap_photos")) || [
+        { url: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=600&auto=format&fit=crop", caption: "Masalımızın ilk gününden...", date: "2026-08-15" }
+    ],
+    wheelOptions: ["Kahve İç", "Film İzle", "Yürüyüş Yap", "Tatlı Ye", "Sarılsınlar", "Masal Anlat"],
+    logs: JSON.parse(localStorage.getItem("sincap_logs")) || []
+};
 
-    document.getElementById("go-to-pin-btn").addEventListener("click", () => {
+window.addEventListener("DOMContentLoaded", () => {
+    initClock();
+    initNavigation();
+    initWelcomeScreen();
+    initPinScreen();
+    initProfileScreen();
+    initRelationshipTimer();
+    initMemoryAndGallery();
+    initQuickLinkModals();
+    initDecisionWheel();
+    initTodoList();
+    initSongsList();
+    initCalendar();
+    initSettingsAndModals();
+    initFirebaseSync();
+});
+
+function initClock() {
+    const clockEl = document.getElementById("current-time-clock");
+    setInterval(() => {
+        const now = new Date();
+        clockEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }, 1000);
+}
+
+function switchScreen(screenId) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(screenId).classList.add("active");
+}
+
+function initWelcomeScreen() {
+    document.getElementById("start-btn").addEventListener("click", () => {
         switchScreen("pin-screen");
     });
+}
 
-    let enteredPin = "";
-    const pinDots = document.querySelectorAll(".dot");
+function initPinScreen() {
+    const dots = document.querySelectorAll(".pin-dots .dot");
+    const errorText = document.getElementById("pin-error");
 
     document.querySelectorAll(".keypad .key").forEach(btn => {
         btn.addEventListener("click", () => {
-            const val = btn.textContent;
-            if (val === "Sil") {
-                enteredPin = enteredPin.slice(0, -1);
-            } else if (enteredPin.length < 4) {
-                enteredPin += val;
-            }
-            updatePinDots();
-            if (enteredPin.length === 4) {
-                setTimeout(checkPin, 200);
+            const val = btn.getAttribute("data-val");
+            if (val === "clear") enteredPinBuffer = "";
+            else if (val === "del") enteredPinBuffer = enteredPinBuffer.slice(0, -1);
+            else if (enteredPinBuffer.length < 4) enteredPinBuffer += val;
+
+            updateDots(dots);
+
+            if (enteredPinBuffer.length === 4) {
+                if (enteredPinBuffer === currentPin) {
+                    errorText.textContent = "";
+                    switchScreen("profile-screen");
+                    setDynamicGreeting();
+                } else {
+                    errorText.textContent = "Hatalı şifre! (Varsayılan: 1508)";
+                    setTimeout(() => {
+                        enteredPinBuffer = "";
+                        updateDots(dots);
+                        errorText.textContent = "";
+                    }, 800);
+                }
             }
         });
     });
+}
 
-    function updatePinDots() {
-        pinDots.forEach((dot, idx) => {
-            if (idx < enteredPin.length) dot.classList.add("filled");
-            else dot.classList.remove("filled");
-        });
-    }
+function updateDots(dots) {
+    dots.forEach((dot, index) => {
+        if (index < enteredPinBuffer.length) dot.classList.add("filled");
+        else dot.classList.remove("filled");
+    });
+}
 
-    function checkPin() {
-        if (enteredPin === CORRECT_PIN) {
-            enteredPin = "";
-            updatePinDots();
-            setupGreeting();
-            switchScreen("profile-screen");
-        } else {
-            alert("Yanlış Şifre!");
-            enteredPin = "";
-            updatePinDots();
-        }
-    }
+function setDynamicGreeting() {
+    const hour = new Date().getHours();
+    const greetingEl = document.getElementById("dynamic-greeting");
+    if (hour < 12) greetingEl.textContent = "Günaydın Sevgilim ☀️";
+    else if (hour < 18) greetingEl.textContent = "Tünaydın Sevgilim 🌸";
+    else greetingEl.textContent = "İyi Akşamlar Sevgilim 🌙";
+}
 
-    function setupGreeting() {
-        const hour = new Date().getHours();
-        let greeting = "İyi Akşamlar Sevgilim 🌙";
-        if (hour >= 6 && hour < 12) greeting = "Günaydın Sevgilim ☀️";
-        else if (hour >= 12 && hour < 18) greeting = "Tünaydın Sevgilim 🌸";
-        document.getElementById("greeting-title").textContent = greeting;
-    }
+function initProfileScreen() {
+    const cards = document.querySelectorAll(".profile-card");
+    const saveBtn = document.getElementById("save-profile-btn");
+    const slider = document.getElementById("mood-slider");
+    const emojiSpan = document.getElementById("mood-emoji");
+    const textSpan = document.getElementById("mood-text");
 
-    const profileCards = document.querySelectorAll(".profile-card");
-    const saveLoginBtn = document.getElementById("save-login-btn");
-
-    profileCards.forEach(card => {
+    cards.forEach(card => {
         card.addEventListener("click", () => {
-            profileCards.forEach(c => c.classList.remove("selected"));
+            cards.forEach(c => c.classList.remove("selected"));
             card.classList.add("selected");
-            currentProfile = card.getAttribute("data-profile");
-            saveLoginBtn.removeAttribute("disabled");
+            selectedUser = card.getAttribute("data-user");
+            saveBtn.disabled = false;
         });
     });
 
-    const moodSlider = document.getElementById("mood-slider");
-    const moodText = document.getElementById("mood-text");
-    const moods = ["Sinirli 😠", "Üzgün 😢", "Mutlu / Huzurlu 😊", "Aşık 😍", "Enerjik Bomba Gibi ⚡"];
-    
-    moodSlider.addEventListener("input", (e) => {
-        currentMood = moods[e.target.value];
-        moodText.textContent = currentMood;
+    slider.addEventListener("input", (e) => {
+        currentMoodIndex = parseInt(e.target.value);
+        emojiSpan.textContent = moods[currentMoodIndex].emoji;
+        textSpan.textContent = moods[currentMoodIndex].text;
     });
 
-    saveLoginBtn.addEventListener("click", () => {
-        if (!currentProfile) {
-            alert("Lütfen Tuncay veya Özge seçimini yapın!");
-            return;
-        }
-
-        const now = new Date();
-        logs.unshift({
-            profile: currentProfile,
-            time: `${String(now.getDate()).padStart(2,'0')}.${String(now.getMonth()+1).padStart(2,'0')}.${now.getFullYear()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,
-            mood: currentMood
+    const proceed = () => {
+        if (!selectedUser) selectedUser = "Sincap";
+        appState.logs.unshift({
+            user: selectedUser,
+            mood: moods[currentMoodIndex].text + " " + moods[currentMoodIndex].emoji,
+            time: new Date().toLocaleString()
         });
-        localStorage.setItem("app_logs", JSON.stringify(logs));
-
-        launchApp();
-    });
-
-    document.getElementById("skip-login-btn").addEventListener("click", () => {
-        if (!currentProfile) {
-            alert("Lütfen önce profilinizi (Tuncay veya Özge) seçin!");
-            return;
-        }
-        launchApp();
-    });
-
-    function launchApp() {
+        saveAndSync();
         switchScreen("main-app");
-        if (autoMusicEnabled) {
-            startSharedMusic();
-        }
-        initMainApp();
-    }
+        playAutoMusic();
+    };
 
-    function startSharedMusic() {
-        isMusicPlaying = true;
-        document.getElementById("play-icon-sym").textContent = "⏸";
-        document.getElementById("modal-play-pause").textContent = "⏸";
-        
-        musicAudio.volume = 0.09;
-        musicAudio.play().catch(e => console.log("Otomatik oynatma engellendi"));
+    saveBtn.addEventListener("click", proceed);
+    document.getElementById("skip-profile-btn").addEventListener("click", proceed);
+}
 
-        let currentVol = 0.09;
-        const targetVol = 0.50;
-        const stepTime = 300;
-        const totalSteps = 15000 / stepTime;
-        const volStep = (targetVol - currentVol) / totalSteps;
-
-        let fadeInterval = setInterval(() => {
-            if (!isMusicPlaying) {
-                clearInterval(fadeInterval);
-                return;
-            }
-            currentVol += volStep;
-            if (currentVol >= targetVol) {
-                currentVol = targetVol;
-                musicAudio.volume = currentVol;
-                clearInterval(fadeInterval);
-            } else {
-                musicAudio.volume = currentVol;
-            }
-        }, stepTime);
-    }
-
-    musicAudio.addEventListener("timeupdate", () => {
-        if (musicAudio.duration) {
-            const progressPercent = (musicAudio.currentTime / musicAudio.duration) * 100;
-            const seekBar = document.getElementById("mini-seek-bar");
-            const modalSeekBar = document.getElementById("audio-scrubber");
-            if (seekBar) seekBar.value = progressPercent;
-            if (modalSeekBar) modalSeekBar.value = progressPercent;
-
-            const curMin = Math.floor(musicAudio.currentTime / 60);
-            const curSec = Math.floor(musicAudio.currentTime % 60);
-            document.getElementById("current-time-lbl").textContent = `${curMin}:${curSec < 10 ? '0' : ''}${curSec}`;
-        }
+function initNavigation() {
+    document.querySelectorAll(".bottom-nav .nav-item").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".bottom-nav .nav-item").forEach(i => i.classList.remove("active"));
+            document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+            
+            btn.classList.add("active");
+            const target = btn.getAttribute("data-target");
+            document.getElementById(target).classList.add("active");
+        });
     });
+}
 
-    const miniSeekBar = document.getElementById("mini-seek-bar");
-    if (miniSeekBar) {
-        miniSeekBar.addEventListener("input", (e) => {
-            if (musicAudio.duration) {
-                const seekTime = (e.target.value / 100) * musicAudio.duration;
-                musicAudio.currentTime = seekTime;
-            }
-        });
-    }
-
-    const modalSeekBar = document.getElementById("audio-scrubber");
-    if (modalSeekBar) {
-        modalSeekBar.addEventListener("input", (e) => {
-            if (musicAudio.duration) {
-                const seekTime = (e.target.value / 100) * musicAudio.duration;
-                musicAudio.currentTime = seekTime;
-            }
-        });
-    }
-
-    function togglePlayPause() {
-        if (isMusicPlaying) {
-            musicAudio.pause();
-            isMusicPlaying = false;
-            document.getElementById("play-icon-sym").textContent = "▶";
-            document.getElementById("modal-play-pause").textContent = "▶";
-        } else {
-            musicAudio.play();
-            isMusicPlaying = true;
-            document.getElementById("play-icon-sym").textContent = "⏸";
-            document.getElementById("modal-play-pause").textContent = "⏸";
-        }
-    }
-
-    document.getElementById("mini-play-pause").addEventListener("click", togglePlayPause);
-    document.getElementById("modal-play-pause").addEventListener("click", togglePlayPause);
-    document.getElementById("open-player-modal").addEventListener("click", () => document.getElementById("music-modal").classList.add("active"));
-    document.getElementById("open-spotify").addEventListener("click", () => window.open("https://open.spotify.com", "_blank"));
-    document.getElementById("open-ytmusic").addEventListener("click", () => window.open("https://music.youtube.com", "_blank"));
-    document.getElementById("show-lyrics-btn").addEventListener("click", () => document.getElementById("lyrics-modal").classList.add("active"));
-
-    function initMainApp() {
-        updateRelationshipTimer();
-        setInterval(updateRelationshipTimer, 1000);
-        renderTodayMemory();
-        renderGallery();
-        renderCalendar();
-        renderEvents();
-        renderSongsList();
-        renderTodos();
-        renderWheelTags();
-        drawWheel();
-    }
-
-    function updateRelationshipTimer() {
+function initRelationshipTimer() {
+    const timerEl = document.getElementById("relationship-timer");
+    setInterval(() => {
         const now = new Date();
         const diff = now - RELATIONSHIP_START;
-        if (diff < 0) return;
+        
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
         const minutes = Math.floor((diff / 1000 / 60) % 60);
         const seconds = Math.floor((diff / 1000) % 60);
-        document.getElementById("relationship-timer-text").textContent = `${days} Gün ${hours} Saat ${minutes} Dakika ${seconds} Saniyedir Birlikteyiz ❤️`;
-    }
 
-    window.renderTodayMemory = function renderTodayMemory() {
-        galleryPhotos = JSON.parse(localStorage.getItem("app_gallery")) || galleryPhotos;
-        if (galleryPhotos.length > 0) {
-            document.getElementById("today-memory-img").src = galleryPhotos[0].url;
-            document.getElementById("today-memory-date").textContent = galleryPhotos[0].date;
-        }
-    };
+        timerEl.textContent = `${days} Gün ${hours} Saat ${minutes} Dakika ${seconds} Saniyedir Birlikteyiz`;
+    }, 1000);
+}
 
-    document.getElementById("open-today-memory").addEventListener("click", () => {
-        if(galleryPhotos.length > 0) openPhotoViewer(galleryPhotos[0]);
-    });
+function initMemoryAndGallery() {
+    renderGallery();
+    updateFeaturedMemory();
 
-    const navItems = document.querySelectorAll(".bottom-nav .nav-item");
-    navItems.forEach(item => {
-        item.addEventListener("click", () => {
-            navItems.forEach(i => i.classList.remove("active"));
-            item.classList.add("active");
-            const targetTab = item.getAttribute("data-tab");
-            document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
-            document.getElementById(targetTab).classList.add("active");
-        });
-    });
-
-    document.querySelectorAll(".app-card").forEach(card => {
-        card.addEventListener("click", () => {
-            const target = card.getAttribute("data-target-tab");
-            if (target === "tab-songs") document.getElementById("songs-list-modal").classList.add("active");
-            else if (target === "tab-todos") document.getElementById("todos-modal").classList.add("active");
-            else if (target === "tab-wheel") document.getElementById("wheel-modal").classList.add("active");
-        });
-    });
-
-    const galleryGridContainer = document.getElementById("gallery-grid-container");
-    window.renderGallery = function renderGallery() {
-        galleryPhotos = JSON.parse(localStorage.getItem("app_gallery")) || galleryPhotos;
-        galleryGridContainer.innerHTML = "";
-        galleryPhotos.forEach(photo => {
-            const div = document.createElement("div");
-            div.className = "gallery-thumb";
-            div.innerHTML = `<img src="${photo.url}" alt="Anı">`;
-            div.addEventListener("click", () => openPhotoViewer(photo));
-            galleryGridContainer.appendChild(div);
-        });
-    };
-
-    let activeViewerPhoto = null;
-    function openPhotoViewer(photo) {
-        activeViewerPhoto = photo;
-        document.getElementById("viewer-img-el").src = photo.url;
-        document.getElementById("viewer-date-lbl").textContent = `Yüklenme Tarihi: ${photo.date}`;
-        document.getElementById("photo-viewer-modal").classList.add("active");
-    }
-
-    document.getElementById("viewer-share-btn").addEventListener("click", () => {
-        if (navigator.share) navigator.share({ title: 'Anımız', url: activeViewerPhoto.url }).catch(() => {});
-        else alert("Bağlantı kopyalandı!");
-    });
-
-    document.getElementById("viewer-delete-btn").addEventListener("click", () => {
-        showConfirm("Bu fotoğrafı silmek istiyor musunuz?", () => {
-            galleryPhotos = galleryPhotos.filter(p => p.id !== activeViewerPhoto.id);
-            localStorage.setItem("app_gallery", JSON.stringify(galleryPhotos));
-            document.getElementById("photo-viewer-modal").classList.remove("active");
-            renderGallery();
-            renderTodayMemory();
-        });
-    });
-
-    document.getElementById("gallery-file-input").addEventListener("change", (e) => {
+    const fileInput = document.getElementById("photo-file-input");
+    fileInput.addEventListener("change", (e) => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = function(event) {
-                galleryPhotos.unshift({ id: Date.now(), url: event.target.result, date: new Date().toISOString().split("T")[0] });
-                localStorage.setItem("app_gallery", JSON.stringify(galleryPhotos));
+                const base64Str = event.target.result;
+                const todayStr = new Date().toISOString().split('T')[0];
+                appState.photos.unshift({ url: base64Str, caption: "Özel bir anı ✨", date: todayStr });
+                saveAndSync();
                 renderGallery();
-                renderTodayMemory();
+                updateFeaturedMemory();
             };
             reader.readAsDataURL(file);
         }
     });
 
-    document.getElementById("camera-snap-btn").addEventListener("click", () => {
-        document.getElementById("camera-file-input").click();
+    document.getElementById("camera-capture-btn").addEventListener("click", () => {
+        fileInput.click();
     });
+}
 
-    document.getElementById("camera-file-input").addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                galleryPhotos.unshift({ id: Date.now(), url: event.target.result, date: new Date().toISOString().split("T")[0] });
-                localStorage.setItem("app_gallery", JSON.stringify(galleryPhotos));
-                renderGallery();
-                renderTodayMemory();
-            };
-            reader.readAsDataURL(file);
-        }
+function updateFeaturedMemory() {
+    if (appState.photos.length > 0) {
+        const latest = appState.photos[0];
+        document.getElementById("featured-memory-img").src = latest.url;
+        document.getElementById("featured-memory-date").textContent = latest.date || "2026-08-15";
+    }
+}
+
+function renderGallery() {
+    const grid = document.getElementById("gallery-grid");
+    grid.innerHTML = "";
+    appState.photos.forEach((photo, index) => {
+        const div = document.createElement("div");
+        div.className = "gallery-item";
+        div.innerHTML = `<img src="${photo.url}" alt="Galeri Foto">`;
+        div.addEventListener("click", () => openPhotoViewer(photo, index));
+        grid.appendChild(div);
     });
+}
 
-    let calendarDate = new Date();
-    window.renderCalendar = function renderCalendar() {
-        eventsList = JSON.parse(localStorage.getItem("app_events")) || eventsList;
-        const year = calendarDate.getFullYear();
-        const month = calendarDate.getMonth();
-        const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-        document.getElementById("cal-month-year").textContent = `${monthNames[month]} ${year}`;
+function openPhotoViewer(photo, index) {
+    const modal = document.getElementById("photo-viewer-modal");
+    document.getElementById("viewer-img").src = photo.url;
+    document.getElementById("viewer-caption").textContent = photo.caption;
+    modal.classList.add("active");
 
-        const container = document.getElementById("cal-days-container");
-        container.innerHTML = "";
-        const firstDayIndex = new Date(year, month, 1).getDay() || 7;
-        const totalDays = new Date(year, month + 1, 0).getDate();
-
-        for (let i = 1; i < firstDayIndex; i++) container.appendChild(document.createElement("span"));
-        const todayStr = new Date().toISOString().split("T")[0];
-
-        for (let day = 1; day <= totalDays; day++) {
-            const span = document.createElement("span");
-            span.className = "cal-day";
-            span.textContent = day;
-            const formattedDate = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-            
-            if (formattedDate === todayStr) span.classList.add("active-today");
-            
-            if (eventsList.some(ev => ev.date === formattedDate)) {
-                span.classList.add("has-event");
-            }
-
-            span.addEventListener("click", () => {
-                openEventModal(formattedDate, true);
-            });
-
-            container.appendChild(span);
-        }
+    document.getElementById("delete-photo-btn").onclick = () => {
+        appState.photos.splice(index, 1);
+        saveAndSync();
+        renderGallery();
+        updateFeaturedMemory();
+        modal.classList.remove("active");
     };
 
-    document.getElementById("prev-month").addEventListener("click", () => { calendarDate.setMonth(calendarDate.getMonth() - 1); renderCalendar(); });
-    document.getElementById("next-month").addEventListener("click", () => { calendarDate.setMonth(calendarDate.getMonth() + 1); renderCalendar(); });
-
-    let selectedEventDateForModal = "";
-    function openEventModal(presetDate = "", isFromCalendar = false) {
-        selectedEventDateForModal = presetDate || new Date().toISOString().split("T")[0];
-        document.getElementById("modal-event-date").value = selectedEventDateForModal;
-        document.getElementById("modal-event-name").value = "";
-        document.getElementById("modal-event-desc").value = "";
-
-        const dateGroup = document.getElementById("event-date-group");
-        if (isFromCalendar) {
-            dateGroup.style.display = "none";
+    document.getElementById("share-photo-btn").onclick = () => {
+        if (navigator.share) {
+            navigator.share({ title: 'Tuncay & Özge Masalı', text: photo.caption, url: photo.url }).catch(()=>{});
         } else {
-            dateGroup.style.display = "block";
+            alert("Paylaşım bu tarayıcıda desteklenmiyor.");
         }
-
-        document.getElementById("event-add-modal").classList.add("active");
-    }
-
-    document.getElementById("open-add-event-modal").addEventListener("click", () => {
-        openEventModal("", false);
-    });
-
-    document.getElementById("save-new-event-btn").addEventListener("click", () => {
-        const dateVal = document.getElementById("modal-event-date").value;
-        const nameVal = document.getElementById("modal-event-name").value.trim();
-        const descVal = document.getElementById("modal-event-desc").value.trim();
-
-        if (!nameVal) {
-            alert("Lütfen etkinlik adını girin!");
-            return;
-        }
-
-        eventsList.push({
-            id: Date.now(),
-            title: nameVal,
-            desc: descVal,
-            date: dateVal || selectedEventDateForModal
-        });
-        localStorage.setItem("app_events", JSON.stringify(eventsList));
-        renderEvents();
-        renderCalendar();
-        document.getElementById("event-add-modal").classList.remove("active");
-    });
-
-    window.renderEvents = function renderEvents() {
-        eventsList = JSON.parse(localStorage.getItem("app_events")) || eventsList;
-        const container = document.getElementById("events-list-container");
-        container.innerHTML = "";
-        eventsList.sort((a, b) => new Date(a.date) - new Date(b.date));
-        eventsList.forEach(ev => {
-            const div = document.createElement("div");
-            div.className = "event-card";
-            div.innerHTML = `<div><h4>${ev.title}</h4><p>${ev.desc} (${ev.date})</p></div><button class="delete-icon-btn">🗑️</button>`;
-            div.querySelector(".delete-icon-btn").addEventListener("click", () => {
-                showConfirm("Bu özel günü silmek istiyor musunuz?", () => {
-                    eventsList = eventsList.filter(e => e.id !== ev.id);
-                    localStorage.setItem("app_events", JSON.stringify(eventsList));
-                    renderEvents();
-                    renderCalendar();
-                });
-            });
-            container.appendChild(div);
-        });
     };
+}
 
-    window.renderSongsList = function renderSongsList() {
-        songsList = JSON.parse(localStorage.getItem("app_songs")) || songsList;
-        const container = document.getElementById("songs-list-container");
-        container.innerHTML = "";
-        songsList.forEach(song => {
-            const div = document.createElement("div");
-            div.className = "event-card";
-            div.innerHTML = `<div><h4>${song.title}</h4><p>${song.artist} (${song.date})</p></div><button class="delete-icon-btn">🗑️</button>`;
-            div.querySelector(".delete-icon-btn").addEventListener("click", () => {
-                showConfirm("Bu şarkıyı silmek istiyor musunuz?", () => {
-                    songsList = songsList.filter(s => s.id !== song.id);
-                    localStorage.setItem("app_songs", JSON.stringify(songsList));
-                    renderSongsList();
-                });
-            });
-            container.appendChild(div);
-        });
-    };
-
-    document.getElementById("open-add-song-modal").addEventListener("click", () => {
-        document.getElementById("modal-song-title").value = "";
-        document.getElementById("modal-song-artist").value = "";
-        document.getElementById("song-add-modal").classList.add("active");
+function initQuickLinkModals() {
+    document.getElementById("goto-songs-tab").addEventListener("click", () => {
+        document.getElementById("songs-modal").classList.add("active");
     });
-
-    document.getElementById("save-new-song-btn").addEventListener("click", () => {
-        const title = document.getElementById("modal-song-title").value.trim();
-        const artist = document.getElementById("modal-song-artist").value.trim();
-
-        if (!title || !artist) {
-            alert("Lütfen şarkı adı ve sanatçı adını doldurun!");
-            return;
-        }
-
-        songsList.unshift({
-            id: Date.now(),
-            title: title,
-            artist: artist,
-            date: new Date().toISOString().split("T")[0]
-        });
-        localStorage.setItem("app_songs", JSON.stringify(songsList));
-        renderSongsList();
-        document.getElementById("song-add-modal").classList.remove("active");
+    document.getElementById("goto-todos-tab").addEventListener("click", () => {
+        document.getElementById("todos-modal").classList.add("active");
     });
-
-    window.renderTodos = function renderTodos() {
-        todosList = JSON.parse(localStorage.getItem("app_todos")) || todosList;
-        const container = document.getElementById("todos-list-container");
-        container.innerHTML = "";
-        todosList.forEach(todo => {
-            const div = document.createElement("div");
-            div.className = "event-card";
-            div.style.textDecoration = todo.done ? "line-through" : "none";
-            div.innerHTML = `<span style="cursor:pointer; flex:1;">${todo.text}</span><button class="delete-icon-btn">🗑️</button>`;
-            div.querySelector("span").addEventListener("click", () => {
-                if(confirm(`"${todo.text}" yapıldı olarak işaretlensin mi?`)) {
-                    todo.done = !todo.done;
-                    localStorage.setItem("app_todos", JSON.stringify(todosList));
-                    renderTodos();
-                }
-            });
-            div.querySelector(".delete-icon-btn").addEventListener("click", () => {
-                showConfirm("Bu görevi silmek istiyor musunuz?", () => {
-                    todosList = todosList.filter(t => t.id !== todo.id);
-                    localStorage.setItem("app_todos", JSON.stringify(todosList));
-                    renderTodos();
-                });
-            });
-            container.appendChild(div);
-        });
-    };
-
-    document.getElementById("open-add-todo-modal").addEventListener("click", () => {
-        document.getElementById("modal-todo-text").value = "";
-        document.getElementById("todo-add-modal").classList.add("active");
+    document.getElementById("goto-wheel-tab").addEventListener("click", () => {
+        document.getElementById("wheel-modal").classList.add("active");
     });
+}
 
-    document.getElementById("save-new-todo-btn").addEventListener("click", () => {
-        const text = document.getElementById("modal-todo-text").value.trim();
-        if (!text) {
-            alert("Lütfen görev açıklamasını yazın!");
-            return;
-        }
-
-        todosList.push({
-            id: Date.now(),
-            text: text,
-            done: false
-        });
-        localStorage.setItem("app_todos", JSON.stringify(todosList));
-        renderTodos();
-        document.getElementById("todo-add-modal").classList.remove("active");
-    });
-
+function initDecisionWheel() {
     const canvas = document.getElementById("decision-wheel");
     const ctx = canvas.getContext("2d");
-    let startAngle = 0, isSpinning = false;
-    const wheelColors = ["#ff758c", "#6c5ce7", "#00cec9", "#fdcb6e", "#e17055", "#0984e3", "#fd79a8"];
+    let angle = 0;
+    const spinBtn = document.getElementById("spin-wheel-btn");
 
-    window.drawWheel = function drawWheel() {
-        wheelOptions = JSON.parse(localStorage.getItem("app_wheel")) || wheelOptions;
-        const arc = Math.PI / (wheelOptions.length / 2);
+    function drawWheel() {
+        const options = appState.wheelOptions;
+        const total = options.length;
+        const arc = (2 * Math.PI) / total;
         const radius = canvas.width / 2;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        wheelOptions.forEach((option, i) => {
-            const angle = startAngle + i * arc;
-            ctx.fillStyle = wheelColors[i % wheelColors.length];
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(radius, radius);
+        ctx.rotate(angle);
+
+        const colors = ["#f43f5e", "#fb7185", "#fda4af", "#e11d48", "#be123c", "#f43f5e"];
+
+        options.forEach((opt, i) => {
+            const startAngle = i * arc;
+            const endAngle = (i + 1) * arc;
+
             ctx.beginPath();
-            ctx.arc(radius, radius, radius, angle, angle + arc, false);
-            ctx.lineTo(radius, radius);
+            ctx.moveTo(0, 0);
+            ctx.arc(0, 0, radius - 4, startAngle, endAngle);
+            ctx.fillStyle = colors[i % colors.length];
             ctx.fill();
+            ctx.strokeStyle = "rgba(255,255,255,0.2)";
+            ctx.lineWidth = 2;
+            ctx.stroke();
 
             ctx.save();
+            ctx.rotate(startAngle + arc / 2);
             ctx.fillStyle = "#fff";
-            ctx.font = "bold 11px Poppins";
-            ctx.translate(
-                radius + Math.cos(angle + arc / 2) * (radius * 0.6),
-                radius + Math.sin(angle + arc / 2) * (radius * 0.6)
-            );
-            ctx.rotate(angle + arc / 2 + Math.PI / 2);
-            ctx.fillText(option, -ctx.measureText(option).width / 2, 0);
+            ctx.font = "bold 10px sans-serif";
+            ctx.fillText(opt, radius / 2.2, 3);
             ctx.restore();
         });
-    };
 
-    function spinTheWheel() {
-        if (isSpinning || wheelOptions.length === 0) return;
-        isSpinning = true;
-        const spinAngle = Math.random() * 2000 + 3000;
-        const spinTime = 2500;
-        let startTime = null;
+        ctx.restore();
+    }
 
-        function animateSpin(currentTime) {
-            if (!startTime) startTime = currentTime;
-            const elapsed = currentTime - startTime;
-            if (elapsed < spinTime) {
-                const progress = elapsed / spinTime;
-                startAngle = (-c_easeOut(progress, 0, spinAngle, spinTime)) * (Math.PI / 180);
-                drawWheel();
+    drawWheel();
+
+    spinBtn.addEventListener("click", () => {
+        if (spinBtn.disabled) return;
+        spinBtn.disabled = true;
+
+        let spinAngle = Math.random() * 1000 + 2000;
+        let start = null;
+        const duration = 2500;
+
+        function animateSpin(timestamp) {
+            if (!start) start = timestamp;
+            const progress = timestamp - start;
+            const easeOut = 1 - Math.pow(1 - Math.min(progress / duration, 1), 3);
+            
+            angle = (spinAngle * easeOut * Math.PI) / 180;
+            drawWheel();
+
+            if (progress < duration) {
                 requestAnimationFrame(animateSpin);
             } else {
-                isSpinning = false;
-                const index = Math.floor(wheelOptions.length - (startAngle % (2 * Math.PI)) / (2 * Math.PI / wheelOptions.length)) % wheelOptions.length;
-                alert(`Çark Sonucu: ${wheelOptions[index]} 🎉`);
+                spinBtn.disabled = false;
+                const total = appState.wheelOptions.length;
+                const arc = (2 * Math.PI) / total;
+                const normalizedAngle = (2 * Math.PI - (angle % (2 * Math.PI))) + Math.PI / 2;
+                const winningIndex = Math.floor(normalizedAngle / arc) % total;
+                alert(`🎉 Çarkın Seçimi: ${appState.wheelOptions[winningIndex]}`);
             }
         }
+
         requestAnimationFrame(animateSpin);
-    }
+    });
+}
 
-    function c_easeOut(t, b, c, d) {
-        t /= d;
-        return -c * t*(t-2) + b;
-    }
+function initTodoList() {
+    const ul = document.getElementById("todos-list-ul");
+    const input = document.getElementById("new-todo-input");
+    const addBtn = document.getElementById("add-todo-btn");
 
-    document.getElementById("spin-wheel-btn").addEventListener("click", spinTheWheel);
-    canvas.addEventListener("click", spinTheWheel);
-
-    window.renderWheelTags = function renderWheelTags() {
-        wheelOptions = JSON.parse(localStorage.getItem("app_wheel")) || wheelOptions;
-        const container = document.getElementById("wheel-tags-container");
-        container.innerHTML = "";
-        wheelOptions.forEach((opt, idx) => {
-            const badge = document.createElement("span");
-            badge.className = "tag-badge";
-            badge.innerHTML = `${opt} <button>&times;</button>`;
-            badge.querySelector("button").addEventListener("click", () => {
-                wheelOptions.splice(idx, 1);
-                localStorage.setItem("app_wheel", JSON.stringify(wheelOptions));
-                renderWheelTags();
-                drawWheel();
+    function renderTodos() {
+        ul.innerHTML = "";
+        appState.todos.forEach((todo, index) => {
+            const li = document.createElement("li");
+            if (todo.done) li.className = "completed";
+            li.innerHTML = `<span>${todo.text}</span><button>🗑️</button>`;
+            
+            li.querySelector("span").addEventListener("click", () => {
+                todo.done = !todo.done;
+                saveAndSync();
+                renderTodos();
             });
-            container.appendChild(badge);
-        });
-    };
 
-    document.getElementById("add-wheel-item-btn").addEventListener("click", () => {
-        const input = document.getElementById("new-wheel-item-input");
+            li.querySelector("button").addEventListener("click", (e) => {
+                e.stopPropagation();
+                appState.todos.splice(index, 1);
+                saveAndSync();
+                renderTodos();
+            });
+
+            ul.appendChild(li);
+        });
+    }
+
+    renderTodos();
+
+    addBtn.addEventListener("click", () => {
         if (input.value.trim()) {
-            wheelOptions.push(input.value.trim());
+            appState.todos.push({ text: input.value.trim(), done: false });
             input.value = "";
-            localStorage.setItem("app_wheel", JSON.stringify(wheelOptions));
-            renderWheelTags();
-            drawWheel();
+            saveAndSync();
+            renderTodos();
+        }
+    });
+}
+
+function initSongsList() {
+    const ul = document.getElementById("songs-list-ul");
+    const input = document.getElementById("new-song-input");
+    const addBtn = document.getElementById("add-song-btn");
+
+    function renderSongs() {
+        ul.innerHTML = "";
+        appState.songs.forEach((song, index) => {
+            const li = document.createElement("li");
+            li.style.cssText = "background:rgba(0,0,0,0.03); padding:8px 10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; font-size:12px;";
+            li.innerHTML = `<span>🎵 <strong>${song.title}</strong> - <small>${song.artist}</small></span><button style="background:transparent; border:none; cursor:pointer;">🗑️</button>`;
+            
+            li.querySelector("button").addEventListener("click", () => {
+                appState.songs.splice(index, 1);
+                saveAndSync();
+                renderSongs();
+            });
+            ul.appendChild(li);
+        });
+    }
+
+    renderSongs();
+
+    addBtn.addEventListener("click", () => {
+        if (input.value.trim()) {
+            appState.songs.push({ title: input.value.trim(), artist: "Özel Şarkı" });
+            input.value = "";
+            saveAndSync();
+            renderSongs();
+        }
+    });
+}
+
+let calDate = new Date(2026, 7, 1);
+let selectedDateStr = "2026-08-15";
+
+function initCalendar() {
+    renderCalendarGrid();
+
+    document.getElementById("prev-month").addEventListener("click", () => {
+        calDate.setMonth(calDate.getMonth() - 1);
+        renderCalendarGrid();
+    });
+
+    document.getElementById("next-month").addEventListener("click", () => {
+        calDate.setMonth(calDate.getMonth() + 1);
+        renderCalendarGrid();
+    });
+
+    document.getElementById("open-add-event-modal").addEventListener("click", () => {
+        document.getElementById("event-date-input").value = selectedDateStr;
+        document.getElementById("event-modal").classList.add("active");
+    });
+
+    document.getElementById("save-event-btn").addEventListener("click", () => {
+        const date = document.getElementById("event-date-input").value;
+        const title = document.getElementById("event-title-input").value;
+        const desc = document.getElementById("event-desc-input").value;
+
+        if (date && title) {
+            if (!appState.events[date]) appState.events[date] = [];
+            appState.events[date].push({ title, desc });
+            saveAndSync();
+            renderCalendarGrid();
+            renderSelectedDayEvents(date);
+            document.getElementById("event-modal").classList.remove("active");
+            document.getElementById("event-title-input").value = "";
+            document.getElementById("event-desc-input").value = "";
+        }
+    });
+}
+
+function renderCalendarGrid() {
+    const grid = document.getElementById("cal-days-grid");
+    const monthYearEl = document.getElementById("cal-month-year");
+    grid.innerHTML = "";
+
+    const year = calDate.getFullYear();
+    const month = calDate.getMonth();
+    const months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+    monthYearEl.textContent = `${months[month]} ${year}`;
+
+    const firstDayIndex = (new Date(year, month, 1).getDay() + 6) % 7;
+    const totalDays = new Date(year, month + 1, 0).getDate();
+
+    for (let i = 0; i < firstDayIndex; i++) {
+        grid.appendChild(document.createElement("div"));
+    }
+
+    for (let d = 1; d <= totalDays; d++) {
+        const dayDiv = document.createElement("div");
+        dayDiv.className = "cal-day";
+        const mStr = String(month + 1).padStart(2, '0');
+        const dStr = String(d).padStart(2, '0');
+        const dateKey = `${year}-${mStr}-${dStr}`;
+
+        dayDiv.textContent = d;
+        if (appState.events[dateKey]) dayDiv.classList.add("has-event");
+        if (dateKey === selectedDateStr) dayDiv.classList.add("selected");
+
+        dayDiv.addEventListener("click", () => {
+            document.querySelectorAll(".cal-day").forEach(el => el.classList.remove("selected"));
+            dayDiv.classList.add("selected");
+            selectedDateStr = dateKey;
+            renderSelectedDayEvents(dateKey);
+        });
+
+        grid.appendChild(dayDiv);
+    }
+
+    renderSelectedDayEvents(selectedDateStr);
+}
+
+function renderSelectedDayEvents(dateKey) {
+    const container = document.getElementById("selected-day-events");
+    container.innerHTML = "";
+    const events = appState.events[dateKey] || [];
+    if (events.length === 0) {
+        container.innerHTML = `<p class="timer-sub" style="font-size:11px; color:var(--text-muted);">Bu tarihte etkinlik yok.</p>`;
+        return;
+    }
+    events.forEach(ev => {
+        const div = document.createElement("div");
+        div.className = "event-item-mini";
+        div.innerHTML = `<strong>${ev.title}</strong><br><small>${ev.desc || ''}</small>`;
+        container.appendChild(div);
+    });
+}
+
+function initSettingsAndModals() {
+    document.querySelectorAll(".close-modal").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".modal").forEach(m => m.classList.remove("active"));
+        });
+    });
+
+    document.getElementById("open-lyrics-modal").addEventListener("click", () => {
+        document.getElementById("lyrics-modal").classList.add("active");
+    });
+
+    const audio = document.getElementById("bg-audio");
+    const miniPlayBtn = document.getElementById("mini-play-btn");
+    let isPlaying = false;
+
+    miniPlayBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (isPlaying) {
+            audio.pause();
+            miniPlayBtn.textContent = "▶️";
+            isPlaying = false;
+        } else {
+            audio.play().catch(()=>{});
+            miniPlayBtn.textContent = "⏸️";
+            isPlaying = true;
         }
     });
 
-    document.getElementById("setting-change-pin").addEventListener("click", () => {
-        document.getElementById("modal-current-pin").value = "";
-        document.getElementById("modal-new-pin-1").value = "";
-        document.getElementById("modal-new-pin-2").value = "";
+    const darkModeToggle = document.getElementById("dark-mode-toggle");
+    darkModeToggle.addEventListener("change", (e) => {
+        if (e.target.checked) document.documentElement.setAttribute("data-theme", "dark");
+        else document.documentElement.setAttribute("data-theme", "light");
+    });
+
+    document.getElementById("change-pin-trigger").addEventListener("click", () => {
         document.getElementById("pin-change-modal").classList.add("active");
     });
 
     document.getElementById("save-new-pin-btn").addEventListener("click", () => {
-        const cur = document.getElementById("modal-current-pin").value;
-        const n1 = document.getElementById("modal-new-pin-1").value;
-        const n2 = document.getElementById("modal-new-pin-2").value;
+        const oldPin = document.getElementById("old-pin-input").value;
+        const newPin = document.getElementById("new-pin-input").value;
 
-        if (cur !== CORRECT_PIN) {
-            alert("Mevcut şifreyi yanlış girdiniz!");
-            return;
+        if (oldPin === currentPin && newPin.length === 4) {
+            currentPin = newPin;
+            localStorage.setItem("sincap_pin", currentPin);
+            alert("Şifre başarıyla değiştirildi! 🔑");
+            document.getElementById("pin-change-modal").classList.remove("active");
+        } else {
+            alert("Mevcut şifre yanlış veya yeni şifre 4 haneli değil!");
         }
-        if (!n1 || n1.length !== 4) {
-            alert("Yeni şifre 4 haneli olmalıdır!");
-            return;
-        }
-        if (n1 !== n2) {
-            alert("Yeni şifreler birbiriyle uyuşmuyor!");
-            return;
-        }
-
-        CORRECT_PIN = n1;
-        localStorage.setItem("app_pin", CORRECT_PIN);
-        alert("PIN şifreniz başarıyla güncellendi! 🔑");
-        document.getElementById("pin-change-modal").classList.remove("active");
     });
 
-    document.getElementById("setting-open-logs").addEventListener("click", () => {
-        logs = JSON.parse(localStorage.getItem("app_logs")) || logs;
+    document.getElementById("view-logs-trigger").addEventListener("click", () => {
         const container = document.getElementById("logs-list-container");
         container.innerHTML = "";
-        logs.forEach((log, idx) => {
+        appState.logs.forEach(log => {
             const div = document.createElement("div");
-            div.className = "event-card";
-            div.innerHTML = `<div><h4>${log.profile}</h4><p>${log.time} - ${log.mood}</p></div><button class="delete-icon-btn">🗑️</button>`;
-            div.querySelector(".delete-icon-btn").addEventListener("click", () => {
-                logs.splice(idx, 1);
-                localStorage.setItem("app_logs", JSON.stringify(logs));
-                document.getElementById("setting-open-logs").click();
-            });
+            div.className = "log-item";
+            div.innerHTML = `<strong>${log.user}</strong>: ${log.mood} <br><small>${log.time}</small>`;
             container.appendChild(div);
         });
         document.getElementById("logs-modal").classList.add("active");
     });
 
-    const autoMusicToggle = document.getElementById("auto-music-toggle");
-    if (autoMusicToggle) {
-        autoMusicToggle.checked = autoMusicEnabled;
-        autoMusicToggle.addEventListener("change", (e) => {
-            autoMusicEnabled = e.target.checked;
-            localStorage.setItem("app_auto_music", autoMusicEnabled);
-        });
-    }
-
     document.getElementById("logout-btn").addEventListener("click", () => {
-        if (isMusicPlaying) { musicAudio.pause(); isMusicPlaying = false; }
-        currentProfile = null;
-        profileCards.forEach(c => c.classList.remove("selected"));
-        saveLoginBtn.setAttribute("disabled", "true");
-        switchScreen("welcome-screen");
+        enteredPinBuffer = "";
+        audio.pause();
+        switchScreen("pin-screen");
     });
+}
 
-    document.getElementById("dark-mode-toggle").addEventListener("change", (e) => {
-        if (e.target.checked) document.body.setAttribute("data-theme", "dark");
-        else document.body.removeAttribute("data-theme");
-    });
-
-    document.querySelectorAll(".close-modal").forEach(btn => {
-        btn.addEventListener("click", () => btn.closest(".modal").classList.remove("active"));
-    });
-
-    document.querySelectorAll(".modal").forEach(modal => {
-        modal.addEventListener("click", (e) => {
-            if (e.target === modal) {
-                modal.classList.remove("active");
-            }
-        });
-    });
-
-    let confirmCallback = null;
-    function showConfirm(text, callback) {
-        document.getElementById("confirm-text").textContent = text;
-        document.getElementById("confirm-modal").classList.add("active");
-        confirmCallback = callback;
+function playAutoMusic() {
+    const autoMusicToggle = document.getElementById("auto-music-toggle");
+    if (autoMusicToggle && autoMusicToggle.checked) {
+        const audio = document.getElementById("bg-audio");
+        audio.play().catch(()=>{});
     }
+}
 
-    document.getElementById("confirm-yes-btn").addEventListener("click", () => {
-        if (confirmCallback) confirmCallback();
-        document.getElementById("confirm-modal").classList.remove("active");
-    });
-    document.getElementById("confirm-no-btn").addEventListener("click", () => {
-        document.getElementById("confirm-modal").classList.remove("active");
-    });
+// Bellek Korumalı & Güvenli Bulut Senkronizasyonu (Firestore)
+function initFirebaseSync() {
+    const statusEl = document.getElementById("sync-status-text");
+    const docRef = doc(db, "sincap_data", "main_state");
 
-    initMainApp();
-});
+    // Canlı dinleyici (onSnapshot)
+    onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+            const cloudData = docSnap.data();
+            if (cloudData.todos) appState.todos = cloudData.todos;
+            if (cloudData.songs) appState.songs = cloudData.songs;
+            if (cloudData.events) appState.events = cloudData.events;
+            if (cloudData.photos) appState.photos = cloudData.photos;
+            if (cloudData.logs) appState.logs = cloudData.logs;
+
+            // Arayüzü tazele
+            saveToLocalStorageLocally();
+            renderGallery();
+            updateFeaturedMemory();
+            statusEl.textContent = "🟢 Buluta Bağlı & Senkronize";
+        } else {
+            // İlk kez boşsa mevcut lokal veriyi buluta yaz
+            saveAndSync();
+        }
+    }, (error) => {
+        console.error("Firebase Senkronizasyon Hatası:", error);
+        statusEl.textContent = "🔴 Bağlantı Hatası (Lokal Mod)";
+    });
+}
+
+function saveAndSync() {
+    saveToLocalStorageLocally();
+    safeSyncToCloud();
+}
+
+function saveToLocalStorageLocally() {
+    localStorage.setItem("sincap_todos", JSON.stringify(appState.todos));
+    localStorage.setItem("sincap_songs", JSON.stringify(appState.songs));
+    localStorage.setItem("sincap_events", JSON.stringify(appState.events));
+    localStorage.setItem("sincap_photos", JSON.stringify(appState.photos));
+    localStorage.setItem("sincap_logs", JSON.stringify(appState.logs));
+}
+
+async function safeSyncToCloud() {
+    try {
+        const docRef = doc(db, "sincap_data", "main_state");
+        // Bellek şişmesini önlemek için sadece yapısal veriler gönderilir
+        await setDoc(docRef, {
+            todos: appState.todos,
+            songs: appState.songs,
+            events: appState.events,
+            photos: appState.photos,
+            logs: appState.logs,
+            updatedAt: new Date().toISOString()
+        });
+    } catch (err) {
+        console.error("Buluta veri yazılırken hata:", err);
+    }
+}

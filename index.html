@@ -1,151 +1,341 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tuncay & Özge Masalı</title>
-    <style>
-        :root {
-            --primary: #ff5277;
-            --bg: #f4f6f8;
-            --card: #ffffff;
-            --text: #2d3436;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .app-container { width: 100%; max-width: 400px; height: 100vh; max-height: 800px; background: #fff; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 20px; overflow: hidden; position: relative; }
-        header { background: linear-gradient(135deg, #ff758c, #ff7eb3); color: white; padding: 20px; text-align: center; }
-        header h1 { font-size: 20px; margin-bottom: 4px; }
-        header p { font-size: 12px; opacity: 0.9; }
-        .content { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .card { background: #fdfdfd; border: 1px solid #eee; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
-        .card h3 { font-size: 14px; color: var(--primary); margin-bottom: 8px; }
-        input, button { width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #ddd; font-size: 13px; }
-        button { background: var(--primary); color: white; border: none; font-weight: 600; cursor: pointer; }
-        button:hover { opacity: 0.9; }
-        ul { list-style: none; margin-top: 8px; max-height: 120px; overflow-y: auto; }
-        li { background: #f9f9f9; padding: 8px; margin-bottom: 4px; border-radius: 6px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .status-bar { font-size: 10px; text-align: center; padding: 6px; background: #eef2f5; color: #636e72; }
-    </style>
-
-    <!-- Firebase SDK Modular -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCi3RVc9AvcI-1ZH9uRWBtFsmW2GuSdMvI",
-            authDomain: "sincap-v2.firebaseapp.com",
-            projectId: "sincap-v2",
-            storageBucket: "sincap-v2.firebasestorage.app",
-            messagingSenderId: "985716748362",
-            appId: "1:985716748362:web:980a879cab98c40afdf6b3",
-            measurementId: "G-PF628J6GDF"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const stateRef = doc(db, "sincap_data", "main_state");
-
-        // Varsayılan Ortak Durum (State)
-        let appState = {
-            todos: [],
-            songs: [],
-            lastUpdate: ""
-        };
-
-        // Buluttan Canlı Dinleme (Real-time Sync)
-        onSnapshot(stateRef, (docSnap) => {
-            if (docSnap.exists()) {
-                appState = docSnap.data();
-                document.getElementById("sync-status").textContent = "🟢 Buluta Bağlı & Senkronize";
-                renderUI();
-            } else {
-                // İlk kurulum
-                syncToCloud();
-            }
-        });
-
-        // Buluta Veri Yazma Fonksiyonu
-        window.syncToCloud = async function() {
-            try {
-                appState.lastUpdate = new Date().toLocaleTimeString();
-                await setDoc(stateRef, appState);
-            } catch (e) {
-                console.error("Yazma hatası:", e);
-                document.getElementById("sync-status").textContent = "🔴 Senkronizasyon Hatası!";
-            }
-        };
-
-        // Arayüzü Güncelleme
-        function renderUI() {
-            // Yapılacaklar
-            const todoListEl = document.getElementById("todo-list");
-            todoListEl.innerHTML = "";
-            (appState.todos || []).forEach((item, index) => {
-                let li = document.createElement("li");
-                li.innerHTML = `${item} <button onclick="removeItem('todos', ${index})" style="width:auto; padding:2px 6px; font-size:10px;">Sil</button>`;
-                todoListEl.appendChild(li);
-            });
-
-            // Şarkılar
-            const songListEl = document.getElementById("song-list");
-            songListEl.innerHTML = "";
-            (appState.songs || []).forEach((item, index) => {
-                let li = document.createElement("li");
-                li.innerHTML = `${item} <button onclick="removeItem('songs', ${index})" style="width:auto; padding:2px 6px; font-size:10px;">Sil</button>`;
-                songListEl.appendChild(li);
-            });
-        }
-
-        // Öğe Ekleme
-        window.addItem = function(type) {
-            const inputEl = document.getElementById(type + "-input");
-            const val = inputEl.value.trim();
-            if(!val) return;
-            
-            if(!appState[type]) appState[type] = [];
-            appState[type].push(val);
-            inputEl.value = "";
-            
-            syncToCloud();
-        };
-
-        // Öğe Silme
-        window.removeItem = function(type, index) {
-            appState[type].splice(index, 1);
-            syncToCloud();
-        };
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tuncay & Özge Masalı (sincap-v2)</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <div class="app-container">
-        <header>
-            <h1>Tuncay & Özge</h1>
-            <p>Bulut Senkronize Ortak Alan</p>
-        </header>
+    <!-- Durum Çubuğu -->
+    <div id="status-bar">
+        <span id="sync-status-text">🟡 Buluta Bağlanıyor...</span>
+        <span id="current-time-clock">00:00</span>
+    </div>
 
-        <div id="sync-status" class="status-bar">Bağlanıyor...</div>
+    <!-- Mobil Çerçeve Kapsayıcısı -->
+    <div id="app-container">
 
-        <div class="content">
-            <!-- Yapılacaklar Kartı -->
-            <div class="card">
-                <h3>Ortak Yapılacaklar</h3>
-                <input type="text" id="todos-input" placeholder="Yeni görev yaz...">
-                <button onclick="addItem('todos')">Ekle</button>
-                <ul id="todo-list"></ul>
+        <!-- 1. Karşılama Ekranı -->
+        <section id="welcome-screen" class="screen active">
+            <div class="welcome-content">
+                <div class="avatar-wrapper pulse-anim">
+                    <img src="giris_foto.jpg" alt="Tuncay & Özge" onerror="this.src='https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=300&auto=format&fit=crop'">
+                </div>
+                <h1 class="font-serif">Tuncay & Özge</h1>
+                <p class="subtitle">Bu Masala Giriş Yap</p>
+                <button id="start-btn" class="primary-btn">Masalı Başlat ✨</button>
+            </div>
+        </section>
+
+        <!-- 2. Şifre (PIN) Ekranı -->
+        <section id="pin-screen" class="screen">
+            <div class="pin-content">
+                <h2>Özel Alan 🔒</h2>
+                <p>Lütfen 4 haneli şifreyi girin (Varsayılan: 1508)</p>
+                
+                <div class="pin-dots">
+                    <div class="dot" data-index="0"></div>
+                    <div class="dot" data-index="1"></div>
+                    <div class="dot" data-index="2"></div>
+                    <div class="dot" data-index="3"></div>
+                </div>
+
+                <div class="keypad">
+                    <button class="key" data-val="1">1</button>
+                    <button class="key" data-val="2">2</button>
+                    <button class="key" data-val="3">3</button>
+                    <button class="key" data-val="4">4</button>
+                    <button class="key" data-val="5">5</button>
+                    <button class="key" data-val="6">6</button>
+                    <button class="key" data-val="7">7</button>
+                    <button class="key" data-val="8">8</button>
+                    <button class="key" data-val="9">9</button>
+                    <button class="key special" data-val="clear">C</button>
+                    <button class="key" data-val="0">0</button>
+                    <button class="key special" data-val="del">⌫</button>
+                </div>
+                <p id="pin-error" class="error-text"></p>
+            </div>
+        </section>
+
+        <!-- 3. Profil & Ruh Hali Ekranı -->
+        <section id="profile-screen" class="screen">
+            <div class="profile-content">
+                <h2 id="dynamic-greeting">Günaydın Sevgilim ☀️</h2>
+                <p>Kim bağlanıyor?</p>
+
+                <div class="profile-cards">
+                    <div class="profile-card" data-user="Tuncay">
+                        <span class="p-emoji">👨‍💼</span>
+                        <h3>Tuncay</h3>
+                    </div>
+                    <div class="profile-card" data-user="Özge">
+                        <span class="p-emoji">❤️</span>
+                        <h3>Özge</h3>
+                    </div>
+                </div>
+
+                <div class="mood-section">
+                    <label>Bugün ruh halin nasıl?</label>
+                    <div class="mood-display">
+                        <span id="mood-emoji">😊</span>
+                        <span id="mood-text">Mutlu / Huzurlu</span>
+                    </div>
+                    <input type="range" id="mood-slider" min="0" max="4" value="2">
+                </div>
+
+                <div class="profile-actions">
+                    <button id="save-profile-btn" class="primary-btn" disabled>Devam Et 🚀</button>
+                    <button id="skip-profile-btn" class="text-btn">Şimdilik Atla</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Ana Uygulama İskeleti -->
+        <main id="main-app" class="screen">
+            
+            <div id="tab-contents">
+                <!-- SEKME 1: ANA SAYFA -->
+                <div class="tab-content active" id="tab-home">
+                    <div class="card music-banner-card">
+                        <div class="music-banner-top" id="open-lyrics-modal">
+                            <div class="music-icon-wrap">🎵</div>
+                            <div class="song-text">
+                                <span class="title">Sen Olurdun Yine</span>
+                                <span class="artist">Ajda Pekkan</span>
+                            </div>
+                            <button id="mini-play-btn" class="banner-play-btn">⏸️</button>
+                        </div>
+                        <div class="banner-progress-bar">
+                            <div id="mini-progress-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="card counter-card-v2">
+                        <div class="counter-title-row">
+                            <span class="heart-icon">❤️</span>
+                            <span class="counter-main-title">Birlikte Geçen Zamanımız</span>
+                        </div>
+                        <div id="relationship-timer" class="timer-text-inline">
+                            0 Gün 0 Saat 0 Dakika 0 Saniyedir Birlikteyiz
+                        </div>
+                    </div>
+
+                    <div class="card memory-card-v2" id="open-today-memory">
+                        <div class="memory-header-v2">
+                            <div class="memory-title-area">
+                                <span class="mem-icon">🖼️</span>
+                                <span class="mem-title">Günün Anısı</span>
+                            </div>
+                            <span class="date-tag-badge" id="memory-date-badge">Anı Köşesi</span>
+                        </div>
+                        <div class="memory-img-box-v2">
+                            <img id="featured-memory-img" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=600&auto=format&fit=crop" alt="Günün Anısı">
+                            <div class="memory-date-tag" id="featured-memory-date">2026-08-15</div>
+                        </div>
+                        <div class="memory-actions-row">
+                            <label class="upload-btn-label">
+                                📁 Fotoğraf Yükle <input type="file" id="photo-file-input" accept="image/*" hidden>
+                            </label>
+                            <button id="camera-capture-btn" class="action-sub-btn">📷 Kamera</button>
+                        </div>
+                    </div>
+
+                    <div class="quick-links-grid">
+                        <button class="quick-link-box" id="goto-songs-tab">
+                            <span class="ql-icon">🎵</span>
+                            <span class="ql-text">Şarkılarımız</span>
+                        </button>
+                        <button class="quick-link-box" id="goto-todos-tab">
+                            <span class="ql-icon">☑️</span>
+                            <span class="ql-text">Yapılacaklar</span>
+                        </button>
+                        <button class="quick-link-box" id="goto-wheel-tab">
+                            <span class="ql-icon">🎯</span>
+                            <span class="ql-text">Özel Çark</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SEKME 2: GALERİ -->
+                <div class="tab-content" id="tab-gallery">
+                    <h2>Anı Galerimiz 🖼️</h2>
+                    <p class="section-desc">Birlikte biriktirdiğimiz tüm güzel anlar</p>
+                    <div id="gallery-grid" class="gallery-grid"></div>
+                </div>
+
+                <!-- SEKME 3: TAKVİM -->
+                <div class="tab-content" id="tab-calendar">
+                    <div class="cal-header">
+                        <button id="prev-month">❮</button>
+                        <h2 id="cal-month-year">Ağustos 2026</h2>
+                        <button id="next-month">❯</button>
+                    </div>
+                    <div class="cal-weekdays">
+                        <span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span>
+                    </div>
+                    <div id="cal-days-grid" class="cal-days-grid"></div>
+
+                    <div class="card event-list-card">
+                        <div class="flex-between">
+                            <h3>Seçili Gün Etkinlikleri</h3>
+                            <button id="open-add-event-modal" class="small-add-btn">+ Etkinlik</button>
+                        </div>
+                        <div id="selected-day-events"></div>
+                    </div>
+                </div>
+
+                <!-- SEKME 4: AYARLAR -->
+                <div class="tab-content" id="tab-settings">
+                    <h2>Ayarlar & Tercihler ⚙️</h2>
+                    
+                    <div class="settings-group">
+                        <h3>Güvenlik</h3>
+                        <button id="change-pin-trigger" class="settings-item-btn">🔑 PIN Şifresini Değiştir</button>
+                        <button id="view-logs-trigger" class="settings-item-btn">📊 Ruh Hali Geçmişi (Loglar)</button>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3>Görünüm & Müzik</h3>
+                        <div class="setting-toggle-row">
+                            <span>🌙 Karanlık Mod</span>
+                            <input type="checkbox" id="dark-mode-toggle">
+                        </div>
+                        <div class="setting-toggle-row">
+                            <span>🎵 Otomatik Müzik Çalar</span>
+                            <input type="checkbox" id="auto-music-toggle" checked>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3>Oturum</h3>
+                        <button id="logout-btn" class="danger-btn">Oturumu Kapat & Kilitle 🚪</button>
+                    </div>
+                </div>
             </div>
 
-            <!-- Şarkılar Kartı -->
-            <div class="card">
-                <h3>Ortak Şarkılarımız</h3>
-                <input type="text" id="songs-input" placeholder="Şarkı adı yaz...">
-                <button onclick="addItem('songs')">Ekle</button>
-                <ul id="song-list"></ul>
+            <!-- Alt Navigasyon Barı -->
+            <nav class="bottom-nav">
+                <button class="nav-item active" data-target="tab-home">
+                    <span class="icon">🏠</span>
+                    <span class="label">Ana Sayfa</span>
+                </button>
+                <button class="nav-item" data-target="tab-gallery">
+                    <span class="icon">🖼️</span>
+                    <span class="label">Galeri</span>
+                </button>
+                <button class="nav-item" data-target="tab-calendar">
+                    <span class="icon">📅</span>
+                    <span class="label">Takvim</span>
+                </button>
+                <button class="nav-item" data-target="tab-settings">
+                    <span class="icon">⚙️</span>
+                    <span class="label">Ayarlar</span>
+                </button>
+            </nav>
+        </main>
+    </div>
+
+    <!-- MODALLAR -->
+    <div id="songs-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>🎵 Şarkılarımız</h3>
+            <div class="song-input-row" style="margin-top:12px; display:flex; gap:8px;">
+                <input type="text" id="new-song-input" placeholder="Şarkı adı ve sanatçı..." style="flex:1; background:rgba(255,255,255,0.06); border:1px solid var(--card-border); padding:8px; border-radius:8px; color:var(--text-color); font-size:12px;">
+                <button id="add-song-btn" style="background:var(--primary); color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer;">+</button>
+            </div>
+            <ul id="songs-list-ul" style="list-style:none; margin-top:12px; max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;"></ul>
+        </div>
+    </div>
+
+    <div id="todos-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>☑️ Yapılacaklar Listesi</h3>
+            <div class="todo-input-row" style="margin-top:12px;">
+                <input type="text" id="new-todo-input" placeholder="Yeni bir hayal veya görev ekle...">
+                <button id="add-todo-btn">+</button>
+            </div>
+            <ul id="todos-list-ul"></ul>
+        </div>
+    </div>
+
+    <div id="wheel-modal" class="modal">
+        <div class="modal-content" style="text-align:center;">
+            <span class="close-modal">&times;</span>
+            <h3>🎯 Ne Yapsak? Karar Çarkı</h3>
+            <div class="wheel-container" style="margin:12px auto;">
+                <canvas id="decision-wheel" width="240" height="240"></canvas>
+                <div class="wheel-pointer"></div>
+            </div>
+            <button id="spin-wheel-btn" class="primary-btn spin-btn">Çarkı Çevir! 🎯</button>
+        </div>
+    </div>
+
+    <div id="photo-viewer-modal" class="modal">
+        <div class="modal-content photo-viewer-content">
+            <span class="close-modal">&times;</span>
+            <img id="viewer-img" src="" alt="Büyük Görüntü">
+            <p id="viewer-caption"></p>
+            <div class="viewer-actions">
+                <button id="share-photo-btn" class="action-btn">🔗 Paylaş</button>
+                <button id="delete-photo-btn" class="danger-sub-btn">🗑️ Sil</button>
             </div>
         </div>
     </div>
 
+    <div id="lyrics-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Sen Olurdun Yine</h2>
+            <p class="artist-sub">Ajda Pekkan</p>
+            <div class="lyrics-box">
+                <p>Gözlerimi kapatsam sen olurdun yine...</p>
+                <p>Yollarımız ayrı olsa, kalplerimiz bir...</p>
+                <p>Bu masal bizimle güzel sincabım...</p>
+            </div>
+            <div class="external-music-links">
+                <a href="https://open.spotify.com" target="_blank" class="ext-link spotify">Spotify'da Dinle</a>
+                <a href="https://music.youtube.com" target="_blank" class="ext-link youtube">YouTube Music</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="event-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Yeni Etkinlik / Hatıra Ekle</h3>
+            <input type="date" id="event-date-input">
+            <input type="text" id="event-title-input" placeholder="Etkinlik Başlığı (örn: Yıldönümü)">
+            <textarea id="event-desc-input" placeholder="Açıklama veya not..."></textarea>
+            <button id="save-event-btn" class="primary-btn">Kaydet</button>
+        </div>
+    </div>
+
+    <div id="pin-change-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Şifre Değiştir</h3>
+            <input type="password" id="old-pin-input" placeholder="Mevcut Şifre" maxlength="4">
+            <input type="password" id="new-pin-input" placeholder="Yeni 4 Haneli Şifre" maxlength="4">
+            <button id="save-new-pin-btn" class="primary-btn">Şifreyi Güncelle</button>
+        </div>
+    </div>
+
+    <div id="logs-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Ruh Hali Geçmişi</h3>
+            <div id="logs-list-container" class="logs-container"></div>
+        </div>
+    </div>
+
+    <audio id="bg-audio" loop src="https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg"></audio>
+
+    <script src="script.js"></script>
 </body>
 </html>
