@@ -4,13 +4,12 @@ window.addEventListener('firebase-ready', () => {
     const { doc, onSnapshot } = window.firebaseModules;
     const sharedDataRef = doc(db, "sincap_data", "main_state");
 
-    // Özge veya sen bir değişiklik yaptığında burası anında tetiklenir
+    // Sayfa açılır açılmaz buluttaki güncel veriyi çek ve localStorage'a bas
     onSnapshot(sharedDataRef, (docSnap) => {
         if (docSnap.exists()) {
             const cloudData = docSnap.data();
-            console.log("Buluttan canlı veri senkronize edildi:", cloudData);
+            console.log("Buluttan canlı veri alındı:", cloudData);
             
-            // Buluttan gelen tüm anahtarları localStorage'a işle
             for (const key in cloudData) {
                 if (Object.prototype.hasOwnProperty.call(cloudData, key)) {
                     const val = cloudData[key];
@@ -18,7 +17,8 @@ window.addEventListener('firebase-ready', () => {
                 }
             }
 
-            // Sayfadaki verileri güncellemek için ekrandaki render fonksiyonlarını tetikleyelim
+            // Veriler güncellendiği an arayüzü yenilemek için sayfayı bir kereye mahsus güncelleyebiliriz
+            // Veya ilgili render fonksiyonlarını tetikleyelim:
             if (typeof renderGallery === "function") renderGallery();
             if (typeof renderTodayMemory === "function") renderTodayMemory();
             if (typeof renderCalendar === "function") renderCalendar();
