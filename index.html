@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins..." rel="stylesheet">
 
-    <!-- BURAYA EKLEYECEKSİN (Firebase Kodun) -->
+    <!-- Firebase SDK ve Bulut Bağlantısı -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
@@ -351,7 +351,7 @@
         </div>
     </div>
 
-    <!-- ŞARKI EKLEME MODALI (Üst Katmanda açılması için z-index ayarlandı) -->
+    <!-- ŞARKI EKLEME MODALI -->
     <div id="song-add-modal" class="modal" style="z-index: 1200;">
         <div class="modal-content">
             <button class="close-modal">&times;</button>
@@ -368,7 +368,7 @@
         </div>
     </div>
 
-    <!-- GÖREV EKLEME MODALI (Üst Katmanda açılması için z-index ayarlandı) -->
+    <!-- GÖREV EKLEME MODALI -->
     <div id="todo-add-modal" class="modal" style="z-index: 1200;">
         <div class="modal-content">
             <button class="close-modal">&times;</button>
@@ -381,7 +381,7 @@
         </div>
     </div>
 
-    <!-- TAKVİM ETKİNLİK EKLEME MODALI (Üst Katmanda açılması için z-index ayarlandı) -->
+    <!-- TAKVİM ETKİNLİK EKLEME MODALI -->
     <div id="event-add-modal" class="modal" style="z-index: 1200;">
         <div class="modal-content">
             <button class="close-modal">&times;</button>

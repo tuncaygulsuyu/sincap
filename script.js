@@ -308,7 +308,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("relationship-timer-text").textContent = `${days} Gün ${hours} Saat ${minutes} Dakika ${seconds} Saniyedir Birlikteyiz ❤️`;
     }
 
-    // Global erişim için fonksiyonları dışa açıyoruz ki onSnapshot tetikleyebilsin
     window.renderTodayMemory = function renderTodayMemory() {
         galleryPhotos = JSON.parse(localStorage.getItem("app_gallery")) || galleryPhotos;
         if (galleryPhotos.length > 0) {
